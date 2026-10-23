@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PDP",
+    "CMC",
+    "PGP"
+  ],
+  "key": {
+    "P": "#c:plates/iron",
+    "D": "minecraft:diamond_pickaxe",
+    "C": "alaindustrial:electronic_circuit",
+    "M": "alaindustrial:machine_casing",
+    "G": "alaindustrial:iron_gear"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_lv"
+  }
+}

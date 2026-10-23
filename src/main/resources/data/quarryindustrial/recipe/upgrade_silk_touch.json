@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SES",
+    "EBE",
+    "SES"
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "E": "minecraft:emerald",
+    "B": "alaindustrial:module_blank"
+  },
+  "result": {
+    "id": "quarryindustrial:upgrade_silk_touch"
+  }
+}

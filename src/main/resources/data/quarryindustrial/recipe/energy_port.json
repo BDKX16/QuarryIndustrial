@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " C ",
+    "CXC",
+    " A "
+  ],
+  "key": {
+    "C": "alaindustrial:insulated_electrum_cable",
+    "X": "quarryindustrial:quarry_casing",
+    "A": "alaindustrial:advanced_circuit"
+  },
+  "result": {
+    "id": "quarryindustrial:energy_port"
+  }
+}

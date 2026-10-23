@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "quarryindustrial:block/quarry_core" },
+    "facing=east": { "model": "quarryindustrial:block/quarry_core", "y": 90 },
+    "facing=south": { "model": "quarryindustrial:block/quarry_core", "y": 180 },
+    "facing=west": { "model": "quarryindustrial:block/quarry_core", "y": 270 }
+  }
+}

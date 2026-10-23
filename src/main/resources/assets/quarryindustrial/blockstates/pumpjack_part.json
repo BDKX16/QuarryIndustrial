@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "base=true": { "model": "quarryindustrial:block/pumpjack" },
+    "base=false": { "model": "quarryindustrial:block/pumpjack" }
+  }
+}

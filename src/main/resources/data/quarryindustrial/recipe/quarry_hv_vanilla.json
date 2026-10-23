@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "EAE",
+    "DQD",
+    "EXE"
+  ],
+  "key": {
+    "E": "minecraft:diamond",
+    "A": "minecraft:comparator",
+    "D": "minecraft:diamond_pickaxe",
+    "Q": "quarryindustrial:quarry_mv",
+    "X": "minecraft:diamond_block"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_hv"
+  }
+}

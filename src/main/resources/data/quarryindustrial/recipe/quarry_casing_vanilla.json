@@ -1,0 +1,29 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "TST",
+    "SIS",
+    "TST"
+  ],
+  "key": {
+    "T": "#c:ingots/iron",
+    "S": "minecraft:obsidian",
+    "I": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_casing",
+    "count": 4
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "quarryindustrial",
+  "version": "${version}",
+  "name": "Quarry Industrial",
+  "description": "Animated industrial quarries that scale from LV up to a multi-reactor nuclear quarry, plus oil pumpjacks for Ala Industrial geysers. Runs on EU (Team Reborn Energy).",
+  "authors": [
+    "BDKX16"
+  ],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/quarryindustrial/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.example.pz.quarryindustrial.client.QuarryindustrialDataGenerator"
+    ],
+    "client": [
+      "org.example.pz.quarryindustrial.client.QuarryindustrialClient"
+    ],
+    "main": [
+      "org.example.pz.quarryindustrial.Quarryindustrial"
+    ]
+  },
+  "mixins": [
+    "quarryindustrial.mixins.json",
+    {
+      "config": "quarryindustrial.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "team_reborn_energy": "*"
+  },
+  "suggests": {
+    "alaindustrial": "*"
+  }
+}

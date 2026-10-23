@@ -1,0 +1,6 @@
+# gradlew tiene que quedar con LF o no corre en Linux/macOS; el .bat, con CRLF
+gradlew text eol=lf
+*.bat text eol=crlf
+*.png binary
+*.jpg binary
+*.jar binary

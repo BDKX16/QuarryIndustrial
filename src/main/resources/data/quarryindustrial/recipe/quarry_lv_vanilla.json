@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PDP",
+    "CMC",
+    "PGP"
+  ],
+  "key": {
+    "P": "#c:ingots/iron",
+    "D": "minecraft:diamond_pickaxe",
+    "C": "minecraft:comparator",
+    "M": "minecraft:iron_block",
+    "G": "minecraft:piston"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_lv"
+  }
+}

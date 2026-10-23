@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "SRS",
+    "NHN",
+    "SXS"
+  ],
+  "key": {
+    "S": "minecraft:netherite_ingot",
+    "R": "minecraft:nether_star",
+    "N": "minecraft:netherite_pickaxe",
+    "H": "quarryindustrial:quarry_hv",
+    "X": "minecraft:diamond_block"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_core"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "quarryindustrial-gametest",
+  "version": "1.0.0",
+  "name": "QuarryIndustrial GameTests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "org.example.pz.quarryindustrial.gametest.QuarryGameTests",
+      "org.example.pz.quarryindustrial.gametest.PumpjackGameTests",
+      "org.example.pz.quarryindustrial.gametest.NuclearQuarryGameTests",
+      "org.example.pz.quarryindustrial.gametest.RecipeGameTests",
+      "org.example.pz.quarryindustrial.gametest.AlaPipeGameTests"
+    ],
+    "fabric-client-gametest": [
+      "org.example.pz.quarryindustrial.gametest.ShowcaseClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.NuclearClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.PumpjackClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.QuarryClientGameTest"
+    ]
+  },
+  "depends": {
+    "quarryindustrial": "*"
+  }
+}

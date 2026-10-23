@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "LDL",
+    "DBD",
+    "LDL"
+  ],
+  "key": {
+    "L": "minecraft:lapis_block",
+    "D": "minecraft:diamond",
+    "B": "alaindustrial:module_blank"
+  },
+  "result": {
+    "id": "quarryindustrial:upgrade_fortune"
+  }
+}

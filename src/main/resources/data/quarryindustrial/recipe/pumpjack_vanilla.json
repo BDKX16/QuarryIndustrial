@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "TTT",
+    "GPG",
+    "MCM"
+  ],
+  "key": {
+    "T": "#c:ingots/iron",
+    "G": "minecraft:piston",
+    "P": "minecraft:bucket",
+    "M": "minecraft:iron_block",
+    "C": "minecraft:comparator"
+  },
+  "result": {
+    "id": "quarryindustrial:pumpjack"
+  }
+}

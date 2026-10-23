@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "TAT",
+    "GQG",
+    "TCT"
+  ],
+  "key": {
+    "T": "#c:ingots/gold",
+    "A": "minecraft:comparator",
+    "G": "minecraft:redstone_block",
+    "Q": "quarryindustrial:quarry_lv",
+    "C": "minecraft:observer"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_mv"
+  }
+}

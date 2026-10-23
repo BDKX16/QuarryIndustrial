@@ -1,0 +1,19 @@
+{
+  "textures": {
+    "frame": "quarryindustrial:block/quarry_frame",
+    "particle": "quarryindustrial:block/quarry_frame"
+  },
+  "elements": [
+    {
+      "from": [4, 0, 4],
+      "to": [12, 4, 12],
+      "faces": {
+        "north": {"texture": "#frame"},
+        "south": {"texture": "#frame"},
+        "east": {"texture": "#frame"},
+        "west": {"texture": "#frame"},
+        "down": {"texture": "#frame", "cullface": "down"}
+      }
+    }
+  ]
+}

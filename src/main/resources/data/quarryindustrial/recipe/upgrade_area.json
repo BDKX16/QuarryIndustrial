@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RCR",
+    "CBC",
+    "RCR"
+  ],
+  "key": {
+    "R": "minecraft:redstone",
+    "C": "minecraft:compass",
+    "B": "alaindustrial:module_blank"
+  },
+  "result": {
+    "id": "quarryindustrial:upgrade_area"
+  }
+}

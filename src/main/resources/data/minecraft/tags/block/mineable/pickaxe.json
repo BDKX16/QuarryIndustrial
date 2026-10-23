@@ -1,0 +1,13 @@
+{
+  "values": [
+    "quarryindustrial:quarry_lv",
+    "quarryindustrial:quarry_mv",
+    "quarryindustrial:quarry_hv",
+    "quarryindustrial:quarry_frame",
+    "quarryindustrial:pumpjack",
+    "quarryindustrial:pumpjack_part",
+    "quarryindustrial:quarry_core",
+    "quarryindustrial:quarry_casing",
+    "quarryindustrial:energy_port"
+  ]
+}
