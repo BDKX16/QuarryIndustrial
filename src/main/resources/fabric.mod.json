@@ -7,7 +7,11 @@
   "authors": [
     "BDKX16"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/BDKX16/QuarryIndustrial",
+    "sources": "https://github.com/BDKX16/QuarryIndustrial",
+    "issues": "https://github.com/BDKX16/QuarryIndustrial/issues"
+  },
   "license": "All-Rights-Reserved",
   "icon": "assets/quarryindustrial/icon.png",
   "environment": "*",

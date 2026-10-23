@@ -6,7 +6,7 @@ eight reactors — plus oil pumpjacks for Ala Industrial's geysers.**
 Built for **Ala Industrial** on Fabric, but it speaks plain **EU (Team Reborn Energy)**, so any compatible
 generator, cable or battery works.
 
-![HV quarry at work](https://raw.githubusercontent.com/REPLACE_ME/QuarryIndustrial/main/docs/screenshots/01_quarry_hv.jpg)
+![HV quarry at work](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/01_quarry_hv.jpg)
 
 ---
 
@@ -30,7 +30,7 @@ pipe with tool joints, and a **tricone bit** whose three cones spin on their own
 - **Won't flood:** fluids inside the area are removed, and fluids touching the border from outside are dammed
   with cobblestone.
 
-![Drill close-up](https://raw.githubusercontent.com/REPLACE_ME/QuarryIndustrial/main/docs/screenshots/02_drill_closeup.jpg)
+![Drill close-up](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/02_drill_closeup.jpg)
 
 ## ☢ The Nuclear Quarry
 
@@ -39,7 +39,7 @@ ceiling: build a **3×3×3 multiblock** with the core on the front face and up t
 one reactor into each port. Four drill heads with **PDC bits** (diamond-cutter blades) chew through up to a
 144×144 area. Missing a block? A **holographic blueprint** shows you exactly where.
 
-![Nuclear quarry](https://raw.githubusercontent.com/REPLACE_ME/QuarryIndustrial/main/docs/screenshots/04_nuclear.jpg)
+![Nuclear quarry](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/04_nuclear.jpg)
 
 ## 🛢 Oil Pumpjacks
 
@@ -53,14 +53,14 @@ Oil flows into an internal tank. Ala Industrial pipes attached to the base pull 
 needed) and carry it straight to the distillation column for diesel and fuel oil. The walking beam, horsehead, pitman arms and counterweighted cranks
 move with real four-bar-linkage kinematics.
 
-![Pumpjack](https://raw.githubusercontent.com/REPLACE_ME/QuarryIndustrial/main/docs/screenshots/06_pumpjack.jpg)
+![Pumpjack](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/06_pumpjack.jpg)
 
 ## 🔧 Upgrades & GUI
 
 **Area, Speed, Fortune I–III, Silk Touch** and a **Void filter** for junk blocks. The GUI shows energy, live EU/t
 input (per port for the Nuclear Quarry), current layer, progress and a **live minimap** of the layer being dug.
 
-![GUI](https://raw.githubusercontent.com/REPLACE_ME/QuarryIndustrial/main/docs/screenshots/09_gui.png)
+![GUI](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/09_gui.png)
 
 ## 📦 Requirements
 

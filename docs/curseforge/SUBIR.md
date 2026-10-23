@@ -13,11 +13,11 @@ Todo lo que pide el formulario de CurseForge, listo para copiar.
 | **Main category** | Technology |
 | **Otras categorías** | Technology › Processing, Technology › Energy, Fabric |
 | **License** | All Rights Reserved (como `LICENSE.txt`). Si querés que otros puedan usar el código, cambialo antes de subir. |
-| **Source** | La URL del repositorio en GitHub, si es público |
+| **Source** | https://github.com/BDKX16/QuarryIndustrial |
 
-En la descripción, las imágenes apuntan a `https://raw.githubusercontent.com/REPLACE_ME/...`: reemplazá
-`REPLACE_ME` por tu usuario de GitHub una vez que subas el repo, o subí las capturas a la galería de CurseForge y
-usá esos links.
+En la descripción, las imágenes apuntan a `https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/screenshots/...`:
+se ven cuando el repo es público y las capturas están en la rama `main`. Si no, subí las capturas a la galería de
+CurseForge y usá esos links.
 
 ## 2. Galería (Images)
 
