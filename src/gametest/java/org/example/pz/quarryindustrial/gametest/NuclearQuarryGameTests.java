@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -14,6 +15,8 @@ import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryStatus;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -55,6 +58,7 @@ public class NuclearQuarryGameTests {
             helper.setBlock(rel, port ? ModBlocks.ENERGY_PORT : ModBlocks.QUARRY_CASING);
         }
         helper.setBlock(CHEST, Blocks.CHEST);
+        helper.getBlockEntity(CORE, QuarryBlockEntity.class).swapBit(new ItemStack(ModItems.bit(BitTier.PDC)));
     }
 
     private static void fillPorts(GameTestHelper helper) {
@@ -95,6 +99,19 @@ public class NuclearQuarryGameTests {
             }
             ChestBlockEntity chest = helper.getBlockEntity(CHEST, ChestBlockEntity.class);
             helper.assertValueEqual(chest.countItem(Items.COBBLESTONE), 9, "cobblestone en el cofre");
+        });
+    }
+
+    /** Con la broca al rojo (y sin agua para enfriarla) mina, pero frenada. */
+    @GameTest(maxTicks = 160)
+    public void hotBitThrottles(GameTestHelper helper) {
+        smallNuclear();
+        build(helper, null);
+        fillPorts(helper);
+        QuarryBlockEntity core = helper.getBlockEntity(CORE, QuarryBlockEntity.class);
+        helper.succeedWhen(() -> {
+            core.setHeat(1000);
+            helper.assertValueEqual(core.status(), QuarryStatus.OVERHEATING, "estado");
         });
     }
 

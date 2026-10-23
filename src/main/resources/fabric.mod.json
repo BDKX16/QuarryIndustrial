@@ -24,6 +24,15 @@
     ],
     "main": [
       "org.example.pz.quarryindustrial.Quarryindustrial"
+    ],
+    "jade": [
+      "org.example.pz.quarryindustrial.compat.jade.QuarryJadePlugin"
+    ],
+    "jei_mod_plugin": [
+      "org.example.pz.quarryindustrial.client.compat.JeiCompat"
+    ],
+    "rei_client": [
+      "org.example.pz.quarryindustrial.client.compat.ReiCompat"
     ]
   },
   "mixins": [
@@ -34,12 +43,15 @@
     }
   ],
   "depends": {
-    "fabricloader": ">=${loader_version}",
+    "fabricloader": ">=0.19.5",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "team_reborn_energy": "*"
   },
   "suggests": {
-    "alaindustrial": "*"
+    "alaindustrial": "*",
+    "jade": "*",
+    "jei": "*",
+    "roughlyenoughitems": "*"
   }
 }

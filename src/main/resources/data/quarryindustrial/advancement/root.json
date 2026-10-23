@@ -1,0 +1,39 @@
+{
+  "rewards": {
+    "loot": [
+      "quarryindustrial:grants/manual"
+    ]
+  },
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "quarryindustrial:quarry_lv"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:quarry_hv"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.root.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.root.description"
+    },
+    "frame": "task",
+    "background": "minecraft:gui/advancements/backgrounds/stone",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "requirements": [
+    [
+      "has_item"
+    ]
+  ]
+}

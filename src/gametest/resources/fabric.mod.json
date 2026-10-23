@@ -10,10 +10,16 @@
       "org.example.pz.quarryindustrial.gametest.PumpjackGameTests",
       "org.example.pz.quarryindustrial.gametest.NuclearQuarryGameTests",
       "org.example.pz.quarryindustrial.gametest.RecipeGameTests",
-      "org.example.pz.quarryindustrial.gametest.AlaPipeGameTests"
+      "org.example.pz.quarryindustrial.gametest.AlaPipeGameTests",
+      "org.example.pz.quarryindustrial.gametest.DrillBitGameTests",
+      "org.example.pz.quarryindustrial.gametest.GeneratorGameTests",
+      "org.example.pz.quarryindustrial.gametest.OffshoreGameTests",
+      "org.example.pz.quarryindustrial.gametest.DroneGameTests"
     ],
     "fabric-client-gametest": [
       "org.example.pz.quarryindustrial.gametest.ShowcaseClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.ExpansionShowcaseClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.CompatClientGameTest",
       "org.example.pz.quarryindustrial.gametest.NuclearClientGameTest",
       "org.example.pz.quarryindustrial.gametest.PumpjackClientGameTest",
       "org.example.pz.quarryindustrial.gametest.QuarryClientGameTest"

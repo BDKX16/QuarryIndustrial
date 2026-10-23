@@ -1,5 +1,8 @@
 package org.example.pz.quarryindustrial.gametest;
 
+import net.minecraft.world.item.ItemStack;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -71,6 +74,9 @@ public class NuclearClientGameTest implements FabricClientGameTest {
                     }
                     QuarryBlockEntity core = (QuarryBlockEntity) level.getBlockEntity(CORE);
                     core.energy.amount = core.energy.getCapacity();
+                    if (core.installedBit() == null) {
+                        core.swapBit(new ItemStack(ModItems.bit(BitTier.PDC)));
+                    }
                 });
                 context.waitTicks(20);
             }

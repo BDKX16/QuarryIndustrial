@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -11,6 +12,8 @@ import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryStatus;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 
 /**
@@ -39,6 +42,7 @@ public class QuarryGameTests {
         }
         helper.setBlock(QUARRY, ModBlocks.QUARRY_LV.defaultBlockState().setValue(QuarryBlock.FACING, Direction.SOUTH));
         helper.setBlock(CHEST, Blocks.CHEST);
+        helper.getBlockEntity(QUARRY, QuarryBlockEntity.class).swapBit(new ItemStack(ModItems.bit(BitTier.IRON)));
     }
 
     private static void assertFrame(GameTestHelper helper) {

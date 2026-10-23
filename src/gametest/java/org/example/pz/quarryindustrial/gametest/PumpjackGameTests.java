@@ -1,5 +1,13 @@
 package org.example.pz.quarryindustrial.gametest;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import org.example.pz.quarryindustrial.block.pumpjack.PumpjackLayout;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
@@ -90,6 +98,44 @@ public class PumpjackGameTests {
             helper.assertValueEqual(pumpjack.status(), PumpjackStatus.PUMPING, "estado");
             // 3 cubos del vaciado + algo del bombeo infinito
             helper.assertTrue(pumpjack.oilMb() > 3000, "oil en el tanque: " + pumpjack.oilMb());
+        });
+    }
+
+    /**
+     * Sin un EU en el buffer pero con diésel en la fila del motor: la cigüeña bombea igual, quemando
+     * combustible. El frente de la base sigue siendo solo salida de oil.
+     */
+    @GameTest(maxTicks = 200, skyAccess = true)
+    public void runsOnDieselWithoutPower(GameTestHelper helper) {
+        if (!FabricLoader.getInstance().isModLoaded("alaindustrial")) {
+            helper.succeed();
+            return;
+        }
+        tinyWellThresholds();
+        placeRock(helper);
+        carveWell(helper, true);
+        PumpjackBlockEntity pumpjack = placePumpjack(helper);
+        pumpjack.energy.amount = 0;
+        BlockPos head = helper.absolutePos(WELLHEAD);
+        Storage<FluidVariant> motor = FluidStorage.SIDED.find(helper.getLevel(),
+                PumpjackLayout.toWorld(head, Direction.NORTH, 0, 0, PumpjackLayout.LENGTH - 1), Direction.UP);
+        Storage<FluidVariant> front = FluidStorage.SIDED.find(helper.getLevel(),
+                PumpjackLayout.toWorld(head, Direction.NORTH, 1, 0, 2), Direction.UP);
+        Fluid diesel = BuiltInRegistries.FLUID.getValue(Identifier.fromNamespaceAndPath("alaindustrial", "diesel"));
+        try (Transaction transaction = Transaction.openOuter()) {
+            helper.assertValueEqual(front.insert(FluidVariant.of(diesel), FluidConstants.BUCKET, transaction), 0L,
+                    "el frente no toma diésel");
+            helper.assertValueEqual(motor.insert(FluidVariant.of(diesel), 4 * FluidConstants.BUCKET, transaction),
+                    4 * FluidConstants.BUCKET, "el motor toma diésel");
+            transaction.commit();
+        }
+        helper.assertTrue(!motor.supportsExtraction(), "del motor no se saca nada");
+
+        helper.succeedWhen(() -> {
+            helper.assertValueEqual(pumpjack.status(), PumpjackStatus.PUMPING, "estado");
+            helper.assertTrue(pumpjack.onDiesel(), "anda a diésel");
+            helper.assertTrue(pumpjack.fuel.amountMb() < 4000, "quemó diésel: " + pumpjack.fuel.amountMb());
+            helper.assertTrue(pumpjack.oilMb() > 100, "bombeó oil: " + pumpjack.oilMb());
         });
     }
 

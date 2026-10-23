@@ -1,0 +1,280 @@
+{
+  "chapters": [
+    {
+      "id": "start",
+      "title": "Getting Started",
+      "icon": "quarryindustrial:manual",
+      "pages": [
+        {
+          "title": "What this mod does",
+          "text": "Quarry Industrial adds automatic mining and oil extraction that scale with your power grid: quarries from LV to a multi-reactor Nuclear Quarry, oil pumpjacks, offshore rigs, generators and a fleet of drones to move everything around.\n\nIt is built for Ala Industrial, but it runs on plain EU (Team Reborn Energy), so any compatible cable, generator or battery works.",
+          "items": [
+            "quarryindustrial:quarry_lv",
+            "quarryindustrial:pumpjack"
+          ]
+        },
+        {
+          "title": "Your first quarry",
+          "text": "1. Craft a Quarry (LV) and an Iron Tricone Bit.\n2. Place the quarry facing you: it mines the square behind it.\n3. Right-click it with the bit to install it.\n4. Connect a cable (32 EU/t is enough).\n5. Put a chest next to it: the drops go there.\n\nThe quarry first builds its frame, then starts digging.",
+          "items": [
+            "quarryindustrial:drill_bit_iron",
+            "minecraft:chest"
+          ]
+        },
+        {
+          "title": "Recipes",
+          "text": "Every item has two recipes. With Ala Industrial installed they use its circuits, casings and plates; without it, vanilla equivalents. JEI and REI show the active one, plus an information page for each machine.",
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "quarries",
+      "title": "Quarries",
+      "icon": "quarryindustrial:quarry_hv",
+      "pages": [
+        {
+          "title": "Tiers",
+          "text": "LV: 32 EU/t, 9x9 to 16x16, 1 head, 5 blocks/s\nMV: 128 EU/t, 16x16 to 48x48, 1 head, 20 blocks/s\nHV: 512 EU/t, 32x32 to 80x80, 2 heads, 60 blocks/s\nNuclear: 512 EU/t per port (1-8), 64x64 to 144x144, 4 heads, 400 blocks/s\n\nSpeed comes from power: every block costs 50 x (1 + hardness) EU. An underfed quarry just digs slower.",
+          "items": [
+            "quarryindustrial:quarry_lv",
+            "quarryindustrial:quarry_mv",
+            "quarryindustrial:quarry_hv"
+          ]
+        },
+        {
+          "title": "Frame and drill string",
+          "text": "The quarry raises a steel frame one block outside its area, 4 blocks high. A bridge rolls along the frame, a carriage rolls along the bridge and a real drill string hangs from it: kelly, drill pipe and the bit at the bottom. The hopper on the carriage fills up with what is being mined.",
+          "items": []
+        },
+        {
+          "title": "Output, claims and chunks",
+          "text": "Drops go to a 27-slot buffer that empties into any chest or pipe next to the quarry. If it fills up, the quarry stops and an alarm sounds.\n\nBlocks are broken by a fake player with the owner's UUID, so claim mods are respected. Only the quarry's chunk and the chunks under the drill heads are kept loaded.\n\nFluids inside the area are removed; fluids touching the border are dammed with cobblestone.",
+          "items": [
+            "minecraft:chest"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bits",
+      "title": "Drill Bits & Cooling",
+      "icon": "quarryindustrial:drill_bit_diamond",
+      "pages": [
+        {
+          "title": "Drill bits",
+          "text": "A quarry does not mine without a bit (it builds the frame anyway). Each bit is crafted from the previous one:\nIron: speed x1.0, life 6000\nDiamond: x1.3, 24000\nNetherite: x1.6, 80000\nPDC: x2.0, 200000\n\nA block wears 1 + hardness / 3 points: stone 1, deepslate 2, obsidian 17. Look at the bit while it works: the carbide inserts disappear row by row, and a nearly dead bit throws sparks.",
+          "items": [
+            "quarryindustrial:drill_bit_iron",
+            "quarryindustrial:drill_bit_diamond",
+            "quarryindustrial:drill_bit_netherite",
+            "quarryindustrial:drill_bit_pdc"
+          ]
+        },
+        {
+          "title": "Water cooling",
+          "text": "Pipe water into the quarry (any face; into the core for the Nuclear Quarry). Each block uses 1 mB and gives +25% speed and half the bit wear. An Ala Industrial pump on a water source is enough.",
+          "items": [
+            "minecraft:water_bucket"
+          ]
+        },
+        {
+          "title": "Heat",
+          "text": "The Nuclear Quarry chews 400 blocks per second: without water its PDC bit heats up. Above 70% heat it slows down (down to 20% speed), the bit glows red and smokes. With water it never overheats.",
+          "items": [
+            "quarryindustrial:quarry_core"
+          ]
+        },
+        {
+          "title": "Replacing bits",
+          "text": "Right-click the quarry with a new bit, or use the bit slot in its GUI. A Maintenance Drone can do it for you (see the Drones chapter).",
+          "items": [
+            "quarryindustrial:maintenance_drone"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "upgrades",
+      "title": "Upgrades",
+      "icon": "quarryindustrial:upgrade_speed",
+      "pages": [
+        {
+          "title": "Quarry upgrades",
+          "text": "Area: +16 per side, up to the tier max (rebuilds the frame).\nSpeed: +50% blocks/s, x1.25 cost (up to 4).\nFortune I-III: fortune drops, +50% cost per level.\nSilk Touch: silk drops, x2 cost.\nVoid: destroys junk (stone, dirt, gravel...).\nOre Seeker: the head only breaks ores and leaves the rock in place.\n\nThey go in the side panel of the GUI, or right-click the quarry with one. Sneak + right-click takes the last one out.",
+          "items": [
+            "quarryindustrial:upgrade_area",
+            "quarryindustrial:upgrade_speed",
+            "quarryindustrial:upgrade_ore_seeker"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nuclear",
+      "title": "Nuclear Quarry",
+      "icon": "quarryindustrial:quarry_core",
+      "pages": [
+        {
+          "title": "Why",
+          "text": "Ala Industrial's thickest cable and its reactor top out at 512 EU/t. The Nuclear Quarry breaks that ceiling with energy ports: one reactor per port, up to 8.",
+          "items": [
+            "quarryindustrial:energy_port"
+          ]
+        },
+        {
+          "title": "Building it",
+          "text": "1. Place the Nuclear Quarry Core facing you.\n2. Behind it, build a 3x3x3 cube: the core is the centre of the front face; the other 26 blocks are Quarry Casing or HV Energy Ports (1 to 8).\n3. Missing blocks show up as a green hologram.\n\nThe area starts behind the cube. Pipe water into the core to keep it cool.",
+          "items": [
+            "quarryindustrial:quarry_core",
+            "quarryindustrial:quarry_casing",
+            "quarryindustrial:energy_port"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oil",
+      "title": "Oil Pumpjacks",
+      "icon": "quarryindustrial:pumpjack",
+      "pages": [
+        {
+          "title": "Geysers",
+          "text": "Ala Industrial generates oil geysers: a jet of oil on the surface, a 1x1 shaft sealed with stone and a buried dome full of crude around Y -45. A Survey Drone finds them for you.",
+          "items": [
+            "quarryindustrial:survey_drone"
+          ]
+        },
+        {
+          "title": "Placing it",
+          "text": "Stand behind the shaft and place the pumpjack facing it: the 3x7x5 structure builds itself towards you. It first drains the real oil in the shaft and dome (1 bucket per second), then pumps forever at 10 mB/t for 32 EU/t, up to ~30 mB/t with 4 speed upgrades.",
+          "items": [
+            "quarryindustrial:pumpjack",
+            "quarryindustrial:upgrade_speed"
+          ]
+        },
+        {
+          "title": "Pipes and diesel",
+          "text": "Ala pipes attached to the base pull the oil by themselves (no wrench needed). Send it to Ala's distillation column for diesel and fuel oil.\n\nPipe diesel into the motor row (the back of the base) and the pumpjack runs on its own diesel when it lacks EU: black smoke comes out of the exhaust.\n\nNow and then an Oil Slime crawls out of the well.",
+          "items": [
+            "alaindustrial:fluid_pipe",
+            "quarryindustrial:diesel_generator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "offshore",
+      "title": "Offshore Rig",
+      "icon": "quarryindustrial:offshore_rig",
+      "pages": [
+        {
+          "title": "Placing it",
+          "text": "Use it on the surface of an ocean at least 8 blocks deep. It builds a 7x7 grated deck at sea level and four legs down to the seabed. The derrick, the flare boom and the engine house are part of it.",
+          "items": [
+            "quarryindustrial:offshore_rig"
+          ]
+        },
+        {
+          "title": "Drilling and production",
+          "text": "Install a drill bit (right-click the deck with it) and give it power: the drill string goes down through the water and 24 m into the seabed (256 EU/t, 50 wear points per metre). Once it reaches the reservoir it produces 25 mB/t of oil forever (96 EU/t), more with speed upgrades, and the gas flare lights up.",
+          "items": [
+            "quarryindustrial:drill_bit_diamond",
+            "quarryindustrial:upgrade_speed"
+          ]
+        },
+        {
+          "title": "Getting the oil ashore",
+          "text": "Oil comes out of any deck block. Running pipes across the sea is tedious: put a Drone Pad on the deck with a Tanker Drone and link it to a pad on the coast. Diesel goes in through the rig's controller, so it can run on its own oil once refined.",
+          "items": [
+            "quarryindustrial:tanker_drone",
+            "quarryindustrial:drone_pad"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "title": "Generators",
+      "icon": "quarryindustrial:diesel_generator",
+      "pages": [
+        {
+          "title": "Diesel Generator",
+          "text": "Burns Ala Industrial's liquid fuels and outputs up to 128 EU/t (MV) to adjacent cables and machines:\nDiesel: 12 EU per mB\nFuel oil: 8 EU per mB\nBiofuel: 8 EU per mB\n\nRight-click it with a bucket or pipe fuel in. It closes the loop: pumpjack, distillation, diesel, power.",
+          "items": [
+            "quarryindustrial:diesel_generator"
+          ]
+        },
+        {
+          "title": "Steam Turbine",
+          "text": "Ala Industrial's reactor boils its coolant into steam, which goes through steam pipes to a Steam Nozzle that vents it into the air. Place the turbine right in front of the nozzle's outlet: it caps the vent and turns the steam into EU (2 EU per mB, up to 1024 EU/t).",
+          "items": [
+            "quarryindustrial:steam_turbine",
+            "alaindustrial:steam_nozzle"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drones",
+      "title": "Drones",
+      "icon": "quarryindustrial:cargo_drone",
+      "pages": [
+        {
+          "title": "Drone pads",
+          "text": "A drone lives on a Drone Pad: right-click the pad with the drone. The pad has an outbox (what the drone takes; pipes and hoppers put things in and it pulls from chests and tanks next to it) and an inbox (what other drones bring; it pushes it into its neighbours). Every trip costs energy from the pad: 1000 EU plus 8 EU per block.",
+          "items": [
+            "quarryindustrial:drone_pad"
+          ]
+        },
+        {
+          "title": "Linking",
+          "text": "Sneak + right-click the source pad with the Drone Linker, then right-click the destination pad (up to 512 blocks away). Transport drones fly from source to destination and back.",
+          "items": [
+            "quarryindustrial:drone_linker"
+          ]
+        },
+        {
+          "title": "Transport drones",
+          "text": "Cargo Drone: items (leaves with 4 stacks or after 10 s).\nTanker Drone: fluids, 16 buckets.\nPower Drone: a flying 400k EU battery.\n\nWhat the destination cannot take comes back with the drone.",
+          "items": [
+            "quarryindustrial:cargo_drone",
+            "quarryindustrial:tanker_drone",
+            "quarryindustrial:power_drone"
+          ]
+        },
+        {
+          "title": "Maintenance and survey",
+          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 48 blocks and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
+          "items": [
+            "quarryindustrial:maintenance_drone",
+            "quarryindustrial:survey_drone",
+            "quarryindustrial:survey_report"
+          ]
+        },
+        {
+          "title": "If something goes wrong",
+          "text": "Drones fly above everything and keep the chunk they are in loaded. Hit a drone to bring it down: it drops what it carried and reappears on its pad. If a pad hears nothing from its drone for 5 minutes, it gives it up for lost and the drone comes back (without its cargo).",
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "extras",
+      "title": "Tips & Compatibility",
+      "icon": "minecraft:spyglass",
+      "pages": [
+        {
+          "title": "Jade, JEI, REI",
+          "text": "With Jade installed, looking at any machine shows its status, energy, bit life, fluids and progress. JEI and REI show every recipe plus an information page per machine.",
+          "items": []
+        },
+        {
+          "title": "Configuration",
+          "text": "Every number is in config/quarryindustrial.json: costs, tiers, bit life, cooling, generators, drones, the offshore rig and the pumpjack. Missing options are added with their defaults when the game starts.",
+          "items": []
+        }
+      ]
+    }
+  ]
+}

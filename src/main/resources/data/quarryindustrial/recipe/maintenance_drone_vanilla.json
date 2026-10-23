@@ -1,0 +1,29 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "M M",
+    " G ",
+    "CXC"
+  ],
+  "key": {
+    "M": "minecraft:phantom_membrane",
+    "G": "minecraft:copper_block",
+    "C": "minecraft:redstone",
+    "X": "minecraft:anvil"
+  },
+  "result": {
+    "id": "quarryindustrial:maintenance_drone"
+  }
+}

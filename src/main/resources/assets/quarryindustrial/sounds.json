@@ -1,0 +1,26 @@
+{
+  "drill": {
+    "subtitle": "subtitles.quarryindustrial.drill",
+    "sounds": [{ "name": "quarryindustrial:drill_loop", "stream": false }]
+  },
+  "diesel": {
+    "subtitle": "subtitles.quarryindustrial.diesel",
+    "sounds": [{ "name": "quarryindustrial:diesel_loop", "stream": false }]
+  },
+  "drone": {
+    "subtitle": "subtitles.quarryindustrial.drone",
+    "sounds": [{ "name": "quarryindustrial:drone_loop", "stream": false }]
+  },
+  "turbine": {
+    "subtitle": "subtitles.quarryindustrial.turbine",
+    "sounds": [{ "name": "quarryindustrial:turbine_loop", "stream": false }]
+  },
+  "pumpjack_stroke": {
+    "subtitle": "subtitles.quarryindustrial.pumpjack_stroke",
+    "sounds": [{ "name": "quarryindustrial:pumpjack_thump", "volume": 0.7 }]
+  },
+  "alarm": {
+    "subtitle": "subtitles.quarryindustrial.alarm",
+    "sounds": [{ "name": "quarryindustrial:alarm", "volume": 0.5 }]
+  }
+}

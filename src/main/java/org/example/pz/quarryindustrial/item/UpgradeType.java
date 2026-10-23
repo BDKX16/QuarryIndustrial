@@ -6,7 +6,9 @@ public enum UpgradeType {
     SPEED(4),
     FORTUNE(3),
     SILK_TOUCH(1),
-    VOID(1);
+    VOID(1),
+    /** Buscavetas: el cabezal solo rompe minerales (#c:ores) y deja la roca en su lugar. */
+    ORE_SEEKER(1);
 
     private final int maxStack;
 

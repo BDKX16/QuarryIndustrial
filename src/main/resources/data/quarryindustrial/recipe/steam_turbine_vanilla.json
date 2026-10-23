@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PBP",
+    "CXC",
+    "PSP"
+  ],
+  "key": {
+    "P": "#c:ingots/iron",
+    "B": "minecraft:iron_bars",
+    "C": "minecraft:copper_block",
+    "X": "minecraft:iron_block",
+    "S": "minecraft:bucket"
+  },
+  "result": {
+    "id": "quarryindustrial:steam_turbine"
+  }
+}

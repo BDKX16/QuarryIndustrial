@@ -157,7 +157,8 @@ public final class QuarryRigModels {
 
     /**
      * Un cono de la broca, con el eje en -Y: base ancha arriba, punta abajo. Tres escalones que forman
-     * el tronco de cono, una nariz de carburo y tres filas de insertos, cada fila desfasada 45°.
+     * el tronco de cono y una nariz de carburo. Los insertos van aparte ({@link #coneTeeth(int)}) para
+     * teñirlos según el material de la broca y sacarlos a medida que se gastan.
      */
     public static ModelPart cone() {
         MeshDefinition mesh = new MeshDefinition();
@@ -167,9 +168,44 @@ public final class QuarryRigModels {
         root.addOrReplaceChild("c3", cubes(CONE).addBox(-1.5f, -4.5f, -1.5f, 3.0f, 1.25f, 3.0f), PartPose.ZERO);
         root.addOrReplaceChild("nose", cubes(CARBIDE).addBox(-0.6f, -5.25f, -0.6f, 1.2f, 0.75f, 1.2f),
                 PartPose.ZERO);
-        addTeeth(root, "row1", 3.25f, -1.4f, 0);
-        addTeeth(root, "row2", 2.55f, -2.9f, EIGHTH);
-        addTeeth(root, "row3", 1.75f, -4.15f, 0);
+        return bake(mesh);
+    }
+
+    /** Filas de insertos del cono, de afuera (0, la que más trabaja y primero se gasta) hacia la punta (2). */
+    public static final int TEETH_ROWS = 3;
+
+    public static ModelPart coneTeeth(int row) {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        switch (row) {
+            case 0 -> addTeeth(root, "row1", 3.25f, -1.4f, 0);
+            case 1 -> addTeeth(root, "row2", 2.55f, -2.9f, EIGHTH);
+            default -> addTeeth(root, "row3", 1.75f, -4.15f, 0);
+        }
+        return bake(mesh);
+    }
+
+    /**
+     * Tolva colgada del costado del carro: ahí caen los drops antes de ir al buffer. Paredes de 1 px y un
+     * embudo abajo; el contenido lo dibuja el renderer con el modelo del último bloque minado.
+     */
+    public static final float HOPPER_INNER_MIN_X = -4;
+    public static final float HOPPER_INNER_MAX_X = 4;
+    public static final float HOPPER_INNER_MIN_Z = 8;
+    public static final float HOPPER_INNER_MAX_Z = 13;
+    public static final float HOPPER_INNER_BOTTOM = 1;
+    public static final float HOPPER_INNER_TOP = 8;
+
+    public static ModelPart hopper() {
+        MeshDefinition mesh = new MeshDefinition();
+        PartDefinition root = mesh.getRoot();
+        root.addOrReplaceChild("bottom", cubes(DARK).addBox(-5, 0, 7, 10, 1, 7), PartPose.ZERO);
+        root.addOrReplaceChild("wall_w", cubes(YELLOW).addBox(-5, 1, 7, 1, 8, 7), PartPose.ZERO);
+        root.addOrReplaceChild("wall_e", cubes(YELLOW).addBox(4, 1, 7, 1, 8, 7), PartPose.ZERO);
+        root.addOrReplaceChild("wall_s", cubes(YELLOW).addBox(-4, 1, 13, 8, 8, 1), PartPose.ZERO);
+        root.addOrReplaceChild("lip", cubes(STEEL).addBox(-5.5f, 8.5f, 12.5f, 11, 1, 2), PartPose.ZERO);
+        root.addOrReplaceChild("funnel", cubes(DARK).addBox(-2, -3, 8.5f, 4, 3, 4), PartPose.ZERO);
+        root.addOrReplaceChild("chute", cubes(STEEL).addBox(-1, -5, 9.5f, 2, 2, 2), PartPose.ZERO);
         return bake(mesh);
     }
 
@@ -179,8 +215,35 @@ public final class QuarryRigModels {
      * la punta exterior. Entre aletas, las boquillas. No tiene partes móviles: gira entera.
      */
     public static ModelPart pdcBit() {
+        return pdcBit(-1);
+    }
+
+    /**
+     * {@code cutters} = -1: el cuerpo (acero, aletas y boquillas). 0..3: un juego de cortadores, del de
+     * calibre (0, el exterior, el primero que se gasta) a los de la nariz (3).
+     */
+    public static final int PDC_CUTTER_SETS = 4;
+
+    public static ModelPart pdcBit(int cutters) {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
+        if (cutters >= 0) {
+            for (int i = 0; i < 5; i++) {
+                PartDefinition blade = root.addOrReplaceChild("blade" + i, CubeListBuilder.create(),
+                        PartPose.rotation(0, i * TAU / 5, 0));
+                if (cutters == 0) {
+                    blade.addOrReplaceChild("gauge", cubes(CARBIDE).addBox(-0.6f, 3.5f, 5.0f, 1.2f, 1.6f, 0.6f),
+                            PartPose.ZERO);
+                } else {
+                    int c = 3 - cutters;
+                    float r = 1.25f + c * 1.5f;
+                    float y = 0.9f + c * 0.45f;
+                    blade.addOrReplaceChild("cutter" + c, cubes(CARBIDE).addBox(-0.6f, y, r - 0.6f, 1.2f, 1.2f, 1.2f),
+                            PartPose.ZERO);
+                }
+            }
+            return bake(mesh);
+        }
         octagon(root, "pin", STEEL, 13, 1.75f, 3);
         octagon(root, "shoulder", STEEL, 11.5f, 3.5f, 1.5f);
         octagon(root, "body", STEEL, 6, 3.25f, 5.5f);
@@ -192,13 +255,6 @@ public final class QuarryRigModels {
             // Aleta: más baja cerca del centro (perfil de "cono" de la cara de la broca)
             blade.addOrReplaceChild("web_inner", cubes(DARK).addBox(-0.9f, 1.5f, 0.75f, 1.8f, 9, 2.25f), PartPose.ZERO);
             blade.addOrReplaceChild("web_outer", cubes(DARK).addBox(-0.9f, 2.25f, 3, 1.8f, 8.25f, 2.25f), PartPose.ZERO);
-            for (int c = 0; c < 3; c++) {
-                float r = 1.25f + c * 1.5f;
-                float y = 0.9f + c * 0.45f;
-                blade.addOrReplaceChild("cutter" + c, cubes(CARBIDE).addBox(-0.6f, y, r - 0.6f, 1.2f, 1.2f, 1.2f),
-                        PartPose.ZERO);
-            }
-            blade.addOrReplaceChild("gauge", cubes(CARBIDE).addBox(-0.6f, 3.5f, 5.0f, 1.2f, 1.6f, 0.6f), PartPose.ZERO);
             PartDefinition nozzle = root.addOrReplaceChild("nozzle" + i, CubeListBuilder.create(),
                     PartPose.rotation(0, yaw + TAU / 10, 0));
             nozzle.addOrReplaceChild("jet", cubes(STEEL).addBox(-0.6f, 4, 2.5f, 1.2f, 1.2f, 1.2f), PartPose.ZERO);

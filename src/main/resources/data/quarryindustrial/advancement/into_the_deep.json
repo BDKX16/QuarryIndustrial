@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:black_gold",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:offshore_rig"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.into_the_deep.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.into_the_deep.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

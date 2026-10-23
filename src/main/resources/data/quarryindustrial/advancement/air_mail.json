@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:root",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:cargo_drone"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.air_mail.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.air_mail.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

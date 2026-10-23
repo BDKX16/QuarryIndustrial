@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "N",
+    "B"
+  ],
+  "key": {
+    "N": "minecraft:netherite_ingot",
+    "B": "quarryindustrial:drill_bit_diamond"
+  },
+  "result": {
+    "id": "quarryindustrial:drill_bit_netherite"
+  }
+}

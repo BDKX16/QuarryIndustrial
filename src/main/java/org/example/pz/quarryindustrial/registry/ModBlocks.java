@@ -6,10 +6,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PlaceOnWaterBlockItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.example.pz.quarryindustrial.Quarryindustrial;
+import org.example.pz.quarryindustrial.block.drone.DronePadBlock;
+import org.example.pz.quarryindustrial.block.generator.GeneratorBlock;
+import org.example.pz.quarryindustrial.block.offshore.OffshoreDeckBlock;
+import org.example.pz.quarryindustrial.block.offshore.OffshoreLegBlock;
+import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlock;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackBlock;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackPartBlock;
 import org.example.pz.quarryindustrial.block.quarry.EnergyPortBlock;
@@ -59,6 +65,50 @@ public final class ModBlocks {
                     .noLootTable()
                     .sound(SoundType.METAL));
 
+    /** Generador diésel (MV): quema los combustibles líquidos de Ala. */
+    public static final GeneratorBlock DIESEL_GENERATOR = register("diesel_generator",
+            properties -> new GeneratorBlock(GeneratorBlock.Kind.DIESEL, properties),
+            BlockBehaviour.Properties.of()
+                    .strength(3.5f)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> state.getValue(GeneratorBlock.LIT) ? 7 : 0)
+                    .sound(SoundType.METAL));
+    /** Turbina de vapor: se pega a la Steam Nozzle de Ala y convierte el vapor del reactor en EU. */
+    public static final GeneratorBlock STEAM_TURBINE = register("steam_turbine",
+            properties -> new GeneratorBlock(GeneratorBlock.Kind.STEAM_TURBINE, properties),
+            BlockBehaviour.Properties.of()
+                    .strength(3.5f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL));
+
+    /** Plataforma offshore: el controlador se pone sobre el agua y arma cubierta y patas. */
+    public static final OffshoreRigBlock OFFSHORE_RIG = registerOnWater("offshore_rig", OffshoreRigBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(5.0f, 12.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL));
+    /** Cubierta de rejilla (sin drop: la plataforma devuelve su item al desarmarse). */
+    public static final OffshoreDeckBlock OFFSHORE_DECK = register("offshore_deck", OffshoreDeckBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(5.0f, 12.0f)
+                    .noOcclusion()
+                    .noLootTable()
+                    .sound(SoundType.METAL));
+    public static final OffshoreLegBlock OFFSHORE_LEG = register("offshore_leg", OffshoreLegBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(-1.0f, 3_600_000.0f)
+                    .noOcclusion()
+                    .noLootTable()
+                    .sound(SoundType.METAL));
+
+    /** Pad de drones: donde aterrizan, cargan y descargan. */
+    public static final DronePadBlock DRONE_PAD = register("drone_pad", DronePadBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(3.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()
+                    .sound(SoundType.METAL));
+
     private ModBlocks() {
     }
 
@@ -79,6 +129,17 @@ public final class ModBlocks {
         ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, Quarryindustrial.id(name));
         Registry.register(BuiltInRegistries.ITEM, itemKey,
                 new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
+        return block;
+    }
+
+    /** Como {@link #register}, pero el item se coloca sobre el agua (como un nenúfar). */
+    private static <T extends Block> T registerOnWater(String name, Function<BlockBehaviour.Properties, T> factory,
+                                                       BlockBehaviour.Properties properties) {
+        ResourceKey<Block> blockKey = ResourceKey.create(Registries.BLOCK, Quarryindustrial.id(name));
+        T block = Registry.register(BuiltInRegistries.BLOCK, blockKey, factory.apply(properties.setId(blockKey)));
+        ResourceKey<Item> itemKey = ResourceKey.create(Registries.ITEM, Quarryindustrial.id(name));
+        Registry.register(BuiltInRegistries.ITEM, itemKey,
+                new PlaceOnWaterBlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
         return block;
     }
 

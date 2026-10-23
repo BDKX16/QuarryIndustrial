@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "quarryindustrial:block/steam_turbine_top",
+    "front": "quarryindustrial:block/steam_turbine_front",
+    "side": "quarryindustrial:block/steam_turbine_side"
+  }
+}

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import org.example.pz.quarryindustrial.item.DrillBitItem;
 import org.example.pz.quarryindustrial.item.UpgradeItem;
 import org.example.pz.quarryindustrial.item.UpgradeType;
 import org.example.pz.quarryindustrial.registry.ModItems;
@@ -94,6 +95,18 @@ public class QuarryBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                           Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.getItem() instanceof DrillBitItem) {
+            // Clic derecho con una broca: la instala y devuelve la que estaba
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof QuarryBlockEntity quarry) {
+                ItemStack previous = quarry.swapBit(stack.split(1));
+                if (!previous.isEmpty()) {
+                    player.getInventory().placeItemBackInInventory(previous, Prediction.SERVER_ONLY);
+                }
+                player.sendOverlayMessage(Component.translatable("message.quarryindustrial.bit.installed",
+                        quarry.bitSlot().getItem(0).getHoverName()));
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (!(stack.getItem() instanceof UpgradeItem upgrade)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }

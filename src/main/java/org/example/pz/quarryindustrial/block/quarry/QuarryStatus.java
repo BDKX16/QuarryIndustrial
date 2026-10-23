@@ -11,7 +11,11 @@ public enum QuarryStatus {
     OUTPUT_FULL,
     FINISHED,
     /** Quarry nuclear con el cubo incompleto o sin puertos de energía. */
-    STRUCTURE_INCOMPLETE;
+    STRUCTURE_INCOMPLETE,
+    /** Sin broca (o se rompió la que tenía). */
+    NO_BIT,
+    /** Quarry nuclear sin refrigerante: mina, pero frenada por el calor. */
+    OVERHEATING;
 
     public Component label() {
         return Component.translatable("status.quarryindustrial." + name().toLowerCase());
@@ -19,6 +23,6 @@ public enum QuarryStatus {
 
     /** Si el taladro gira en el renderer. */
     public boolean drilling() {
-        return this == MINING;
+        return this == MINING || this == OVERHEATING;
     }
 }

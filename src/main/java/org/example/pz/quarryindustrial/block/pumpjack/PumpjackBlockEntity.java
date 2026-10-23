@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -25,7 +26,11 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.example.pz.quarryindustrial.registry.ModAdvancements;
+import org.example.pz.quarryindustrial.ClientEffects;
+import org.example.pz.quarryindustrial.compat.AlaOilSlime;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
+import org.example.pz.quarryindustrial.energy.FuelTank;
 import org.example.pz.quarryindustrial.item.UpgradeType;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
@@ -86,6 +91,14 @@ public class PumpjackBlockEntity extends BlockEntity {
      * neutral, reconocen la cigüeña como un origen de un solo sentido y tiran del oil sin usar la llave.
      */
     private final Storage<FluidVariant> exposedTank = FilteringStorage.extractOnlyOf(tank);
+    /**
+     * Motor diésel: si falta energía, la cigüeña quema combustible. Entra solo por la fila del motor (atrás
+     * de todo), así el resto de la base sigue siendo un origen de oil de un solo sentido para los caños.
+     */
+    public final FuelTank fuel = new FuelTank(QuarryConfig.get().pumpjack.fuelTankBuckets, this::setChanged);
+    private final Storage<FluidVariant> exposedFuel = FilteringStorage.insertOnlyOf(fuel);
+    /** Este tick la energía salió del motor diésel (para el humo y el estado). */
+    private boolean onDiesel;
 
     private PumpjackStatus status = PumpjackStatus.IDLE;
     private @Nullable OilWellValidator.Well well;
@@ -163,20 +176,21 @@ public class PumpjackBlockEntity extends BlockEntity {
             setStatus(PumpjackStatus.OUTPUT_FULL);
             return;
         }
-        if (energy.amount < config.drainEuPerBucket) {
-            setStatus(PumpjackStatus.NO_POWER);
-            return;
-        }
         BlockPos source = nextSource(level);
         if (source == null) {
             // No queda oil real: de acá en adelante, extracción infinita
             domeDrained = true;
+            ModAdvancements.grant(level, worldPosition, ModAdvancements.BOTTOMLESS);
             setChanged();
             return;
         }
+        if (!pay(config.drainEuPerBucket)) {
+            setStatus(PumpjackStatus.NO_POWER);
+            return;
+        }
         level.setBlock(source, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
-        energy.amount -= config.drainEuPerBucket;
         fill(oil, FluidConstants.BUCKET);
+        maybeReleaseSlime();
         drainCooldown = Math.max(0, config.drainTicksPerBucket - 1);
         setStatus(PumpjackStatus.DRAINING);
     }
@@ -190,13 +204,43 @@ public class PumpjackBlockEntity extends BlockEntity {
             setStatus(PumpjackStatus.OUTPUT_FULL);
             return;
         }
-        if (energy.amount < cost) {
+        if (!pay(cost)) {
             setStatus(PumpjackStatus.NO_POWER);
             return;
         }
-        energy.amount -= cost;
         fill(oil, amount);
         setStatus(PumpjackStatus.PUMPING);
+        maybeReleaseSlime();
+    }
+
+    /** Cobra {@code cost} EU; lo que falte lo pone el motor diésel. Devuelve false si no alcanzó. */
+    private boolean pay(long cost) {
+        boolean diesel = false;
+        if (energy.amount < cost && fuel.hasFuel()) {
+            long burned = fuel.burn(Math.min(cost - energy.amount, energy.getCapacity() - energy.amount));
+            energy.amount += burned;
+            diesel = burned > 0;
+        }
+        if (diesel != onDiesel) {
+            onDiesel = diesel;
+            markForSync();
+            if (diesel && level instanceof ServerLevel serverLevel) {
+                ModAdvancements.grant(serverLevel, worldPosition, ModAdvancements.SELF_SUFFICIENT);
+            }
+        }
+        if (energy.amount < cost) {
+            return false;
+        }
+        energy.amount -= cost;
+        return true;
+    }
+
+    /** De vez en cuando sube un Oil Slime de Ala Industrial por el pozo, como cuando Ala vacía un géiser. */
+    private void maybeReleaseSlime() {
+        if (level instanceof ServerLevel serverLevel) {
+            AlaOilSlime.maybeRelease(serverLevel, worldPosition.relative(getBlockState().getValue(PumpjackBlock.FACING)),
+                    QuarryConfig.get().pumpjack.oilSlimeChance);
+        }
     }
 
     /** La próxima fuente de oil del pozo. Si la cola está vacía, la rellena recorriendo caño y domo. */
@@ -314,6 +358,9 @@ public class PumpjackBlockEntity extends BlockEntity {
     // ── Estado ──
 
     private void setStatus(PumpjackStatus status) {
+        if (this.status != status && status.running() && level instanceof ServerLevel serverLevel) {
+            ModAdvancements.grant(serverLevel, worldPosition, ModAdvancements.BLACK_GOLD);
+        }
         if (this.status != status) {
             this.status = status;
             markForSync();
@@ -352,6 +399,18 @@ public class PumpjackBlockEntity extends BlockEntity {
         return exposedTank;
     }
 
+    /** Lo que ve un caño pegado a {@code part}: combustible en la fila del motor, oil en el resto. */
+    public Storage<FluidVariant> fluidAt(BlockPos part) {
+        Direction back = getBlockState().getValue(PumpjackBlock.FACING).getOpposite();
+        BlockPos offset = part.subtract(worldPosition);
+        int depth = offset.getX() * back.getStepX() + offset.getZ() * back.getStepZ();
+        return depth == PumpjackLayout.LENGTH - 1 ? exposedFuel : exposedTank;
+    }
+
+    public boolean onDiesel() {
+        return onDiesel;
+    }
+
     public boolean isDismantling() {
         return dismantling;
     }
@@ -359,14 +418,26 @@ public class PumpjackBlockEntity extends BlockEntity {
     // ── Cliente: animación ──
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, PumpjackBlockEntity pumpjack) {
+        ClientEffects.machineTick.accept(pumpjack);
         pumpjack.previousCrankAngle = pumpjack.crankAngle;
+        if (pumpjack.onDiesel && pumpjack.status.running() && level.getRandom().nextInt(3) == 0) {
+            // Escape del motor, arriba de la fila de atrás
+            BlockPos exhaust = PumpjackLayout.toWorld(pos, state.getValue(PumpjackBlock.FACING), 1, 2,
+                    PumpjackLayout.LENGTH - 1);
+            level.addParticle(ParticleTypes.LARGE_SMOKE, exhaust.getX() + 0.5, exhaust.getY() + 0.2,
+                    exhaust.getZ() + 0.5, 0, 0.06, 0);
+        }
         if (pumpjack.status.running()) {
             // Unos 8 golpes por minuto sin upgrades, como una cigüeña real; más rápido con upgrades
             float speed = 0.042f * (1 + pumpjack.speedUpgrades * 0.5f);
             if (pumpjack.status == PumpjackStatus.DRAINING) {
                 speed *= 1.5f;
             }
+            float before = pumpjack.crankAngle;
             pumpjack.crankAngle += speed;
+            if (before < Math.PI && pumpjack.crankAngle >= Math.PI) {
+                ClientEffects.pumpjackStroke.accept(pumpjack);
+            }
             if (pumpjack.crankAngle > Math.PI * 2) {
                 pumpjack.crankAngle -= (float) (Math.PI * 2);
                 pumpjack.previousCrankAngle -= (float) (Math.PI * 2);
@@ -403,6 +474,7 @@ public class PumpjackBlockEntity extends BlockEntity {
         TagValueOutput output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, registries);
         output.putString("Status", status.name());
         output.putInt("SpeedUpgrades", speedUpgrades);
+        output.putBoolean("Diesel", onDiesel);
         return output.buildResult();
     }
 
@@ -418,7 +490,9 @@ public class PumpjackBlockEntity extends BlockEntity {
         output.putInt("SpeedUpgrades", speedUpgrades);
         output.putLong("Energy", energy.amount);
         output.putBoolean("DomeDrained", domeDrained);
+        output.putBoolean("Diesel", onDiesel);
         SingleVariantStorage.writeValue(tank, FluidVariant.CODEC, output);
+        fuel.save(output.child("Fuel"));
     }
 
     @Override
@@ -432,6 +506,8 @@ public class PumpjackBlockEntity extends BlockEntity {
         speedUpgrades = Math.min(input.getIntOr("SpeedUpgrades", 0), MAX_SPEED_UPGRADES);
         energy.amount = Math.min(input.getLongOr("Energy", 0L), energy.getCapacity());
         domeDrained = input.getBooleanOr("DomeDrained", false);
+        onDiesel = input.getBooleanOr("Diesel", false);
         SingleVariantStorage.readValue(tank, FluidVariant.CODEC, FluidVariant::blank, input);
+        fuel.load(input.childOrEmpty("Fuel"));
     }
 }

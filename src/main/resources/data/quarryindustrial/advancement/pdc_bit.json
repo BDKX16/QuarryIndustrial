@@ -1,0 +1,32 @@
+{
+  "parent": "quarryindustrial:bit_broken",
+  "criteria": {
+    "has_item": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "quarryindustrial:drill_bit_pdc"
+          }
+        ]
+      }
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:drill_bit_pdc"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.pdc_bit.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.pdc_bit.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "has_item"
+    ]
+  ]
+}

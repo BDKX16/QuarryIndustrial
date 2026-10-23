@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:frame_built",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:quarry_core"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.nuclear_eight.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.nuclear_eight.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

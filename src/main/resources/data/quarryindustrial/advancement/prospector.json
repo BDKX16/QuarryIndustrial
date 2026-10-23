@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:air_mail",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:survey_drone"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.prospector.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.prospector.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

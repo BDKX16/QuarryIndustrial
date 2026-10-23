@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:frame_built",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "minecraft:bedrock"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.rock_bottom.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.rock_bottom.description"
+    },
+    "frame": "challenge"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

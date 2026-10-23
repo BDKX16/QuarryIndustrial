@@ -18,7 +18,16 @@ import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.example.pz.quarryindustrial.Quarryindustrial;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import org.example.pz.quarryindustrial.block.quarry.DrillHead;
 import org.example.pz.quarryindustrial.block.quarry.QuarryArea;
+import org.example.pz.quarryindustrial.item.BitTier;
 import org.example.pz.quarryindustrial.block.quarry.NuclearStructure;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
@@ -63,12 +72,23 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
     private final ModelPart kelly = QuarryRigModels.kelly();
     private final ModelPart triconeBody = QuarryRigModels.triconeBody();
     private final ModelPart cone = QuarryRigModels.cone();
+    private final ModelPart[] coneTeeth = new ModelPart[QuarryRigModels.TEETH_ROWS];
     private final ModelPart pdcBit = QuarryRigModels.pdcBit();
+    private final ModelPart[] pdcCutters = new ModelPart[QuarryRigModels.PDC_CUTTER_SETS];
+    private final ModelPart hopper = QuarryRigModels.hopper();
+    private final ItemModelResolver itemModelResolver;
     private final ModelPart ghostBlock = QuarryRigModels.ghostBlock();
     /** Tinte del holograma: verde "plano técnico", semitransparente (ARGB). */
     private static final int GHOST_TINT = 0x8840FF90;
 
     public QuarryRenderer(BlockEntityRendererProvider.Context context) {
+        this.itemModelResolver = context.itemModelResolver();
+        for (int i = 0; i < coneTeeth.length; i++) {
+            coneTeeth[i] = QuarryRigModels.coneTeeth(i);
+        }
+        for (int i = 0; i < pdcCutters.length; i++) {
+            pdcCutters[i] = QuarryRigModels.pdcBit(i);
+        }
     }
 
     @Override
@@ -82,7 +102,10 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
         BlockEntityRenderer.super.extractRenderState(quarry, state, partialTick, cameraPos, crumbling);
         QuarryArea area = quarry.area();
         Level level = quarry.getLevel();
-        state.pdcBit = quarry.tier().multiblock();
+        BitTier bit = quarry.visualBit();
+        state.bit = bit;
+        state.bitWear = quarry.visualBitWear();
+        state.bodyTint = heatTint(quarry.visualHeat());
         extractGhosts(quarry, state, level);
         int count = quarry.visualHeadCount();
         state.hasRig = area != null && quarry.frameBuilt() && level != null && count > 0;
@@ -97,7 +120,14 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
         if (state.heads.length != count * 3) {
             state.heads = new float[count * 3];
             state.headLights = new int[count * 2];
+            state.hopperItems = new ItemStackRenderState[count];
+            for (int i = 0; i < count; i++) {
+                state.hopperItems[i] = new ItemStackRenderState();
+            }
         }
+        // Mientras mina, la tolva nunca se ve vacía: siempre hay material cayendo
+        float fill = quarry.visualFill();
+        state.hopperFill = quarry.status().drilling() ? Math.max(0.25f, fill) : fill;
         for (int i = 0; i < count; i++) {
             double x = quarry.visualX(i, partialTick);
             double y = quarry.visualY(i, partialTick);
@@ -110,6 +140,16 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
                     BlockPos.containing(x, area.topY() + 1, z));
             state.headLights[i * 2 + 1] = LightCoordsUtil.getLightCoords(level,
                     BlockPos.containing(x, y + 1.5, z));
+            ItemStackRenderState hopperItem = state.hopperItems[i];
+            hopperItem.clear();
+            List<DrillHead> heads = quarry.heads();
+            if (state.hopperFill > 0 && i < heads.size()) {
+                Item item = Block.stateById(heads.get(i).lastMined()).getBlock().asItem();
+                if (item != Items.AIR) {
+                    itemModelResolver.updateForTopItem(hopperItem, new ItemStack(item), ItemDisplayContext.NONE,
+                            level, null, 0);
+                }
+            }
         }
         state.drillAngle = quarry.drillAngle(partialTick);
     }
@@ -169,11 +209,47 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
             poseStack.translate(hx, railY, hz);
             submit(collector, carriage, poseStack, renderType, topLight);
             submit(collector, beacon, poseStack, renderType, LightCoordsUtil.FULL_BRIGHT);
+            submit(collector, hopper, poseStack, renderType, topLight);
+            submitHopperLoad(state, i, poseStack, collector, topLight);
             poseStack.popPose();
 
             submitDrillString(state, poseStack, collector, renderType, hx, hy, hz, railY + TABLE_BOTTOM - RAIL_TOP,
                     topLight, bitLight);
         }
+    }
+
+    /**
+     * El material en la tolva: el modelo del último bloque minado, aplastado al ancho de la tolva y con la
+     * altura de lo lleno que está el buffer.
+     */
+    private static void submitHopperLoad(QuarryRenderState state, int head, PoseStack poseStack,
+                                         SubmitNodeCollector collector, int light) {
+        if (state.hopperFill <= 0 || head >= state.hopperItems.length || state.hopperItems[head].isEmpty()) {
+            return;
+        }
+        float width = (QuarryRigModels.HOPPER_INNER_MAX_X - QuarryRigModels.HOPPER_INNER_MIN_X) * PX;
+        float depth = (QuarryRigModels.HOPPER_INNER_MAX_Z - QuarryRigModels.HOPPER_INNER_MIN_Z) * PX;
+        float height = (QuarryRigModels.HOPPER_INNER_TOP - QuarryRigModels.HOPPER_INNER_BOTTOM) * PX
+                * Math.min(1, state.hopperFill);
+        poseStack.pushPose();
+        // El modelo del item está centrado en el origen (de -0.5 a 0.5)
+        poseStack.translate((QuarryRigModels.HOPPER_INNER_MIN_X + QuarryRigModels.HOPPER_INNER_MAX_X) / 2 * PX,
+                QuarryRigModels.HOPPER_INNER_BOTTOM * PX + height / 2,
+                (QuarryRigModels.HOPPER_INNER_MIN_Z + QuarryRigModels.HOPPER_INNER_MAX_Z) / 2 * PX);
+        poseStack.scale(width, height, depth);
+        state.hopperItems[head].submit(poseStack, collector, light, OverlayTexture.NO_OVERLAY, 0);
+        poseStack.popPose();
+    }
+
+    /** Blanco hasta 400 de calor; de ahí la broca se pone al rojo. */
+    private static int heatTint(int heat) {
+        if (heat <= 400) {
+            return 0xFFFFFFFF;
+        }
+        float t = Math.min(1, (heat - 400) / 600f);
+        int g = (int) (255 - 170 * t);
+        int b = (int) (255 - 210 * t);
+        return 0xFF000000 | 0xFF0000 | (g << 8) | b;
     }
 
     /** El puente: una viga de lado a lado del marco, con un carro de rodadura en cada punta. */
@@ -234,30 +310,58 @@ public class QuarryRenderer implements BlockEntityRenderer<QuarryBlockEntity, Qu
             }
         }
 
+        BitTier bit = state.bit;
+        if (bit == null) {
+            // Sin broca: la sarta termina en el pin desnudo
+            return;
+        }
         poseStack.pushPose();
         poseStack.translate(x, bitBase, z);
         poseStack.rotate(Axis.YP, angle);
-        if (state.pdcBit) {
-            submit(collector, pdcBit, poseStack, renderType, bitLight);
+        int teethTint = bit.teethTint();
+        if (bit.pdc()) {
+            submit(collector, pdcBit, poseStack, renderType, bitLight, state.bodyTint);
+            // Los cortadores se van cayendo de afuera hacia adentro a medida que la broca se gasta
+            int lost = wornSets(state.bitWear, pdcCutters.length);
+            for (int set = lost; set < pdcCutters.length; set++) {
+                submit(collector, pdcCutters[set], poseStack, renderType, bitLight, teethTint);
+            }
             poseStack.popPose();
             return;
         }
-        submit(collector, triconeBody, poseStack, renderType, bitLight);
+        submit(collector, triconeBody, poseStack, renderType, bitLight, state.bodyTint);
+        int lost = wornSets(state.bitWear, coneTeeth.length);
         for (int leg = 0; leg < 3; leg++) {
             poseStack.pushPose();
             poseStack.rotate(Axis.YP, (float) (leg * Math.PI * 2 / 3));
             poseStack.translate(0, QuarryRigModels.CONE_MOUNT_Y * PX, QuarryRigModels.CONE_MOUNT_Z * PX);
             poseStack.rotate(Axis.XP, QuarryRigModels.CONE_TILT);
             poseStack.rotate(Axis.YP, angle * CONE_SPIN_RATIO);
-            submit(collector, cone, poseStack, renderType, bitLight);
+            submit(collector, cone, poseStack, renderType, bitLight, state.bodyTint);
+            for (int row = lost; row < coneTeeth.length; row++) {
+                submit(collector, coneTeeth[row], poseStack, renderType, bitLight, teethTint);
+            }
             poseStack.popPose();
         }
         poseStack.popPose();
     }
 
+    /** Cuántos juegos de dientes ya se perdieron: ninguno hasta el 40 % de desgaste, todos cerca del final. */
+    private static int wornSets(float wear, int sets) {
+        if (wear < 0.4f) {
+            return 0;
+        }
+        return Math.min(sets, 1 + (int) ((wear - 0.4f) / 0.55f * (sets - 1)));
+    }
+
     private static void submit(SubmitNodeCollector collector, ModelPart part, PoseStack poseStack,
                                RenderType renderType, int light) {
         collector.submitModelPart(part, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, DIRECT_UV);
+    }
+
+    private static void submit(SubmitNodeCollector collector, ModelPart part, PoseStack poseStack,
+                               RenderType renderType, int light, int tint) {
+        collector.submitModelPart(part, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, DIRECT_UV, tint);
     }
 
     /** El pórtico es mucho más grande que el bloque: hay que dibujarlo aunque la quarry quede fuera de cámara. */

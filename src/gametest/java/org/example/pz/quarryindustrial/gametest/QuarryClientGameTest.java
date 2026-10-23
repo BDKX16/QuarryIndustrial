@@ -1,5 +1,8 @@
 package org.example.pz.quarryindustrial.gametest;
 
+import net.minecraft.world.item.ItemStack;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
@@ -47,6 +50,7 @@ public class QuarryClientGameTest implements FabricClientGameTest {
                 quarry.installUpgrade(UpgradeType.SPEED);
                 quarry.installUpgrade(UpgradeType.SPEED);
                 quarry.installUpgrade(UpgradeType.FORTUNE);
+                quarry.swapBit(new ItemStack(ModItems.bit(BitTier.DIAMOND)));
             });
             world.getServer().runCommand("gamemode spectator @a");
 

@@ -163,7 +163,8 @@ public class PumpjackBlock extends BaseEntityBlock {
         }
         player.sendOverlayMessage(Component.translatable("message.quarryindustrial.pumpjack.status",
                 pumpjack.status().label(), pumpjack.energy.getAmount(), pumpjack.energy.getCapacity(),
-                pumpjack.oilMb(), pumpjack.tankCapacityMb(), pumpjack.speedUpgrades()));
+                pumpjack.oilMb(), pumpjack.tankCapacityMb(), pumpjack.speedUpgrades(),
+                pumpjack.fuel.amountMb(), pumpjack.fuel.capacityMb()));
         return InteractionResult.SUCCESS;
     }
 }

@@ -1,0 +1,280 @@
+{
+  "chapters": [
+    {
+      "id": "start",
+      "title": "Primeros pasos",
+      "icon": "quarryindustrial:manual",
+      "pages": [
+        {
+          "title": "Qué hace este mod",
+          "text": "Quarry Industrial agrega minería automática y extracción de petróleo que escalan con tu red de energía: quarries desde LV hasta una quarry nuclear con varios reactores, cigüeñas petroleras, plataformas offshore, generadores y una flota de drones para mover todo.\n\nEstá hecho para Ala Industrial, pero funciona con EU (Team Reborn Energy), así que sirve cualquier cable, generador o batería compatible.",
+          "items": [
+            "quarryindustrial:quarry_lv",
+            "quarryindustrial:pumpjack"
+          ]
+        },
+        {
+          "title": "Tu primera quarry",
+          "text": "1. Fabricá una Quarry (LV) y una broca tricónica de hierro.\n2. Poné la quarry mirando hacia vos: mina el cuadrado de atrás.\n3. Clic derecho con la broca para instalarla.\n4. Conectá un cable (32 EU/t alcanzan).\n5. Poné un cofre al lado: ahí van los drops.\n\nLa quarry primero arma su marco y después empieza a excavar.",
+          "items": [
+            "quarryindustrial:drill_bit_iron",
+            "minecraft:chest"
+          ]
+        },
+        {
+          "title": "Recetas",
+          "text": "Cada item tiene dos recetas. Con Ala Industrial usan sus circuitos, carcasas y placas; sin Ala, equivalentes vanilla. JEI y REI muestran la que corresponde, y una página de información de cada máquina.",
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "quarries",
+      "title": "Quarries",
+      "icon": "quarryindustrial:quarry_hv",
+      "pages": [
+        {
+          "title": "Tiers",
+          "text": "LV: 32 EU/t, 9x9 a 16x16, 1 cabezal, 5 bloques/s\nMV: 128 EU/t, 16x16 a 48x48, 1 cabezal, 20 bloques/s\nHV: 512 EU/t, 32x32 a 80x80, 2 cabezales, 60 bloques/s\nNuclear: 512 EU/t por puerto (1-8), 64x64 a 144x144, 4 cabezales, 400 bloques/s\n\nLa velocidad sale de la energía: cada bloque cuesta 50 x (1 + dureza) EU. Con poca energía, simplemente mina más lento.",
+          "items": [
+            "quarryindustrial:quarry_lv",
+            "quarryindustrial:quarry_mv",
+            "quarryindustrial:quarry_hv"
+          ]
+        },
+        {
+          "title": "Marco y sarta",
+          "text": "La quarry levanta un marco de acero un bloque por fuera del área, de 4 de alto. Un puente corre sobre el marco, un carro sobre el puente y de él cuelga una sarta de verdad: kelly, tubos y la broca abajo. La tolva del carro se va llenando con lo que se mina.",
+          "items": []
+        },
+        {
+          "title": "Salida, claims y chunks",
+          "text": "Los drops van a un buffer de 27 slots que se vacía en cualquier cofre o caño pegado. Si se llena, la quarry se para y suena una alarma.\n\nLos bloques los rompe un jugador falso con el UUID del dueño, así que se respetan los mods de claims. Solo quedan cargados el chunk de la quarry y los de los cabezales.\n\nLos fluidos dentro del área se borran; los que tocan el borde se tapan con adoquín.",
+          "items": [
+            "minecraft:chest"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "bits",
+      "title": "Brocas y refrigeración",
+      "icon": "quarryindustrial:drill_bit_diamond",
+      "pages": [
+        {
+          "title": "Brocas",
+          "text": "Sin broca la quarry no mina (el marco lo arma igual). Cada broca se fabrica con la anterior:\nHierro: velocidad x1.0, vida 6000\nDiamante: x1.3, 24000\nNetherite: x1.6, 80000\nPDC: x2.0, 200000\n\nCada bloque gasta 1 + dureza / 3 puntos: piedra 1, pizarra profunda 2, obsidiana 17. Mirá la broca mientras trabaja: los insertos de carburo se van cayendo fila por fila y una broca casi muerta tira chispas.",
+          "items": [
+            "quarryindustrial:drill_bit_iron",
+            "quarryindustrial:drill_bit_diamond",
+            "quarryindustrial:drill_bit_netherite",
+            "quarryindustrial:drill_bit_pdc"
+          ]
+        },
+        {
+          "title": "Refrigeración con agua",
+          "text": "Entrá agua por caño a la quarry (por cualquier cara; en la nuclear, por el núcleo). Cada bloque gasta 1 mB y da +25 % de velocidad y la mitad de desgaste. Con una bomba de Ala sobre una fuente de agua alcanza.",
+          "items": [
+            "minecraft:water_bucket"
+          ]
+        },
+        {
+          "title": "Calor",
+          "text": "La quarry nuclear muele 400 bloques por segundo: sin agua la broca PDC se calienta. Arriba del 70 % de calor frena (hasta el 20 % de velocidad), la broca se pone al rojo y echa humo. Con agua nunca se recalienta.",
+          "items": [
+            "quarryindustrial:quarry_core"
+          ]
+        },
+        {
+          "title": "Cambiar brocas",
+          "text": "Clic derecho con una broca nueva o el slot de broca de la GUI. Un dron de mantenimiento lo puede hacer solo (ver el capítulo de drones).",
+          "items": [
+            "quarryindustrial:maintenance_drone"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "upgrades",
+      "title": "Upgrades",
+      "icon": "quarryindustrial:upgrade_speed",
+      "pages": [
+        {
+          "title": "Upgrades de la quarry",
+          "text": "Área: +16 por lado, hasta el máximo del tier (rehace el marco).\nVelocidad: +50 % bloques/s, x1.25 de coste (hasta 4).\nFortuna I-III: drops con fortuna, +50 % de coste por nivel.\nToque de seda: drops con seda, x2 de coste.\nFiltro: destruye la basura (piedra, tierra, grava...).\nBuscavetas: el cabezal solo rompe minerales y deja la roca.\n\nVan en el panel lateral de la GUI, o clic derecho con uno. Agachado + clic saca el último.",
+          "items": [
+            "quarryindustrial:upgrade_area",
+            "quarryindustrial:upgrade_speed",
+            "quarryindustrial:upgrade_ore_seeker"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nuclear",
+      "title": "Quarry nuclear",
+      "icon": "quarryindustrial:quarry_core",
+      "pages": [
+        {
+          "title": "Para qué",
+          "text": "El cable más grueso de Ala Industrial y su reactor llegan a 512 EU/t. La quarry nuclear rompe ese techo con puertos de energía: un reactor por puerto, hasta 8.",
+          "items": [
+            "quarryindustrial:energy_port"
+          ]
+        },
+        {
+          "title": "Cómo se arma",
+          "text": "1. Poné el Núcleo de quarry nuclear mirando hacia vos.\n2. Detrás, armá un cubo de 3x3x3: el núcleo es el centro de la cara delantera; los otros 26 bloques son Carcasa de quarry o Puertos de energía HV (de 1 a 8).\n3. Lo que falta se ve como un holograma verde.\n\nEl área empieza detrás del cubo. Entrá agua al núcleo para enfriarla.",
+          "items": [
+            "quarryindustrial:quarry_core",
+            "quarryindustrial:quarry_casing",
+            "quarryindustrial:energy_port"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "oil",
+      "title": "Cigüeñas petroleras",
+      "icon": "quarryindustrial:pumpjack",
+      "pages": [
+        {
+          "title": "Géiseres",
+          "text": "Ala Industrial genera géiseres de petróleo: un chorro en la superficie, un caño de 1x1 sellado con piedra y un domo enterrado lleno de crudo cerca de Y -45. Un dron explorador los encuentra por vos.",
+          "items": [
+            "quarryindustrial:survey_drone"
+          ]
+        },
+        {
+          "title": "Cómo se pone",
+          "text": "Parate detrás del caño y poné la cigüeña mirando hacia él: la estructura de 3x7x5 se arma hacia vos. Primero vacía el crudo real del caño y el domo (1 cubo por segundo) y después bombea para siempre a 10 mB/t por 32 EU/t, hasta ~30 mB/t con 4 upgrades de velocidad.",
+          "items": [
+            "quarryindustrial:pumpjack",
+            "quarryindustrial:upgrade_speed"
+          ]
+        },
+        {
+          "title": "Caños y diésel",
+          "text": "Los caños de Ala pegados a la base sacan el petróleo solos (sin llave). Mandalo a la columna de destilación de Ala para diésel y fuel oil.\n\nCon diésel por la fila del motor (atrás de la base), la cigüeña anda con su propio diésel cuando le falta EU: sale humo negro del escape.\n\nCada tanto sale un Oil Slime del pozo.",
+          "items": [
+            "alaindustrial:fluid_pipe",
+            "quarryindustrial:diesel_generator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "offshore",
+      "title": "Plataforma offshore",
+      "icon": "quarryindustrial:offshore_rig",
+      "pages": [
+        {
+          "title": "Cómo se pone",
+          "text": "Usala sobre la superficie de un océano de al menos 8 bloques de profundidad. Arma una cubierta de rejilla de 7x7 a nivel del mar y cuatro patas hasta el fondo. La torre, la antorcha y la sala de máquinas vienen incluidas.",
+          "items": [
+            "quarryindustrial:offshore_rig"
+          ]
+        },
+        {
+          "title": "Perforación y producción",
+          "text": "Instalale una broca (clic derecho en la cubierta) y dale energía: la sarta baja por el agua y 24 m dentro del lecho marino (256 EU/t, 50 puntos de desgaste por metro). Al llegar al reservorio produce 25 mB/t de petróleo para siempre (96 EU/t), más con upgrades de velocidad, y se enciende la antorcha.",
+          "items": [
+            "quarryindustrial:drill_bit_diamond",
+            "quarryindustrial:upgrade_speed"
+          ]
+        },
+        {
+          "title": "Llevar el petróleo a tierra",
+          "text": "El petróleo sale por cualquier bloque de la cubierta. Llevar caños por el mar es tedioso: poné un pad con un dron cisterna sobre la cubierta y vinculalo a un pad en la costa. El diésel entra por el controlador, así la plataforma puede andar con su propio petróleo refinado.",
+          "items": [
+            "quarryindustrial:tanker_drone",
+            "quarryindustrial:drone_pad"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "power",
+      "title": "Generadores",
+      "icon": "quarryindustrial:diesel_generator",
+      "pages": [
+        {
+          "title": "Generador diésel",
+          "text": "Quema los combustibles líquidos de Ala Industrial y entrega hasta 128 EU/t (MV) a cables y máquinas pegadas:\nDiésel: 12 EU por mB\nFuel oil: 8 EU por mB\nBiocombustible: 8 EU por mB\n\nClic derecho con un balde o con caño. Cierra el ciclo: cigüeña, destilación, diésel, energía.",
+          "items": [
+            "quarryindustrial:diesel_generator"
+          ]
+        },
+        {
+          "title": "Turbina de vapor",
+          "text": "El reactor de Ala Industrial hierve su refrigerante en vapor, que va por caños de vapor a una Steam Nozzle que lo ventea al aire. Poné la turbina justo delante de la boca de la nozzle: tapa el venteo y convierte el vapor en EU (2 EU por mB, hasta 1024 EU/t).",
+          "items": [
+            "quarryindustrial:steam_turbine",
+            "alaindustrial:steam_nozzle"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drones",
+      "title": "Drones",
+      "icon": "quarryindustrial:cargo_drone",
+      "pages": [
+        {
+          "title": "Pads de drones",
+          "text": "Un dron vive en un pad: clic derecho en el pad con el dron. El pad tiene un buzón de salida (lo que se lleva el dron; caños y tolvas meten cosas y tira de cofres y tanques pegados) y uno de llegada (lo que traen otros drones, que reparte a sus vecinos). Cada viaje cuesta energía del pad: 1000 EU más 8 EU por bloque.",
+          "items": [
+            "quarryindustrial:drone_pad"
+          ]
+        },
+        {
+          "title": "Vincular",
+          "text": "Con el vinculador, agachado + clic derecho en el pad de origen y después clic derecho en el de destino (hasta 512 bloques). Los drones de transporte van del origen al destino y vuelven.",
+          "items": [
+            "quarryindustrial:drone_linker"
+          ]
+        },
+        {
+          "title": "Drones de transporte",
+          "text": "Dron de carga: items (sale con 4 stacks o a los 10 s).\nDron cisterna: fluidos, 16 cubos.\nDron de energía: una batería voladora de 400k EU.\n\nLo que el destino no puede recibir vuelve con el dron.",
+          "items": [
+            "quarryindustrial:cargo_drone",
+            "quarryindustrial:tanker_drone",
+            "quarryindustrial:power_drone"
+          ]
+        },
+        {
+          "title": "Mantenimiento y exploración",
+          "text": "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 48 bloques y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres que vio.",
+          "items": [
+            "quarryindustrial:maintenance_drone",
+            "quarryindustrial:survey_drone",
+            "quarryindustrial:survey_report"
+          ]
+        },
+        {
+          "title": "Si algo sale mal",
+          "text": "Los drones vuelan por arriba de todo y mantienen cargado el chunk donde están. Si golpeás un dron, cae: suelta lo que llevaba y vuelve a aparecer en su pad. Si un pad no sabe nada de su dron por 5 minutos, lo da por perdido y el dron vuelve (sin la carga).",
+          "items": []
+        }
+      ]
+    },
+    {
+      "id": "extras",
+      "title": "Consejos y compatibilidad",
+      "icon": "minecraft:spyglass",
+      "pages": [
+        {
+          "title": "Jade, JEI, REI",
+          "text": "Con Jade, mirar cualquier máquina muestra su estado, energía, vida de la broca, fluidos y avance. JEI y REI muestran todas las recetas y una página de información por máquina.",
+          "items": []
+        },
+        {
+          "title": "Configuración",
+          "text": "Todos los números están en config/quarryindustrial.json: costes, tiers, vida de las brocas, refrigeración, generadores, drones, la plataforma offshore y la cigüeña. Las opciones que falten se agregan con su valor por defecto al arrancar.",
+          "items": []
+        }
+      ]
+    }
+  ]
+}

@@ -26,13 +26,18 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
     private static final int ENERGY_Y = 18;
     private static final int ENERGY_W = 10;
     private static final int ENERGY_H = 50;
-    private static final int TEXT_X = 22;
+    /** Barra de agua (refrigerante) al lado de la de energía, y la de calor (solo nuclear) al lado. */
+    private static final int COOLANT_X = 21;
+    private static final int COOLANT_W = 5;
+    private static final int HEAT_X = 28;
+    private static final int HEAT_W = 3;
+    private static final int TEXT_X = 34;
     private static final int MAP_X = 120;
     private static final int MAP_Y = 18;
     private static final int MAP_SIZE = 48;
     private static final int LINE = 10;
     private static final int PROGRESS_Y = 72;
-    private static final int PROGRESS_W = 114;
+    private static final int PROGRESS_W = 102;
 
     private static final int PANEL = 0xFFC6C6C6;
     private static final int LIGHT = 0xFFFFFFFF;
@@ -53,9 +58,20 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         bevel(graphics, x, y, PANEL_WIDTH, HEIGHT, PANEL, LIGHT, SHADOW);
         // Panel lateral de upgrades, pegado al principal
         bevel(graphics, x + PANEL_WIDTH + 2, y + 10, WIDTH - PANEL_WIDTH - 2,
-                QuarryBlockEntity.UPGRADE_SLOTS * 18 + 14, PANEL, LIGHT, SHADOW);
+                QuarryMenu.BIT_Y + 18 + 4 - 10, PANEL, LIGHT, SHADOW);
         for (int i = 0; i < QuarryBlockEntity.UPGRADE_SLOTS; i++) {
             slot(graphics, x + QuarryMenu.UPGRADE_X, y + QuarryMenu.UPGRADE_Y + i * 18);
+        }
+        // Separador y slot de la broca (con una broca dibujada de fondo cuando está vacío)
+        graphics.fill(x + QuarryMenu.BIT_X - 1, y + QuarryMenu.BIT_Y - 7, x + QuarryMenu.BIT_X + 17,
+                y + QuarryMenu.BIT_Y - 6, SHADOW);
+        slot(graphics, x + QuarryMenu.BIT_X, y + QuarryMenu.BIT_Y);
+        if (menu.getSlot(QuarryBlockEntity.UPGRADE_SLOTS).getItem().isEmpty()) {
+            int bx = x + QuarryMenu.BIT_X + 8;
+            int by = y + QuarryMenu.BIT_Y + 2;
+            graphics.fill(bx - 1, by, bx + 1, by + 6, 0xFF6E6E6E);
+            graphics.fill(bx - 4, by + 6, bx + 4, by + 10, 0xFF6E6E6E);
+            graphics.fill(bx - 2, by + 10, bx + 2, by + 13, 0xFF6E6E6E);
         }
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -72,6 +88,10 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         }
 
         drawEnergy(graphics, x + ENERGY_X, y + ENERGY_Y);
+        drawCoolant(graphics, x + COOLANT_X, y + ENERGY_Y);
+        if (menu.ports() > 0 || isNuclear()) {
+            drawHeat(graphics, x + HEAT_X, y + ENERGY_Y);
+        }
         drawInfo(graphics, x + TEXT_X, y + ENERGY_Y);
         drawProgress(graphics, x + TEXT_X, y + PROGRESS_Y);
         drawMinimap(graphics, x + MAP_X, y + MAP_Y);
@@ -83,6 +103,28 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         int filled = (int) Math.min(ENERGY_H, menu.energy() * ENERGY_H / capacity);
         // Rojo HV abajo, amarillo LV arriba: el mismo código de colores que los tiers de Ala
         graphics.fillGradient(x, y + ENERGY_H - filled, x + ENERGY_W, y + ENERGY_H, 0xFFFFD24A, 0xFFFF3D5A);
+    }
+
+    private boolean isNuclear() {
+        QuarryBlockEntity quarry = menu.quarry();
+        return quarry != null && quarry.tier().multiblock();
+    }
+
+    private void drawCoolant(GuiGraphicsExtractor graphics, int x, int y) {
+        bevel(graphics, x - 1, y - 1, COOLANT_W + 2, ENERGY_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        int capacity = Math.max(1, menu.coolantCapacity());
+        int filled = Math.min(ENERGY_H, menu.coolant() * ENERGY_H / capacity);
+        graphics.fillGradient(x, y + ENERGY_H - filled, x + COOLANT_W, y + ENERGY_H, 0xFF6FB8FF, 0xFF2A5BD8);
+    }
+
+    /** Calor de la broca: verde → naranja → rojo; la marca blanca es donde empieza a frenar. */
+    private void drawHeat(GuiGraphicsExtractor graphics, int x, int y) {
+        bevel(graphics, x - 1, y - 1, HEAT_W + 2, ENERGY_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        int heat = Math.clamp(menu.heat(), 0, 1000);
+        int filled = heat * ENERGY_H / 1000;
+        int color = heat > 700 ? 0xFFFF3A2A : heat > 400 ? 0xFFFF9A2A : 0xFF4ACF5A;
+        graphics.fill(x, y + ENERGY_H - filled, x + HEAT_W, y + ENERGY_H, color);
+        graphics.fill(x, y + ENERGY_H * 3 / 10, x + HEAT_W, y + ENERGY_H * 3 / 10 + 1, 0xAAFFFFFF);
     }
 
     private void drawInfo(GuiGraphicsExtractor graphics, int x, int y) {
@@ -163,6 +205,14 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         if (isHovering(ENERGY_X, ENERGY_Y, ENERGY_W, ENERGY_H, mouseX, mouseY)) {
             graphics.setTooltipForNextFrame(font, Component.translatable("gui.quarryindustrial.energy_tooltip",
                     menu.energy(), menu.capacity()), mouseX, mouseY);
+        } else if (isHovering(COOLANT_X, ENERGY_Y, COOLANT_W, ENERGY_H, mouseX, mouseY)) {
+            graphics.setComponentTooltipForNextFrame(font, List.of(
+                    Component.translatable("gui.quarryindustrial.coolant", menu.coolant(), menu.coolantCapacity()),
+                    Component.translatable("gui.quarryindustrial.coolant_hint")), mouseX, mouseY);
+        } else if (isNuclear() && isHovering(HEAT_X, ENERGY_Y, HEAT_W, ENERGY_H, mouseX, mouseY)) {
+            graphics.setComponentTooltipForNextFrame(font, List.of(
+                    Component.translatable("gui.quarryindustrial.heat", menu.heat() / 10),
+                    Component.translatable("gui.quarryindustrial.heat_hint")), mouseX, mouseY);
         } else if (menu.ports() > 0 && isHovering(TEXT_X, ENERGY_Y + LINE, MAP_X - TEXT_X, LINE, mouseX, mouseY)) {
             List<Component> lines = new ArrayList<>();
             lines.add(Component.translatable("gui.quarryindustrial.ports_tooltip"));
@@ -176,8 +226,8 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
     private static int statusColor(QuarryStatus status) {
         return switch (status) {
             case MINING -> 0xFF1E8A3C;
-            case BUILDING_FRAME -> 0xFFB07A00;
-            case NO_POWER, STRUCTURE_INCOMPLETE -> 0xFFB02020;
+            case BUILDING_FRAME, OVERHEATING -> 0xFFB07A00;
+            case NO_POWER, STRUCTURE_INCOMPLETE, NO_BIT -> 0xFFB02020;
             case OUTPUT_FULL -> 0xFFC05A00;
             case FINISHED -> 0xFF2050B0;
             case IDLE -> TEXT;

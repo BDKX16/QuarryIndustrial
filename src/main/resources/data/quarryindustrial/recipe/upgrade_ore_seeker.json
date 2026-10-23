@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " R ",
+    "LBL",
+    " C "
+  ],
+  "key": {
+    "R": "alaindustrial:drill_row_module",
+    "L": "minecraft:spyglass",
+    "B": "alaindustrial:module_blank",
+    "C": "alaindustrial:drill_column_module"
+  },
+  "result": {
+    "id": "quarryindustrial:upgrade_ore_seeker"
+  }
+}

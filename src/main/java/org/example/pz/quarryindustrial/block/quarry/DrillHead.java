@@ -18,6 +18,8 @@ public final class DrillHead {
     private int y;
     private int z;
     private boolean finished;
+    /** Id del último bloque que rompió (Block.getId), para las partículas y la tolva del renderer. 0 = nada. */
+    private int lastMined;
 
     public DrillHead(int minX, int maxX, int minZ, int maxZ, int startY) {
         this.minX = minX;
@@ -53,6 +55,14 @@ public final class DrillHead {
         return finished;
     }
 
+    public int lastMined() {
+        return lastMined;
+    }
+
+    public void setLastMined(int stateId) {
+        this.lastMined = stateId;
+    }
+
     public int y() {
         return y;
     }
@@ -77,6 +87,7 @@ public final class DrillHead {
         output.putIntArray("Bounds", new int[]{minX, maxX, minZ, maxZ});
         output.putIntArray("Cursor", new int[]{x, y, z});
         output.putBoolean("Finished", finished);
+        output.putInt("LastMined", lastMined);
     }
 
     public static DrillHead load(ValueInput input) {
@@ -90,6 +101,7 @@ public final class DrillHead {
         head.x = cursor[0];
         head.z = cursor[2];
         head.finished = input.getBooleanOr("Finished", false);
+        head.lastMined = input.getIntOr("LastMined", 0);
         return head;
     }
 }

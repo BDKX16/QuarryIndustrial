@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:frame_built",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:drill_bit_iron"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.bit_broken.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.bit_broken.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

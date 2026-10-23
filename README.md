@@ -1,8 +1,9 @@
 # Quarry Industrial
 
 Mod de Fabric para **Minecraft 26.3**. Agrega quarries de minería automática que escalan desde una máquina LV
-hasta una **quarry nuclear multibloque** alimentada por varios reactores, y **cigüeñas petroleras** (pumpjacks)
-que extraen petróleo de los géiseres de [Ala Industrial](https://github.com/AlaMine-Team-Org/AlaIndustrial).
+hasta una **quarry nuclear multibloque** alimentada por varios reactores, **cigüeñas petroleras** (pumpjacks)
+que extraen petróleo de los géiseres de [Ala Industrial](https://github.com/AlaMine-Team-Org/AlaIndustrial),
+**plataformas offshore**, generadores diésel y de vapor, y una flota de **drones** para mover todo.
 
 Funciona con energía **EU** a través de Team Reborn Energy. Se conecta solo con los cables, generadores y reactores
 de Ala Industrial (y de Tech Reborn), sin depender de su código.
@@ -66,6 +67,28 @@ real de un mecanismo de 4 barras.
 
 ![Cigüeña sobre un géiser](docs/screenshots/06_pumpjack.jpg)
 
+### Brocas, refrigeración y calor
+
+La quarry necesita una **broca** (el marco lo arma igual). Se gasta con cada bloque: `1 + dureza / 3` puntos
+(piedra 1, pizarra profunda 2, obsidiana 17) y al final se rompe. Cada una se fabrica con la anterior:
+
+| Broca | Velocidad | Vida |
+|---|---|---|
+| Tricónica de hierro | ×1.0 | 6 000 |
+| Tricónica de diamante | ×1.3 | 24 000 |
+| Tricónica de netherite | ×1.6 | 80 000 |
+| PDC | ×2.0 | 200 000 |
+
+En el modelo se ve: los insertos de carburo se van cayendo fila por fila y una broca casi muerta tira chispas.
+Se instala con clic derecho, en el slot de la GUI o con un dron de mantenimiento.
+
+- **Agua:** por caño, por cualquier cara (en la nuclear, por el núcleo). 1 mB por bloque: +25 % de velocidad y la
+  mitad de desgaste.
+- **Calor (quarry nuclear):** sin agua, la PDC se calienta. Arriba del 70 % frena (hasta el 20 % de velocidad), se
+  pone al rojo y echa humo.
+- **Visualización:** esquirlas del bloque que se rompe salen de la broca, salpica el lodo cuando hay agua y la
+  tolva del carro se llena con el material que se está minando.
+
 ### Upgrades
 
 Se ponen en el panel lateral de la GUI o con clic derecho sobre la quarry (agachado + clic saca el último).
@@ -77,8 +100,66 @@ Se ponen en el panel lateral de la GUI o con clic derecho sobre la quarry (agach
 | Fortuna | Fortuna I–III en los drops, +50 % coste por nivel | 3 |
 | Toque de seda | Drops con seda, ×2 coste (no se combina con fortuna) | 1 |
 | Filtro (void) | Destruye piedra, tierra, grava, etc. (tag `quarryindustrial:void_filter`) | 1 |
+| Buscavetas | El cabezal solo rompe minerales (`#c:ores`) y deja la roca en su lugar. Se fabrica con los módulos de fila y columna del taladro de Ala | 1 |
 
-La cigüeña solo acepta upgrades de velocidad.
+La cigüeña y la plataforma offshore solo aceptan upgrades de velocidad.
+
+### Motor diésel y Oil Slimes
+
+Con diésel (o fuel oil, o biocombustible) por la **fila del motor** (la de atrás de la base), la cigüeña quema su
+propio combustible cuando le falta EU y echa humo por el escape. El resto de la base sigue siendo solo salida de
+petróleo, así los caños de Ala lo toman sin llave. Cada tanto sale un **Oil Slime** de Ala del pozo.
+
+### Plataforma offshore
+
+Se pone sobre la superficie de un **océano** de al menos 8 bloques de profundidad, como un nenúfar. Arma una
+cubierta de rejilla de 7×7 a nivel del mar y cuatro patas hasta el fondo, con la torre de perforación en
+celosía, el aparejo móvil, la casilla, la sala de máquinas y la antorcha de gas.
+
+1. Con una broca y energía (256 EU/t), la sarta baja por el agua y perfora 24 m dentro del lecho marino
+   (50 puntos de desgaste por metro).
+2. Al llegar al reservorio produce **25 mB/t de petróleo para siempre** (96 EU/t), más con upgrades, y se
+   enciende la antorcha.
+
+El petróleo sale por cualquier bloque de la cubierta (lo ideal es un dron cisterna hasta la costa) y el diésel
+entra por el controlador.
+
+### Generadores
+
+| Bloque | Qué hace |
+|---|---|
+| Generador diésel | Quema diésel (12 EU/mB), fuel oil u otro biocombustible (8 EU/mB) de Ala y entrega hasta 128 EU/t |
+| Turbina de vapor | Se pone tapando la boca de una **Steam Nozzle** de Ala: toma el vapor del reactor antes de que se ventee y lo convierte en EU (2 EU/mB, hasta 1024 EU/t) |
+
+La Steam Nozzle de Ala no deja sacar vapor por la API de fluidos, así que la turbina lo lee de su tanque por
+reflexión (si la API de Ala cambia, simplemente no toma vapor de la nozzle).
+
+### Drones
+
+Un dron vive en un **pad de drones**. El pad tiene un buzón de salida (lo llenan los caños y tolvas, y además tira
+de cofres y tanques pegados) y uno de llegada (lo que traen otros drones, que reparte a sus vecinos). Cada viaje
+cuesta 1000 EU + 8 EU por bloque de la energía del pad. El **vinculador** une un pad de origen con uno de destino
+(agachado + clic en el origen, clic en el destino; hasta 512 bloques).
+
+| Dron | Qué hace |
+|---|---|
+| Carga | Items entre dos pads (sale con 4 stacks o a los 10 s) |
+| Cisterna | Fluidos, 16 cubos por viaje (el petróleo de la offshore a la costa) |
+| Energía | Una batería voladora de 400 000 EU para quarries lejos de la red |
+| Mantenimiento | Con brocas de repuesto en su pad, cambia las gastadas (≥ 90 %) de quarries y plataformas a 48 bloques |
+| Explorador | Clic en su pad: recorre un radio de 128 bloques y vuelve con un informe de los géiseres que vio |
+
+Despegan en vertical, vuelan en línea recta por arriba de todo y aterrizan; mantienen cargado el chunk donde
+están. Un golpe los baja (sueltan la carga y vuelven a aparecer en su pad). Si un pad no sabe nada de su dron por
+5 minutos, lo da por perdido y el dron vuelve sin la carga.
+
+### Manual, sonidos y logros
+
+- **Manual del operador:** un libro con 10 capítulos (en inglés y español) que se abre con clic derecho. Llega
+  solo con la primera quarry, o se fabrica con un libro y un lingote de hierro.
+- **Sonidos propios** (sintetizados con `tools/gen_sounds.py`): la broca, el motor diésel, la turbina, las hélices
+  de los drones, el golpe de la cigüeña y una alarma cuando una quarry se para.
+- **14 logros** en una pestaña propia, desde "Arriba el pórtico" hasta "Ocho reactores, un pozo".
 
 ### GUI
 
@@ -95,6 +176,8 @@ en curso con los cabezales, el buffer de salida y los upgrades.
   porque no hay petróleo.
 - **Recetas:** cada item tiene dos recetas y se carga la que corresponde: con Ala usan sus circuitos, carcasas y
   placas; sin Ala, equivalentes vanilla.
+- **Jade:** al mirar cualquier máquina muestra estado, energía, vida de la broca, fluidos y avance.
+- **JEI / REI:** muestran las recetas y una página de información por máquina.
 
 ## Configuración
 
@@ -107,17 +190,22 @@ reconocer un géiser).
 ```bash
 ./gradlew build                 # compila y arma el jar en build/libs
 ./gradlew runClient             # cliente de desarrollo (con Ala Industrial cargado)
-./gradlew runGameTest           # gametests de servidor (quarries, nuclear, cigüeña, recetas)
+./gradlew runGameTest           # gametests de servidor (quarries, brocas, nuclear, cigüeña, offshore, generadores, drones, recetas, logros)
 ./gradlew runGameTest -PnoAla   # los mismos, sin Ala Industrial
 ./gradlew runClientGameTest     # pruebas visuales: abre el juego y saca capturas en build/run/clientGameTest
 QUARRY_SHOWCASE=1 QUARRY_SHOWCASE_DIR=docs/screenshots ./gradlew runClientGameTest   # capturas de esta página
 python tools/finish_showcase.py  # después del showcase: JPG para las capturas y recorte de la GUI
+QUARRY_EXPANSION=1 QUARRY_SHOWCASE_DIR=docs/screenshots ./gradlew runClientGameTest   # capturas de la expansión
+./gradlew runClient -PwithJade -PwithJei   # cliente con Jade y JEI (también -PwithRei)
 ```
 
 - Java 25, Gradle 9.8 (wrapper incluido), Fabric Loom 1.19.
 - Ala Industrial se carga solo en runtime (`ala_version` en `gradle.properties`); el mod no compila contra sus clases.
-- `tools/gen_textures.py`, `tools/gen_icon.py` y `tools/gen_recipes.py` generan texturas, ícono y recetas
-  (requieren Python 3 con Pillow).
+- `tools/gen_textures.py`, `tools/gen_textures_expansion.py`, `tools/gen_icon.py` y `tools/gen_recipes.py`
+  generan texturas, ícono y recetas (requieren Python 3 con Pillow). `gen_blocks.py`, `gen_item_models.py`,
+  `gen_lang.py`, `gen_manual.py` y `gen_advancements.py` generan modelos, textos, el manual y los logros;
+  `gen_sounds.py` sintetiza los sonidos (necesita ffmpeg con libvorbis).
+- Jade, JEI y REI se compilan como `compileOnly`: no son dependencias del mod.
 - El showcase arma las escenas en un mundo normal con semilla fija (`quarryindustrial`) y saca las capturas en
   1920×1080 sin HUD; tarda unos 4 minutos.
 
@@ -127,8 +215,13 @@ python tools/finish_showcase.py  # después del showcase: JPG para las capturas 
 |---|---|
 | `src/main/.../block/quarry` | Quarries, marco, multibloque nuclear, GUI (menú) |
 | `src/main/.../block/pumpjack` | Cigüeña, validador del pozo, partes del multibloque |
+| `src/main/.../block/offshore` | Plataforma offshore (controlador, cubierta, patas) |
+| `src/main/.../block/generator` | Generador diésel y turbina de vapor |
+| `src/main/.../block/drone`, `drone` | Pads y drones |
+| `src/main/.../compat` | Jade, el vapor de Ala, los Oil Slimes |
 | `src/client/.../render` | Renderers y modelos 3D (pórtico, broca tricónica y PDC, cigüeña) |
-| `src/client/.../screen` | Pantalla de la quarry |
+| `src/client/.../screen`, `manual` | Pantalla de la quarry y el manual |
+| `src/client/.../compat` | JEI, REI y la parte de cliente de Jade |
 | `src/gametest` | Gametests de servidor y pruebas visuales de cliente |
 | `docs/` | Capturas y material para CurseForge |
 

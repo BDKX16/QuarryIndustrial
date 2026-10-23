@@ -18,7 +18,9 @@ import java.util.List;
 public class RecipeGameTests {
     private static final List<String> ITEMS = List.of("quarry_lv", "quarry_mv", "quarry_hv", "quarry_core",
             "quarry_casing", "energy_port", "pumpjack", "upgrade_area", "upgrade_speed", "upgrade_fortune",
-            "upgrade_silk_touch", "upgrade_void");
+            "upgrade_silk_touch", "upgrade_void", "upgrade_ore_seeker", "drill_bit_iron", "drill_bit_diamond",
+            "drill_bit_netherite", "drill_bit_pdc", "diesel_generator", "steam_turbine", "offshore_rig", "drone_pad",
+            "drone_linker", "cargo_drone", "tanker_drone", "power_drone", "maintenance_drone", "survey_drone");
 
     @GameTest
     public void recipeVariantMatchesInstalledMods(GameTestHelper helper) {
@@ -29,6 +31,18 @@ public class RecipeGameTests {
             boolean vanilla = recipes.byKey(key(item + "_vanilla")).isPresent();
             helper.assertTrue(withAla == ala, "receta con Ala de " + item + " cargada=" + withAla);
             helper.assertTrue(vanilla == !ala, "receta vanilla de " + item + " cargada=" + vanilla);
+        }
+        helper.succeed();
+    }
+
+    /** Los logros del mod cargan (un JSON mal armado se descarta en silencio al arrancar). */
+    @GameTest
+    public void advancementsLoad(GameTestHelper helper) {
+        for (String name : List.of("root", "frame_built", "bit_broken", "pdc_bit", "rock_bottom", "nuclear_eight",
+                "black_gold", "bottomless", "self_sufficient", "into_the_deep", "waste_not", "air_mail", "pit_crew",
+                "prospector")) {
+            helper.assertTrue(helper.getLevel().getServer().getAdvancements().get(Quarryindustrial.id(name)) != null,
+                    "logro " + name);
         }
         helper.succeed();
     }

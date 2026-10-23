@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PBP",
+    "CXC",
+    "PSP"
+  ],
+  "key": {
+    "P": "#c:plates/tempered_iron",
+    "B": "alaindustrial:iron_gear",
+    "C": "alaindustrial:copper_coil",
+    "X": "alaindustrial:machine_casing",
+    "S": "alaindustrial:steam_pipe"
+  },
+  "result": {
+    "id": "quarryindustrial:steam_turbine"
+  }
+}

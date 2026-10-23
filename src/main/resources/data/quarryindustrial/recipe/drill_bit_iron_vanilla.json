@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:all_mods_loaded",
+        "values": [
+          "alaindustrial"
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    " P ",
+    "PGP",
+    "I I"
+  ],
+  "key": {
+    "P": "#c:ingots/iron",
+    "G": "minecraft:iron_block",
+    "I": "#c:ingots/iron"
+  },
+  "result": {
+    "id": "quarryindustrial:drill_bit_iron"
+  }
+}

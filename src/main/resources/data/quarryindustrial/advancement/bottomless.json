@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:black_gold",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:pumpjack"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.bottomless.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.bottomless.description"
+    },
+    "frame": "goal"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

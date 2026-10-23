@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "SPS",
+    "BJB",
+    "SCS"
+  ],
+  "key": {
+    "S": "#c:plates/tempered_iron",
+    "P": "alaindustrial:pump",
+    "B": "quarryindustrial:drill_bit_diamond",
+    "J": "quarryindustrial:pumpjack",
+    "C": "alaindustrial:advanced_circuit"
+  },
+  "result": {
+    "id": "quarryindustrial:offshore_rig"
+  }
+}

@@ -63,7 +63,67 @@ RECIPES = {
     "upgrade_void": (1, ["OPO", "PBP", "OPO"],
                      {"O": "minecraft:obsidian", "P": "minecraft:ender_pearl", "B": A + "module_blank"},
                      {"O": "minecraft:obsidian", "P": "minecraft:ender_pearl", "B": "minecraft:redstone_block"}),
+    # ── Brocas: cada una se arma con la anterior (que puede estar gastada) ──
+    "drill_bit_iron": (1, [" P ", "PGP", "I I"],
+                       {"P": "#c:plates/iron", "G": A + "iron_gear", "I": "#c:ingots/iron"},
+                       {"P": "#c:ingots/iron", "G": "minecraft:iron_block", "I": "#c:ingots/iron"}),
+    "drill_bit_diamond": (1, [" D ", "DBD", " D "],
+                          {"D": "minecraft:diamond", "B": Q + "drill_bit_iron"},
+                          {"D": "minecraft:diamond", "B": Q + "drill_bit_iron"}),
+    "drill_bit_netherite": (1, ["N", "B"],
+                            {"N": A + "netherite_drill_head", "B": Q + "drill_bit_diamond"},
+                            {"N": "minecraft:netherite_ingot", "B": Q + "drill_bit_diamond"}),
+    "drill_bit_pdc": (1, ["DSD", "DBD", "DSD"],
+                      {"D": "minecraft:diamond", "S": "#c:plates/shielding_alloy", "B": Q + "drill_bit_netherite"},
+                      {"D": "minecraft:diamond", "S": "minecraft:netherite_scrap", "B": Q + "drill_bit_netherite"}),
+    "upgrade_ore_seeker": (1, [" R ", "LBL", " C "],
+                           {"R": A + "drill_row_module", "L": "minecraft:spyglass", "B": A + "module_blank",
+                            "C": A + "drill_column_module"},
+                           {"R": "minecraft:compass", "L": "minecraft:spyglass", "B": "minecraft:redstone_block",
+                            "C": "minecraft:diamond_pickaxe"}),
+    # ── Generadores ──
+    "diesel_generator": (1, [" T ", "GXG", "PCP"],
+                         {"T": A + "fluid_tank", "G": A + "iron_gear", "X": A + "generator", "P": "#c:plates/iron",
+                          "C": A + "electronic_circuit"},
+                         {"T": "minecraft:bucket", "G": "minecraft:piston", "X": "minecraft:blast_furnace",
+                          "P": "#c:ingots/iron", "C": "minecraft:redstone"}),
+    "steam_turbine": (1, ["PBP", "CXC", "PSP"],
+                      {"P": "#c:plates/tempered_iron", "B": A + "iron_gear", "C": A + "copper_coil",
+                       "X": A + "machine_casing", "S": A + "steam_pipe"},
+                      {"P": "#c:ingots/iron", "B": "minecraft:iron_bars", "C": "minecraft:copper_block",
+                       "X": "minecraft:iron_block", "S": "minecraft:bucket"}),
+    "offshore_rig": (1, ["SPS", "BJB", "SCS"],
+                     {"S": "#c:plates/tempered_iron", "P": A + "pump", "B": Q + "drill_bit_diamond",
+                      "J": Q + "pumpjack", "C": A + "advanced_circuit"},
+                     {"S": "minecraft:iron_block", "P": "minecraft:bucket", "B": Q + "drill_bit_diamond",
+                      "J": Q + "pumpjack", "C": "minecraft:comparator"}),
+    # ── Drones: el chasis es el dron de jardín de Ala (sin Ala, un bloque de cobre) y la carga depende del tipo ──
+    **{f"{kind}_drone": (1, ["M M", " G ", "CXC"],
+                         {"M": "minecraft:phantom_membrane", "G": A + "garden_drone", "C": A + "electronic_circuit",
+                          "X": ala_part},
+                         {"M": "minecraft:phantom_membrane", "G": "minecraft:copper_block", "C": "minecraft:redstone",
+                          "X": vanilla_part})
+       for kind, ala_part, vanilla_part in (
+           ("cargo", "minecraft:chest", "minecraft:chest"),
+           ("tanker", A + "fluid_tank", "minecraft:bucket"),
+           ("power", A + "battery_box", "minecraft:redstone_block"),
+           ("maintenance", A + "wrench", "minecraft:anvil"),
+           ("survey", "minecraft:spyglass", "minecraft:spyglass"))},
+    "drone_pad": (2, ["YYY", "CXC"],
+                  {"Y": "minecraft:yellow_concrete", "C": A + "electronic_circuit", "X": A + "machine_casing"},
+                  {"Y": "minecraft:yellow_concrete", "C": "minecraft:redstone", "X": "minecraft:iron_block"}),
+    "drone_linker": (1, [" A ", "IRI", "III"],
+                     {"A": "minecraft:lightning_rod", "I": "#c:plates/iron", "R": A + "electronic_circuit"},
+                     {"A": "minecraft:lightning_rod", "I": "#c:ingots/iron", "R": "minecraft:redstone"}),
 }
+
+
+def category(item):
+    if item.startswith("upgrade"):
+        return "misc"
+    if item.startswith("drill_bit"):
+        return "equipment"
+    return "redstone"
 
 
 def recipe(item, count, pattern, key, conditions):
@@ -73,7 +133,7 @@ def recipe(item, count, pattern, key, conditions):
     return {
         "fabric:load_conditions": conditions,
         "type": "minecraft:crafting_shaped",
-        "category": "misc" if item.startswith("upgrade") else "redstone",
+        "category": category(item),
         "pattern": pattern,
         "key": key,
         "result": result,

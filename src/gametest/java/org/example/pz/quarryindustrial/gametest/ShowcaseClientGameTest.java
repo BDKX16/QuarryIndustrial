@@ -1,5 +1,8 @@
 package org.example.pz.quarryindustrial.gametest;
 
+import net.minecraft.world.item.ItemStack;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -36,8 +39,8 @@ import java.util.List;
  * {@code QUARRY_SHOWCASE=1 ./gradlew runClientGameTest}; después, {@code python tools/finish_showcase.py}.
  */
 public class ShowcaseClientGameTest implements FabricClientGameTest {
-    private static final String SEED = "quarryindustrial";
-    private static final int CHUNK_TIMEOUT = 20 * 600;
+    static final String SEED = "quarryindustrial";
+    static final int CHUNK_TIMEOUT = 20 * 600;
 
     @Override
     public void runTest(ClientGameTestContext context) {
@@ -197,7 +200,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     }
 
     /** Altura del suelo en (x, z), con los chunks ya cargados alrededor. */
-    private static BlockPos surface(TestSingleplayerContext world, ClientGameTestContext context, BlockPos around) {
+    static BlockPos surface(TestSingleplayerContext world, ClientGameTestContext context, BlockPos around) {
         world.getServer().runCommand(String.format("tp @a %d 120 %d", around.getX(), around.getZ()));
         // En un mundo normal la generación es lenta: más margen que el que trae por defecto
         world.getConnection().waitForChunksDownload(CHUNK_TIMEOUT);
@@ -218,7 +221,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     private static final List<BlockPos> USED_SITES = new java.util.ArrayList<>();
     private static final int SITE_SPACING = 64;
 
-    private static BlockPos findSite(TestSingleplayerContext world, ClientGameTestContext context, BlockPos start,
+    static BlockPos findSite(TestSingleplayerContext world, ClientGameTestContext context, BlockPos start,
                                      int size) {
         BlockPos found = world.getServer().computeOnServer(server -> {
             ServerLevel level = server.overworld();
@@ -267,7 +270,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     }
 
     /** Saca árboles y plantas sobre el área (lo que haría un jugador antes de poner la quarry). */
-    private static void clearAbove(TestSingleplayerContext world, BlockPos center, int half, int y) {
+    static void clearAbove(TestSingleplayerContext world, BlockPos center, int half, int y) {
         command(world, "fill %d %d %d %d %d %d air replace #minecraft:logs", center.getX() - half, y - 2,
                 center.getZ() - half, center.getX() + half, y + 14, center.getZ() + half);
         command(world, "fill %d %d %d %d %d %d air replace #minecraft:leaves", center.getX() - half, y - 2,
@@ -275,7 +278,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     }
 
     /** Despeja árboles y arbustos alrededor del bloque y deja un piso de pasto parejo. */
-    private static void prepareSite(TestSingleplayerContext world, BlockPos pos, int radius) {
+    static void prepareSite(TestSingleplayerContext world, BlockPos pos, int radius) {
         command(world, "fill %d %d %d %d %d %d air", pos.getX() - radius, pos.getY(), pos.getZ() - radius,
                 pos.getX() + radius, pos.getY() + 10, pos.getZ() + radius);
         command(world, "fill %d %d %d %d %d %d grass_block", pos.getX() - radius, pos.getY() - 1, pos.getZ() - radius,
@@ -287,6 +290,9 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
             ServerLevel level = server.overworld();
             if (level.getBlockEntity(hv) instanceof QuarryBlockEntity quarry) {
                 quarry.energy.amount = quarry.energy.getCapacity();
+                if (quarry.installedBit() == null) {
+                    quarry.swapBit(new ItemStack(ModItems.bit(BitTier.DIAMOND)));
+                }
             }
             for (BlockPos pos : NuclearStructure.positions(core, Direction.SOUTH)) {
                 if (level.getBlockEntity(pos) instanceof EnergyPortBlockEntity port) {
@@ -295,6 +301,9 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
             }
             if (level.getBlockEntity(core) instanceof QuarryBlockEntity nuclear) {
                 nuclear.energy.amount = nuclear.energy.getCapacity();
+                if (nuclear.installedBit() == null) {
+                    nuclear.swapBit(new ItemStack(ModItems.bit(BitTier.PDC)));
+                }
             }
             if (level.getBlockEntity(well) instanceof PumpjackBlockEntity pumpjack) {
                 pumpjack.energy.amount = pumpjack.energy.getCapacity();
@@ -302,7 +311,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
         });
     }
 
-    private static BlockPos head(TestSingleplayerContext world, BlockPos quarry, int index) {
+    static BlockPos head(TestSingleplayerContext world, BlockPos quarry, int index) {
         return world.getServer().computeOnServer(server -> {
             List<?> heads = ((QuarryBlockEntity) server.overworld().getBlockEntity(quarry)).heads();
             return ((QuarryBlockEntity) server.overworld().getBlockEntity(quarry)).heads()
@@ -321,7 +330,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     }
 
     /** Pone la cámara en {@code eye} mirando a {@code target} y saca una captura en 1920×1080. */
-    private static void shot(TestSingleplayerContext world, ClientGameTestContext context, Path output, String name,
+    static void shot(TestSingleplayerContext world, ClientGameTestContext context, Path output, String name,
                              BlockPos eye, BlockPos target) {
         // tp ubica los pies; la cámara queda 1.62 más arriba
         command(world, "tp @a %.2f %.2f %.2f facing %.2f %.2f %.2f", eye.getX() + 0.5, eye.getY() - 1.12,
@@ -333,7 +342,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
         Quarryindustrial.LOGGER.info("Showcase: {}", file);
     }
 
-    private static void command(TestSingleplayerContext world, String format, Object... args) {
+    static void command(TestSingleplayerContext world, String format, Object... args) {
         world.getServer().runCommand(String.format(java.util.Locale.ROOT, format, args));
     }
 }

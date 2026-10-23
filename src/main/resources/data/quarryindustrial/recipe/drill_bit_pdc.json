@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "DSD",
+    "DBD",
+    "DSD"
+  ],
+  "key": {
+    "D": "minecraft:diamond",
+    "S": "#c:plates/shielding_alloy",
+    "B": "quarryindustrial:drill_bit_netherite"
+  },
+  "result": {
+    "id": "quarryindustrial:drill_bit_pdc"
+  }
+}

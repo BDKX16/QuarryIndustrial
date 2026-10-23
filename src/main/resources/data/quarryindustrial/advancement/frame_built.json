@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:root",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:quarry_lv"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.frame_built.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.frame_built.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

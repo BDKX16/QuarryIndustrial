@@ -5,17 +5,23 @@ import com.mojang.serialization.Codec;
 import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
+import net.fabricmc.fabric.api.tag.convention.v2.ConventionalBlockTags;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.item.ContainerStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.FilteringStorage;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleVariantStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -24,6 +30,9 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -41,16 +50,21 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.example.pz.quarryindustrial.registry.ModAdvancements;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
+import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.item.DrillBitItem;
 import org.example.pz.quarryindustrial.item.UpgradeItem;
 import org.example.pz.quarryindustrial.item.UpgradeType;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 import org.example.pz.quarryindustrial.registry.ModItems;
 import org.example.pz.quarryindustrial.registry.ModTags;
+import org.example.pz.quarryindustrial.registry.ModTickets;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
@@ -117,6 +131,47 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
             onUpgradesChanged();
         }
     };
+    /** La broca instalada (un slot). Se gasta al minar; sin broca no se mina. */
+    private final SimpleContainer bitSlot = new SimpleContainer(1) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            QuarryBlockEntity.this.needsSync = true;
+            QuarryBlockEntity.this.setChanged();
+        }
+
+        @Override
+        public boolean canPlaceItem(int slot, ItemStack stack) {
+            return stack.getItem() instanceof DrillBitItem;
+        }
+    };
+    /** Agua para enfriar la broca. Los caños la meten por cualquier cara; nadie la puede sacar. */
+    public final SingleVariantStorage<FluidVariant> coolant = new SingleVariantStorage<>() {
+        @Override
+        protected FluidVariant getBlankVariant() {
+            return FluidVariant.blank();
+        }
+
+        @Override
+        protected long getCapacity(FluidVariant variant) {
+            return QuarryConfig.get().coolantTankBuckets * FluidConstants.BUCKET;
+        }
+
+        @Override
+        protected boolean canInsert(FluidVariant variant) {
+            return variant.isOf(Fluids.WATER);
+        }
+
+        @Override
+        protected void onFinalCommit() {
+            setChanged();
+        }
+    };
+    private final Storage<FluidVariant> exposedCoolant = FilteringStorage.insertOnlyOf(coolant);
+    /** Quarry nuclear: calor de la broca, de 0 a 1000. Arriba de {@code heatThrottleStart} frena. */
+    private double heat;
+    /** Desgaste fraccionario acumulado (con refrigerante cada bloque gasta medio punto). */
+    private double wearRemainder;
     private final List<DrillHead> heads = new ArrayList<>();
     private final Set<Long> forcedChunks = new HashSet<>();
     /** Solo multibloque: puertos de energía encontrados en el último escaneo del cubo. */
@@ -145,6 +200,12 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
     private double[] previousVisual = new double[0];
     private float drillAngle;
     private float previousDrillAngle;
+    // Solo cliente (sincronizado): la broca que se ve, su desgaste, lo lleno de la tolva, si hay agua y el calor
+    private int clientBitTier = -1;
+    private float clientBitWear;
+    private float clientFill;
+    private boolean clientCooled;
+    private int clientHeat;
 
     public QuarryBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.QUARRY, pos, state);
@@ -182,6 +243,9 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
     }
 
     private void tickBody(ServerLevel level, BlockPos pos, BlockState state) {
+        if (heat > 0) {
+            heat = Math.max(0, heat - QuarryConfig.get().heatDissipationPerTick);
+        }
         if (!started) {
             layout(pos, state);
         }
@@ -203,6 +267,9 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
 
         if (heads.stream().allMatch(DrillHead::isFinished)) {
+            if (status != QuarryStatus.FINISHED) {
+                ModAdvancements.grant(level, pos, ModAdvancements.ROCK_BOTTOM, owner);
+            }
             setStatus(QuarryStatus.FINISHED);
             releaseChunks(level);
             return;
@@ -217,7 +284,13 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
 
         QuarryConfig config = QuarryConfig.get();
-        double perTick = maxBlocksPerSecond() / 20.0;
+        BitTier bitTier = installedBit();
+        if (bitTier == null && config.bits.requireDrillBit) {
+            setStatus(QuarryStatus.NO_BIT);
+            return;
+        }
+        double throttle = heatThrottle();
+        double perTick = maxBlocksPerSecond(bitTier) / 20.0 * throttle;
         // Sin acumular más de dos ticks: una quarry parada no tiene que "ponerse al día" de golpe
         blockBudget = Math.min(blockBudget + perTick, Math.max(1.0, perTick * 2));
 
@@ -226,7 +299,10 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         boolean starved = false;
         MiningContext context = null;
 
-        int maxSkips = config.maxSkipsPerTick * Math.max(1, heads.size());
+        boolean seeking = hasUpgrade(UpgradeType.ORE_SEEKER);
+        // El buscavetas salta mucha roca por cada mineral: más margen de saltos por tick
+        int maxSkips = config.maxSkipsPerTick * Math.max(1, heads.size()) * (seeking ? 8 : 1);
+        boolean bitBroke = false;
         // Ronda entre cabezales para que todos avancen parejo
         mining:
         while (blockBudget >= 1.0 && skips < maxSkips) {
@@ -238,7 +314,8 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
                 BlockPos target = head.cursor();
                 BlockState targetState = level.getBlockState(target);
                 sealFluidsAround(level, target);
-                if (!isMineable(level, target, targetState)) {
+                if (!isMineable(level, target, targetState)
+                        || (seeking && !targetState.is(ConventionalBlockTags.ORES))) {
                     clearFluid(level, target, targetState);
                     head.advance(level.getMinY());
                     skips++;
@@ -261,9 +338,18 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
                     continue;
                 }
                 head.advance(level.getMinY());
+                head.setLastMined(Block.getId(targetState));
                 blockBudget -= 1.0;
                 mined++;
                 progressed = true;
+                boolean cooled = useCoolant();
+                if (tier.multiblock() && !cooled) {
+                    heat = Math.min(1000, heat + config.nuclearHeatPerBlock);
+                }
+                if (bitTier != null && wearBit(level, target, targetState, cooled)) {
+                    bitBroke = true;
+                    break mining;
+                }
                 if (!overflow.isEmpty()) {
                     break mining;
                 }
@@ -276,8 +362,10 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         if (mined > 0 || skips > 0) {
             needsSync = true;
         }
-        if (mined > 0) {
-            setStatus(QuarryStatus.MINING);
+        if (bitBroke) {
+            setStatus(QuarryStatus.NO_BIT);
+        } else if (mined > 0) {
+            setStatus(throttle < 1 ? QuarryStatus.OVERHEATING : QuarryStatus.MINING);
         } else if (starved) {
             setStatus(QuarryStatus.NO_POWER);
         }
@@ -302,6 +390,9 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
             if (formed != structureFormed) {
                 structureFormed = formed;
                 needsSync = true;
+                if (formed && energyPorts.size() >= 8) {
+                    ModAdvancements.grant(level, pos, ModAdvancements.NUCLEAR_EIGHT, owner);
+                }
             }
         }
         if (portAverages.length != energyPorts.size()) {
@@ -386,7 +477,10 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
                 case QuarryMenu.PROGRESS -> progressPermille();
                 case QuarryMenu.PORTS -> energyPorts.size();
                 case QuarryMenu.SIDE -> side();
-                default -> index >= QuarryMenu.PORT_INPUTS && index < QuarryMenu.DATA_COUNT
+                case QuarryMenu.COOLANT -> (int) coolantMb();
+                case QuarryMenu.COOLANT_CAPACITY -> (int) coolantCapacityMb();
+                case QuarryMenu.HEAT -> heat();
+                default -> index >= QuarryMenu.PORT_INPUTS && index < QuarryMenu.PORT_INPUTS + QuarryMenu.MAX_PORTS_SHOWN
                         ? (int) Math.min(0x7FFF, portAverageInput(index - QuarryMenu.PORT_INPUTS)) : 0;
             };
         }
@@ -485,6 +579,7 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         if (frameProgress >= positions.size()) {
             frameBuilt = true;
             needsSync = true;
+            ModAdvancements.grant(level, worldPosition, ModAdvancements.FRAME_BUILT, owner);
         }
         setChanged();
     }
@@ -639,9 +734,122 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         return FakePlayer.get(level, new GameProfile(owner, "[Quarry]"));
     }
 
-    private double maxBlocksPerSecond() {
+    private double maxBlocksPerSecond(@Nullable BitTier bit) {
+        QuarryConfig config = QuarryConfig.get();
         int speed = upgradeCount(UpgradeType.SPEED);
-        return tier.settings().maxBlocksPerSecond * (1 + speed * QuarryConfig.get().speedUpgradePercent / 100.0);
+        double rate = tier.settings().maxBlocksPerSecond * (1 + speed * config.speedUpgradePercent / 100.0);
+        if (bit != null) {
+            rate *= bit.settings().speedMultiplier;
+        }
+        if (coolant.amount >= config.coolantPerBlockMb * MB) {
+            rate *= 1 + config.coolantSpeedBonusPercent / 100.0;
+        }
+        return rate;
+    }
+
+    // ── Broca, refrigerante y calor ──
+
+    private static final long MB = FluidConstants.BUCKET / 1000;
+
+    public @Nullable BitTier installedBit() {
+        return bitSlot.getItem(0).getItem() instanceof DrillBitItem bit ? bit.tier() : null;
+    }
+
+    public SimpleContainer bitSlot() {
+        return bitSlot;
+    }
+
+    /** Cambia la broca por {@code stack}; devuelve la que estaba (o vacío). */
+    public ItemStack swapBit(ItemStack stack) {
+        ItemStack previous = bitSlot.getItem(0);
+        bitSlot.setItem(0, stack);
+        return previous;
+    }
+
+    /** Gasta el agua de un bloque. Devuelve si había. */
+    private boolean useCoolant() {
+        long perBlock = QuarryConfig.get().coolantPerBlockMb * MB;
+        if (perBlock <= 0 || coolant.amount < perBlock) {
+            return false;
+        }
+        coolant.amount -= perBlock;
+        if (coolant.amount == 0) {
+            coolant.variant = FluidVariant.blank();
+        }
+        return true;
+    }
+
+    /**
+     * Desgasta la broca por un bloque: {@code 1 + dureza / hardnessPerWearPoint} puntos, la mitad con
+     * refrigerante. Devuelve true si la broca se rompió.
+     */
+    private boolean wearBit(ServerLevel level, BlockPos target, BlockState state, boolean cooled) {
+        ItemStack bit = bitSlot.getItem(0);
+        if (!(bit.getItem() instanceof DrillBitItem)) {
+            return false;
+        }
+        QuarryConfig config = QuarryConfig.get();
+        double hardness = Math.max(0, state.getDestroySpeed(level, target));
+        double wear = 1 + Math.floor(hardness / config.bits.hardnessPerWearPoint);
+        if (cooled) {
+            wear *= config.coolantWearMultiplier;
+        }
+        wearRemainder += wear;
+        int whole = (int) wearRemainder;
+        if (whole <= 0) {
+            return false;
+        }
+        wearRemainder -= whole;
+        int damage = bit.getDamageValue() + whole;
+        if (damage >= bit.getMaxDamage()) {
+            bitSlot.setItem(0, ItemStack.EMPTY);
+            level.playSound(null, target, SoundEvents.ITEM_BREAK.value(), SoundSource.BLOCKS, 1.0f, 0.7f);
+            ModAdvancements.grant(level, worldPosition, ModAdvancements.BIT_BROKEN, owner);
+            return true;
+        }
+        bit.setDamageValue(damage);
+        return false;
+    }
+
+    /** 1 sin calor; baja hasta 0.2 cuando el calor llega a 1000. */
+    private double heatThrottle() {
+        double start = QuarryConfig.get().heatThrottleStart;
+        if (heat <= start) {
+            return 1;
+        }
+        return Math.max(0.2, 1 - (heat - start) / Math.max(1, 1000 - start) * 0.8);
+    }
+
+    public int heat() {
+        return (int) Math.round(heat);
+    }
+
+    public void setHeat(double heat) {
+        this.heat = Math.clamp(heat, 0, 1000);
+        setChanged();
+    }
+
+    public Storage<FluidVariant> coolantStorage() {
+        return exposedCoolant;
+    }
+
+    public long coolantMb() {
+        return coolant.amount / MB;
+    }
+
+    public long coolantCapacityMb() {
+        return coolant.getCapacity() / MB;
+    }
+
+    /** Qué tan lleno está el buffer, de 0 a 1 (para la tolva del carro). */
+    public float bufferFill() {
+        int used = 0;
+        for (ItemStack stack : buffer.getItems()) {
+            if (!stack.isEmpty()) {
+                used++;
+            }
+        }
+        return overflow.isEmpty() ? used / (float) BUFFER_SLOTS : 1;
     }
 
     // ── Salida de items ──
@@ -680,6 +888,7 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
     public List<ItemStack> contentsToDrop() {
         List<ItemStack> all = new ArrayList<>(buffer.removeAllItems());
         all.addAll(upgradeSlots.removeAllItems());
+        all.addAll(bitSlot.removeAllItems());
         all.addAll(overflow);
         overflow.clear();
         return all;
@@ -702,14 +911,14 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         for (Long chunk : Set.copyOf(forcedChunks)) {
             if (!wanted.contains(chunk)) {
                 ChunkPos chunkPos = ChunkPos.unpack(chunk);
-                level.setChunkForced(chunkPos.x(), chunkPos.z(), false);
+                ModTickets.force(level, chunkPos, false);
                 forcedChunks.remove(chunk);
             }
         }
         for (Long chunk : wanted) {
             if (forcedChunks.add(chunk)) {
                 ChunkPos chunkPos = ChunkPos.unpack(chunk);
-                level.setChunkForced(chunkPos.x(), chunkPos.z(), true);
+                ModTickets.force(level, chunkPos, true);
             }
         }
         setChanged();
@@ -721,7 +930,7 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
         for (Long chunk : forcedChunks) {
             ChunkPos chunkPos = ChunkPos.unpack(chunk);
-            level.setChunkForced(chunkPos.x(), chunkPos.z(), false);
+            ModTickets.force(level, chunkPos, false);
         }
         forcedChunks.clear();
         setChanged();
@@ -909,6 +1118,9 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
                 visual[i * 3 + 2] = tz;
             }
         }
+        if (status.drilling() && level != null) {
+            spawnDrillParticles(level);
+        }
         previousDrillAngle = drillAngle;
         if (status.drilling()) {
             drillAngle += 0.45f;
@@ -917,6 +1129,56 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
                 previousDrillAngle -= (float) (Math.PI * 2);
             }
         }
+    }
+
+    /**
+     * Lo que se ve en la punta de la broca: esquirlas del bloque que se está rompiendo, agua del lodo de
+     * perforación si hay refrigerante, humo si la broca está recalentada y chispas si está gastada.
+     */
+    private void spawnDrillParticles(Level level) {
+        RandomSource random = level.getRandom();
+        for (int i = 0; i < Math.min(heads.size(), visual.length / 3); i++) {
+            double x = visual[i * 3];
+            double y = visual[i * 3 + 1] + 1.0;
+            double z = visual[i * 3 + 2];
+            BlockState mined = Block.stateById(heads.get(i).lastMined());
+            if (!mined.isAir()) {
+                for (int n = 0; n < 2; n++) {
+                    level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, mined),
+                            x + (random.nextDouble() - 0.5) * 0.6, y, z + (random.nextDouble() - 0.5) * 0.6,
+                            (random.nextDouble() - 0.5) * 0.3, 0.15 + random.nextDouble() * 0.2,
+                            (random.nextDouble() - 0.5) * 0.3);
+                }
+            }
+            if (clientCooled && random.nextInt(3) == 0) {
+                level.addParticle(ParticleTypes.SPLASH, x + (random.nextDouble() - 0.5) * 0.5, y + 0.1,
+                        z + (random.nextDouble() - 0.5) * 0.5, 0, 0.1, 0);
+            }
+            if (clientHeat > QuarryConfig.get().heatThrottleStart && random.nextInt(2) == 0) {
+                level.addParticle(ParticleTypes.LARGE_SMOKE, x, y + 0.3, z, 0, 0.05, 0);
+            }
+            if (clientBitWear > 0.8f && random.nextInt(4) == 0) {
+                level.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y + 0.05, z,
+                        (random.nextDouble() - 0.5) * 0.6, 0.2, (random.nextDouble() - 0.5) * 0.6);
+            }
+        }
+    }
+
+    /** Broca que muestra el renderer (null = sin broca). */
+    public @Nullable BitTier visualBit() {
+        return BitTier.byOrdinal(clientBitTier);
+    }
+
+    public float visualBitWear() {
+        return clientBitWear;
+    }
+
+    public float visualFill() {
+        return clientFill;
+    }
+
+    public int visualHeat() {
+        return clientHeat;
     }
 
     private void snapTo(int i) {
@@ -964,6 +1226,12 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         if (area != null) {
             area.save(output);
         }
+        BitTier bit = installedBit();
+        output.putInt("BitTier", bit != null ? bit.ordinal() : -1);
+        output.putFloat("BitWear", DrillBitItem.wear(bitSlot.getItem(0)));
+        output.putFloat("Fill", bufferFill());
+        output.putBoolean("Cooled", coolant.amount > 0);
+        output.putInt("Heat", heat());
         ValueOutput.ValueOutputList headList = output.childrenList("Heads");
         for (DrillHead head : heads) {
             head.save(headList.addChild());
@@ -978,6 +1246,11 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
         started = input.getBooleanOr("Started", false);
         frameBuilt = input.getBooleanOr("FrameBuilt", false);
+        clientBitTier = input.getIntOr("BitTier", -1);
+        clientBitWear = input.getFloatOr("BitWear", 0);
+        clientFill = input.getFloatOr("Fill", 0);
+        clientCooled = input.getBooleanOr("Cooled", false);
+        clientHeat = input.getIntOr("Heat", 0);
         area = QuarryArea.load(input);
         heads.clear();
         input.childrenListOrEmpty("Heads").stream().map(DrillHead::load).forEach(heads::add);
@@ -1049,6 +1322,10 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
         output.store("UpgradeSlots", ItemStack.OPTIONAL_CODEC.listOf(), upgradeSlots.getItems());
         output.store("Buffer", ItemStack.OPTIONAL_CODEC.listOf(), buffer.getItems());
+        output.store("Bit", ItemStack.OPTIONAL_CODEC, bitSlot.getItem(0));
+        SingleVariantStorage.writeValue(coolant, FluidVariant.CODEC, output.child("Coolant"));
+        output.putDouble("HeatLevel", heat);
+        output.putDouble("WearRemainder", wearRemainder);
         output.store("Overflow", ItemStack.CODEC.listOf(), List.copyOf(overflow));
         output.store("ForcedChunks", Codec.LONG.listOf(), List.copyOf(forcedChunks));
     }
@@ -1071,6 +1348,10 @@ public class QuarryBlockEntity extends BlockEntity implements ExtendedMenuProvid
         }
         overflow.clear();
         overflow.addAll(input.read("Overflow", ItemStack.CODEC.listOf()).orElse(List.of()));
+        bitSlot.getItems().set(0, input.read("Bit", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
+        SingleVariantStorage.readValue(coolant, FluidVariant.CODEC, FluidVariant::blank, input.childOrEmpty("Coolant"));
+        heat = input.getDoubleOr("HeatLevel", 0);
+        wearRemainder = input.getDoubleOr("WearRemainder", 0);
         forcedChunks.clear();
         forcedChunks.addAll(input.read("ForcedChunks", Codec.LONG.listOf()).orElse(List.of()));
     }

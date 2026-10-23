@@ -66,6 +66,26 @@ dependencies {
     if (!project.hasProperty("noAla")) {
         runtimeOnly "maven.modrinth:ala-industrial:${project.ala_version}"
     }
+
+    // Compatibilidad opcional: se compila contra sus APIs, pero no se incluyen ni son obligatorios.
+    // Jade (info al mirar un bloque), JEI y REI (páginas de información de las máquinas).
+    compileOnly "maven.modrinth:jade:${project.jade_version}"
+    compileOnly "maven.modrinth:jei:${project.jei_version}"
+    compileOnly "maven.modrinth:rei:${project.rei_version}"
+    // REI usa tipos de Architectury en sus firmas: hace falta para compilar
+    compileOnly "maven.modrinth:architectury-api:${project.architectury_version}"
+    // Para probarlos en el cliente de desarrollo: -PwithJade, -PwithJei, -PwithRei
+    if (project.hasProperty("withJade")) {
+        runtimeOnly "maven.modrinth:jade:${project.jade_version}"
+    }
+    if (project.hasProperty("withJei")) {
+        runtimeOnly "maven.modrinth:jei:${project.jei_version}"
+    }
+    if (project.hasProperty("withRei")) {
+        runtimeOnly "maven.modrinth:rei:${project.rei_version}"
+        runtimeOnly "maven.modrinth:architectury-api:${project.architectury_version}"
+        runtimeOnly "maven.modrinth:cloth-config:${project.cloth_config_version}"
+    }
 }
 
 processResources {
