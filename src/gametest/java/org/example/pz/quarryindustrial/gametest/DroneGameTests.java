@@ -12,6 +12,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -23,7 +24,10 @@ import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.drone.DroneKind;
+import org.example.pz.quarryindustrial.drone.DroneNetwork;
 import org.example.pz.quarryindustrial.item.BitTier;
+import org.example.pz.quarryindustrial.network.ConsolePayloads;
+import org.example.pz.quarryindustrial.network.DroneConsoleService;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 import org.example.pz.quarryindustrial.registry.ModComponents;
 import org.example.pz.quarryindustrial.registry.ModEntities;
@@ -31,6 +35,7 @@ import org.example.pz.quarryindustrial.registry.ModItems;
 import team.reborn.energy.api.EnergyStorage;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Drones entre dos pads de prueba: A en (1, 1, 1) y B en (6, 1, 6). Para que las pruebas sean cortas los
@@ -164,6 +169,37 @@ public class DroneGameTests {
             helper.assertTrue(report.is(ModItems.SURVEY_REPORT), "hay informe en el buzón: " + report);
             List<BlockPos> sites = report.getOrDefault(ModComponents.SURVEY_SITES, List.of());
             helper.assertTrue(sites.contains(expected), "el informe marca el géiser " + expected + ": " + sites);
+            helper.assertTrue(DroneNetwork.get(helper.getLevel()).sites().stream()
+                    .anyMatch(site -> site.pos().equals(expected)), "la centralita ve el géiser en el mapa");
         });
+    }
+
+    private static Optional<ConsolePayloads.Pad> seen(ConsolePayloads.Snapshot snapshot, BlockPos pos) {
+        return snapshot.pads().stream().filter(pad -> pad.pos().equals(pos)).findFirst();
+    }
+
+    /** La centralita ve los pads de la zona con su dron y su vínculo; al romper un pad, lo deja de ver. */
+    @GameTest(maxTicks = 100)
+    public void consoleSeesPadsAndLinks(GameTestHelper helper) {
+        linkedPair(helper, DroneKind.CARGO);
+        BlockPos consolePos = new BlockPos(3, 1, 3);
+        helper.setBlock(consolePos, ModBlocks.DRONE_CONSOLE);
+        BlockPos console = helper.absolutePos(consolePos);
+        BlockPos a = helper.absolutePos(PAD_A);
+        BlockPos b = helper.absolutePos(PAD_B);
+        helper.startSequence()
+                .thenWaitUntil(() -> {
+                    ConsolePayloads.Snapshot snapshot = DroneConsoleService.snapshot(helper.getLevel(), console);
+                    ConsolePayloads.Pad source = seen(snapshot, a).orElseThrow(() -> helper.assertionException(
+                            Component.literal("la centralita no ve el pad A: " + snapshot.pads())));
+                    helper.assertValueEqual(source.kind(), DroneKind.CARGO.ordinal(), "dron del pad A");
+                    helper.assertValueEqual(source.link(), Optional.of(b), "vínculo de A");
+                    helper.assertTrue(seen(snapshot, b).isPresent(), "la centralita ve el pad B");
+                })
+                .thenExecute(() -> helper.destroyBlock(PAD_B))
+                .thenWaitUntil(() -> helper.assertTrue(
+                        seen(DroneConsoleService.snapshot(helper.getLevel(), console), b).isEmpty(),
+                        "el pad roto desaparece de la centralita"))
+                .thenSucceed();
     }
 }

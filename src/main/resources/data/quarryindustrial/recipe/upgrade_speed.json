@@ -5,6 +5,14 @@
       "values": [
         "alaindustrial"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:module_blank",
+        "alaindustrial:overclocker_chip_i"
+      ]
     }
   ],
   "type": "minecraft:crafting_shaped",

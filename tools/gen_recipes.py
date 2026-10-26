@@ -1,16 +1,16 @@
 """Genera las recetas del mod en dos variantes por item.
 
 Uso:  python tools/gen_recipes.py
-- <item>.json          se carga solo si está Ala Industrial (usa sus circuitos, carcasas y placas);
-- <item>_vanilla.json  se carga solo si NO está Ala (equivalentes vanilla, para jugar el mod solo).
+- <item>.json          se carga solo si está Ala Industrial y registra todos los items suyos que usa la receta
+                       (una versión de Ala sin alguno de ellos haría fallar la carga de datapacks del server);
+- <item>_vanilla.json  se carga en cualquier otro caso (equivalentes vanilla, para jugar el mod solo).
 Las condiciones son las de Fabric Resource Conditions ("fabric:load_conditions").
 """
 import json
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent.parent / "src/main/resources/data/quarryindustrial/recipe"
-WITH_ALA = [{"condition": "fabric:all_mods_loaded", "values": ["alaindustrial"]}]
-WITHOUT_ALA = [{"condition": "fabric:not", "value": WITH_ALA[0]}]
+ALA_LOADED = {"condition": "fabric:all_mods_loaded", "values": ["alaindustrial"]}
 
 Q = "quarryindustrial:"
 A = "alaindustrial:"
@@ -77,7 +77,7 @@ RECIPES = {
                       {"D": "minecraft:diamond", "S": "#c:plates/shielding_alloy", "B": Q + "drill_bit_netherite"},
                       {"D": "minecraft:diamond", "S": "minecraft:netherite_scrap", "B": Q + "drill_bit_netherite"}),
     "upgrade_ore_seeker": (1, [" R ", "LBL", " C "],
-                           {"R": A + "drill_row_module", "L": "minecraft:spyglass", "B": A + "module_blank",
+                           {"R": A + "magnet_filter_module", "L": "minecraft:spyglass", "B": A + "module_blank",
                             "C": A + "drill_column_module"},
                            {"R": "minecraft:compass", "L": "minecraft:spyglass", "B": "minecraft:redstone_block",
                             "C": "minecraft:diamond_pickaxe"}),
@@ -112,6 +112,11 @@ RECIPES = {
     "drone_pad": (2, ["YYY", "CXC"],
                   {"Y": "minecraft:yellow_concrete", "C": A + "electronic_circuit", "X": A + "machine_casing"},
                   {"Y": "minecraft:yellow_concrete", "C": "minecraft:redstone", "X": "minecraft:iron_block"}),
+    "drone_console": (1, [" A ", "GMG", "CXC"],
+                      {"A": "minecraft:lightning_rod", "G": "minecraft:glass_pane", "M": "minecraft:map",
+                       "C": A + "advanced_circuit", "X": A + "machine_casing"},
+                      {"A": "minecraft:lightning_rod", "G": "minecraft:glass_pane", "M": "minecraft:map",
+                       "C": "minecraft:comparator", "X": "minecraft:iron_block"}),
     "drone_linker": (1, [" A ", "IRI", "III"],
                      {"A": "minecraft:lightning_rod", "I": "#c:plates/iron", "R": A + "electronic_circuit"},
                      {"A": "minecraft:lightning_rod", "I": "#c:ingots/iron", "R": "minecraft:redstone"}),
@@ -140,10 +145,23 @@ def recipe(item, count, pattern, key, conditions):
     }
 
 
+def ala_conditions(key):
+    """Ala cargado y, si la receta usa items de Ala, que existan en la versión instalada."""
+    items = sorted({v for v in key.values() if v.startswith(A)})
+    conditions = [ALA_LOADED]
+    if items:
+        conditions.append({"condition": "fabric:registry_contains", "registry": "minecraft:item", "values": items})
+    return conditions
+
+
+def vanilla_conditions(key):
+    return [{"condition": "fabric:not", "value": {"condition": "fabric:and", "values": ala_conditions(key)}}]
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for item, (count, pattern, ala, vanilla) in RECIPES.items():
-        for suffix, key, conditions in (("", ala, WITH_ALA), ("_vanilla", vanilla, WITHOUT_ALA)):
+        for suffix, key, conditions in (("", ala, ala_conditions(ala)), ("_vanilla", vanilla, vanilla_conditions(ala))):
             path = OUT / f"{item}{suffix}.json"
             path.write_text(json.dumps(recipe(item, count, pattern, key, conditions), indent=2) + "\n",
                             encoding="utf-8")

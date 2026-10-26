@@ -1,5 +1,7 @@
 package org.example.pz.quarryindustrial.block.pumpjack;
 
+import org.example.pz.quarryindustrial.menu.InfoKind;
+import org.example.pz.quarryindustrial.menu.InfoMachine;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -54,7 +56,7 @@ import java.util.Set;
  * El oil va a un tanque interno que se puede vaciar desde cualquier parte de la base; además la cigüeña
  * lo empuja sola a los caños y tanques que tenga al lado.
  */
-public class PumpjackBlockEntity extends BlockEntity {
+public class PumpjackBlockEntity extends BlockEntity implements InfoMachine {
     public static final int MAX_SPEED_UPGRADES = 4;
     private static final long MB = FluidConstants.BUCKET / 1000;
     private static final int REVALIDATE_INTERVAL = 200;
@@ -372,6 +374,23 @@ public class PumpjackBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
+    }
+
+    @Override
+    public InfoKind infoKind() {
+        return InfoKind.PUMPJACK;
+    }
+
+    @Override
+    public void fillInfo(long[] values) {
+        values[0] = status.ordinal();
+        values[1] = energy.getAmount();
+        values[2] = energy.getCapacity();
+        values[3] = oilMb();
+        values[4] = tankCapacityMb();
+        values[5] = fuel.amountMb();
+        values[6] = fuel.capacityMb();
+        values[7] = speedUpgrades();
     }
 
     public PumpjackStatus status() {

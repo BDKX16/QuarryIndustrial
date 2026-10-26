@@ -5,6 +5,13 @@
       "values": [
         "alaindustrial"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:module_blank"
+      ]
     }
   ],
   "type": "minecraft:crafting_shaped",

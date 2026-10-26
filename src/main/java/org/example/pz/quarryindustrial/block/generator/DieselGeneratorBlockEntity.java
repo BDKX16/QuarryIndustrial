@@ -11,6 +11,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.energy.FuelTank;
+import org.example.pz.quarryindustrial.menu.InfoKind;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 
 /**
@@ -42,6 +43,21 @@ public class DieselGeneratorBlockEntity extends GeneratorBlockEntity {
     @Override
     public Storage<FluidVariant> fluidInput() {
         return exposedFuel;
+    }
+
+    @Override
+    public InfoKind infoKind() {
+        return InfoKind.DIESEL;
+    }
+
+    @Override
+    protected long tankMb() {
+        return fuel.amountMb();
+    }
+
+    @Override
+    protected long tankCapacityMb() {
+        return fuel.capacityMb();
     }
 
     @Override

@@ -18,6 +18,7 @@ import net.minecraft.world.level.material.Fluid;
 import org.example.pz.quarryindustrial.compat.AlaSteamNozzle;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.energy.CombustionFuels;
+import org.example.pz.quarryindustrial.menu.InfoKind;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 
 /**
@@ -101,6 +102,21 @@ public class SteamTurbineBlockEntity extends GeneratorBlockEntity {
     @Override
     public Storage<FluidVariant> fluidInput() {
         return exposedSteam;
+    }
+
+    @Override
+    public InfoKind infoKind() {
+        return InfoKind.TURBINE;
+    }
+
+    @Override
+    protected long tankMb() {
+        return steamMb();
+    }
+
+    @Override
+    protected long tankCapacityMb() {
+        return steam.getCapacity() / MB;
     }
 
     public long steamMb() {

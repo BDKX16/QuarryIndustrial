@@ -5,6 +5,14 @@
       "values": [
         "alaindustrial"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:advanced_circuit",
+        "alaindustrial:pump"
+      ]
     }
   ],
   "type": "minecraft:crafting_shaped",

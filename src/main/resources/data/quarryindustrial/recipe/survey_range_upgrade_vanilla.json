@@ -1,0 +1,41 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:electronic_circuit"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "GSG",
+    "IRI",
+    "GSG"
+  ],
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "S": "minecraft:spyglass",
+    "I": "#c:ingots/iron",
+    "R": "minecraft:redstone_block"
+  },
+  "result": {
+    "id": "quarryindustrial:survey_range_upgrade"
+  }
+}

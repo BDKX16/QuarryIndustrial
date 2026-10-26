@@ -3,9 +3,24 @@
     {
       "condition": "fabric:not",
       "value": {
-        "condition": "fabric:all_mods_loaded",
+        "condition": "fabric:and",
         "values": [
-          "alaindustrial"
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:copper_coil",
+              "alaindustrial:iron_gear",
+              "alaindustrial:machine_casing",
+              "alaindustrial:steam_pipe"
+            ]
+          }
         ]
       }
     }

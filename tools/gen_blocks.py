@@ -91,8 +91,26 @@ def drone_pad():
     drops_self("drone_pad")
 
 
+def drone_console():
+    """Centralita: orientable, con la pantalla de radar animada al frente."""
+    write(ASSETS / "models/block/drone_console.json", {
+        "parent": "minecraft:block/orientable",
+        "textures": {"top": f"{NS}:block/drone_console_top", "front": f"{NS}:block/drone_console_front",
+                     "side": f"{NS}:block/drone_console_side"}})
+    variants = {}
+    for facing, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        model = {"model": f"{NS}:block/drone_console"}
+        if y:
+            model["y"] = y
+        variants[f"facing={facing}"] = model
+    write(ASSETS / "blockstates/drone_console.json", {"variants": variants})
+    write(ASSETS / "items/drone_console.json", {"model": {"type": "minecraft:model", "model": f"{NS}:block/drone_console"}})
+    drops_self("drone_console")
+
+
 def main():
     drone_pad()
+    drone_console()
     for name in LIT_MACHINES:
         lit_machine(name)
     offshore()
@@ -100,7 +118,7 @@ def main():
         drops_self(name)
     tag = DATA / "minecraft/tags/block/mineable/pickaxe.json"
     values = json.loads(tag.read_text(encoding="utf-8"))["values"]
-    for name in DROPS_SELF + ["offshore_rig", "offshore_deck", "drone_pad"]:
+    for name in DROPS_SELF + ["offshore_rig", "offshore_deck", "drone_pad", "drone_console"]:
         if f"{NS}:{name}" not in values:
             values.append(f"{NS}:{name}")
     write(tag, {"values": values})

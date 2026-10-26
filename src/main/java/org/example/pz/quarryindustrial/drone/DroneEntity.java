@@ -294,6 +294,27 @@ public class DroneEntity extends Entity {
         return flightId;
     }
 
+    public BlockPos home() {
+        return home;
+    }
+
+    /** Hacia dónde va ahora mismo (para el mapa de la centralita). */
+    public BlockPos heading() {
+        return BlockPos.containing(goal());
+    }
+
+    public boolean returning() {
+        return returning;
+    }
+
+    /** Explorador: los puntos del barrido que le faltan recorrer (vacío si ya vuelve o no es explorador). */
+    public List<BlockPos> remainingRoute() {
+        if (returning || kind() != DroneKind.SURVEY || waypoint >= waypoints.size()) {
+            return List.of();
+        }
+        return List.copyOf(waypoints.subList(waypoint, waypoints.size()));
+    }
+
     private void dropPayload(ServerLevel level) {
         for (ItemStack stack : payload.items) {
             spawnAtLocation(level, stack);

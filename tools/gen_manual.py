@@ -234,6 +234,18 @@ CHAPTERS = [
          "en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres "
          "que vio.",
          [Q + "maintenance_drone", Q + "survey_drone", Q + "survey_report"]),
+        ("Drone Control Station", "Centralita de drones",
+         "Right-click the station to open a map of every pad within 1024 blocks. The map shows the terrain you "
+         "have loaded, each pad's link as a dashed line, drones in flight (with the survey drone's remaining "
+         "sweep) and every oil geyser your survey drones found, as a black drop.\n\nClick a pad to select it, "
+         "then Link and click the destination pad. The Drones tab lists every pad with its status; the Wells tab "
+         "lists the geysers. You can also launch survey drones from here.",
+         "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el terreno "
+         "que tenés cargado, el vínculo de cada pad como una línea a trazos, los drones en vuelo (con lo que le "
+         "falta del barrido al explorador) y cada géiser que encontraron tus exploradores, como una gota negra."
+         "\n\nClic en un pad para elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista "
+         "todos los pads con su estado; la de Pozos, los géiseres. También podés mandar a explorar desde acá.",
+         [Q + "drone_console"]),
         ("If something goes wrong", "Si algo sale mal",
          "Drones fly above everything and keep the chunk they are in loaded. Hit a drone to bring it down: it "
          "drops what it carried and reappears on its pad. If a pad hears nothing from its drone for 5 minutes, it "

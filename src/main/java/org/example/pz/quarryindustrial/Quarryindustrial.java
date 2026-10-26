@@ -3,6 +3,7 @@ package org.example.pz.quarryindustrial;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.Identifier;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
+import org.example.pz.quarryindustrial.network.DroneConsoleService;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 import org.example.pz.quarryindustrial.registry.ModComponents;
@@ -34,5 +35,6 @@ public class Quarryindustrial implements ModInitializer {
         ModComponents.init();
         ModEntities.init();
         ModSounds.init();
+        DroneConsoleService.init();
     }
 }

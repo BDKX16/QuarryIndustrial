@@ -245,11 +245,18 @@
         },
         {
           "title": "Maintenance and survey",
-          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 48 blocks and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
+          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 48 blocks and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: open its pad and press \"Send survey\". It sweeps a 128-block radius (+64 per Survey Range Upgrade, up to 4) and brings back a Survey Report with every oil geyser it saw.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",
             "quarryindustrial:survey_report"
+          ]
+        },
+        {
+          "title": "Drone Control Station",
+          "text": "Right-click the station to open a map of every pad within 1024 blocks. The map shows the terrain you have already seen (what is not loaded now is drawn darker), each pad's link as a dashed line, drones in flight (with the survey drone's remaining sweep) and every oil geyser your survey drones found, as a black drop. Place Drone Radars inside its range to extend it: each one adds its own radius, and they chain.\n\nClick a pad to select it, then Link and click the destination pad. The Drones tab lists every pad with its status; the Wells tab lists the geysers. You can also launch survey drones from here.",
+          "items": [
+            "quarryindustrial:drone_console"
           ]
         },
         {

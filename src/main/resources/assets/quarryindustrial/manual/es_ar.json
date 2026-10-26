@@ -245,11 +245,18 @@
         },
         {
           "title": "Mantenimiento y exploración",
-          "text": "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 48 bloques y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres que vio.",
+          "text": "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 48 bloques y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: abre su pad y pulsa \"Mandar a explorar\". Recorre un radio de 128 bloques (+64 por cada mejora de alcance, hasta 4) y vuelve con un informe de todos los géiseres que vio.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",
             "quarryindustrial:survey_report"
+          ]
+        },
+        {
+          "title": "Centralita de drones",
+          "text": "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el terreno que ya viste (lo que no está cargado se ve más oscuro), el vínculo de cada pad como una línea a trazos, los drones en vuelo (con lo que le falta del barrido al explorador) y cada géiser que encontraron tus exploradores, como una gota negra. Los radares repetidores amplían el alcance: ponlos dentro de la zona que ya ve y cada uno suma su radio; se encadenan.\n\nClic en un pad para elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista todos los pads con su estado; la de Pozos, los géiseres. También podés mandar a explorar desde acá.",
+          "items": [
+            "quarryindustrial:drone_console"
           ]
         },
         {

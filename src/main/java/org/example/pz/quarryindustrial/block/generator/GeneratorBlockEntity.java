@@ -14,13 +14,14 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.example.pz.quarryindustrial.registry.ModAdvancements;
 import org.example.pz.quarryindustrial.energy.EnergyOutput;
+import org.example.pz.quarryindustrial.menu.InfoMachine;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 /**
  * Base de los generadores: un buffer que solo se vacía (por cables o empujando a los vecinos) y un
  * tanque de fluido que solo se llena. Cada tick: {@link #generate} produce y después se empuja la energía.
  */
-public abstract class GeneratorBlockEntity extends BlockEntity {
+public abstract class GeneratorBlockEntity extends BlockEntity implements InfoMachine {
     public final SimpleEnergyStorage energy;
     private final long maxOutput;
     private boolean running;
@@ -47,6 +48,21 @@ public abstract class GeneratorBlockEntity extends BlockEntity {
     public abstract Storage<FluidVariant> fluidInput();
 
     public abstract Component statusMessage();
+
+    /** Lo que guarda el tanque, en mB (combustible o vapor). */
+    protected abstract long tankMb();
+
+    protected abstract long tankCapacityMb();
+
+    @Override
+    public void fillInfo(long[] values) {
+        values[0] = running ? 1 : 0;
+        values[1] = averageOutput();
+        values[2] = energy.amount;
+        values[3] = energy.getCapacity();
+        values[4] = tankMb();
+        values[5] = tankCapacityMb();
+    }
 
     protected void serverTick(Level level, BlockPos pos, BlockState state) {
         if (!(level instanceof ServerLevel serverLevel)) {

@@ -1,5 +1,7 @@
 package org.example.pz.quarryindustrial.block.offshore;
 
+import org.example.pz.quarryindustrial.menu.InfoKind;
+import org.example.pz.quarryindustrial.menu.InfoMachine;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -47,7 +49,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
  * cigüeña. Puede andar a diésel (combustible por el controlador) y el oil sale por cualquier bloque de la
  * cubierta: con caños hasta la costa o, mejor, con un dron cisterna.
  */
-public class OffshoreRigBlockEntity extends BlockEntity {
+public class OffshoreRigBlockEntity extends BlockEntity implements InfoMachine {
     public static final int MAX_SPEED_UPGRADES = 4;
     private static final long MB = FluidConstants.BUCKET / 1000;
     private static final int STRUCTURE_CHECK_INTERVAL = 100;
@@ -313,6 +315,25 @@ public class OffshoreRigBlockEntity extends BlockEntity {
 
     public boolean isDismantling() {
         return dismantling;
+    }
+
+    @Override
+    public InfoKind infoKind() {
+        return InfoKind.OFFSHORE;
+    }
+
+    @Override
+    public void fillInfo(long[] values) {
+        values[0] = status.ordinal();
+        values[1] = (long) drilled;
+        values[2] = QuarryConfig.get().offshore.drillDepth;
+        values[3] = energy.amount;
+        values[4] = energy.getCapacity();
+        values[5] = oilMb();
+        values[6] = tankCapacityMb();
+        values[7] = fuel.amountMb();
+        values[8] = fuel.capacityMb();
+        values[9] = speedUpgrades;
     }
 
     public Component statusMessage() {

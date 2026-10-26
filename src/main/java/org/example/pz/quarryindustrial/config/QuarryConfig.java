@@ -197,6 +197,13 @@ public final class QuarryConfig {
         public int surveyScanRadius = 6;
         /** Ticks sin noticias de un dron en vuelo para darlo por perdido (y devolverlo al pad, sin la carga). */
         public int lostAfterTicks = 6_000;
+        /** Centralita: hasta qué distancia (horizontal) ve pads, drones y géiseres. */
+        public int consoleRange = 1_024;
+        /** Radar repetidor: hasta dónde ve a su alrededor, si él mismo está dentro de lo que ya ve la centralita. */
+        public int radarRange = 1_024;
+        /** Mejora de alcance del explorador: bloques de radio que suma cada una y cuántas entran en un pad. */
+        public int surveyRangeBonus = 64;
+        public int surveyRangeMax = 4;
     }
 
     // ── Plataforma offshore ──

@@ -34,7 +34,11 @@ public final class MachineGuide {
         add(entries, ModBlocks.DIESEL_GENERATOR.asItem(), "diesel_generator");
         add(entries, ModBlocks.STEAM_TURBINE.asItem(), "steam_turbine");
         add(entries, ModBlocks.DRONE_PAD.asItem(), "drone_pad");
+        add(entries, ModBlocks.DRONE_CONSOLE.asItem(), "drone_console");
+        add(entries, ModBlocks.RADAR.asItem(), "drone_radar");
         add(entries, ModItems.DRONE_LINKER, "drone_linker");
+        add(entries, ModItems.PAD_CHUNK_LOADER, "pad_chunk_loader");
+        add(entries, ModItems.SURVEY_RANGE_UPGRADE, "survey_range_upgrade");
         add(entries, ModItems.MANUAL, "manual");
         for (BitTier tier : BitTier.values()) {
             add(entries, ModItems.bit(tier), "drill_bit");

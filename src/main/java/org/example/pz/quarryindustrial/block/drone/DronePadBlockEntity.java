@@ -1,5 +1,8 @@
 package org.example.pz.quarryindustrial.block.drone;
 
+import org.example.pz.quarryindustrial.menu.InfoKind;
+import org.example.pz.quarryindustrial.menu.InfoMachine;
+import net.minecraft.server.level.ServerPlayer;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
@@ -44,12 +47,14 @@ import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.drone.DroneEntity;
 import org.example.pz.quarryindustrial.drone.DroneFlights;
 import org.example.pz.quarryindustrial.drone.DroneKind;
+import org.example.pz.quarryindustrial.drone.DroneNetwork;
 import org.example.pz.quarryindustrial.drone.DronePayload;
 import org.example.pz.quarryindustrial.item.DrillBitItem;
 import org.example.pz.quarryindustrial.item.DroneItem;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
 import org.example.pz.quarryindustrial.registry.ModComponents;
 import org.example.pz.quarryindustrial.registry.ModItems;
+import org.example.pz.quarryindustrial.registry.ModTickets;
 import org.jetbrains.annotations.Nullable;
 import team.reborn.energy.api.EnergyStorage;
 import team.reborn.energy.api.base.SimpleEnergyStorage;
@@ -70,7 +75,7 @@ import java.util.UUID;
  * </ul>
  * Cada viaje cuesta energía del pad.
  */
-public class DronePadBlockEntity extends BlockEntity {
+public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     public static final int BOX_SLOTS = 9;
     private static final long MB = FluidConstants.BUCKET / 1000;
     private static final int TRANSFER_INTERVAL = 10;
@@ -115,6 +120,12 @@ public class DronePadBlockEntity extends BlockEntity {
     /** Ticks que lleva esperando la carga en el buzón de salida. */
     private int waitingTicks;
     private boolean surveyRequested;
+    /** Tiene el cargador de chunks instalado. */
+    private boolean chunkLoader;
+    /** Mejoras de alcance del explorador instaladas. */
+    private int surveyUpgrades;
+    /** El ticket de este pad ya está puesto en esta sesión. */
+    private boolean chunkForced;
     private DronePadStatus status = DronePadStatus.NO_DRONE;
     private int tickCounter;
 
@@ -180,6 +191,11 @@ public class DronePadBlockEntity extends BlockEntity {
             return;
         }
         tickCounter++;
+        updateChunkTicket(serverLevel);
+        if (tickCounter == 1) {
+            // Se anota en el registro de la dimensión (para la centralita) al cargarse
+            report(serverLevel);
+        }
         // La energía sale cada tick (los consumidores aceptan poco por vez); items y fluidos, cada tanto
         pushInbox(serverLevel, pos, tickCounter % TRANSFER_INTERVAL == 0);
         if (flight != null) {
@@ -318,6 +334,54 @@ public class DronePadBlockEntity extends BlockEntity {
         setChanged();
     }
 
+    public int surveyUpgrades() {
+        return surveyUpgrades;
+    }
+
+    /** Instala una mejora de alcance del explorador; false si ya no entran más. */
+    public boolean installSurveyUpgrade() {
+        if (surveyUpgrades >= QuarryConfig.get().drones.surveyRangeMax) {
+            return false;
+        }
+        surveyUpgrades++;
+        markForSync();
+        return true;
+    }
+
+    // ── Cargador de chunks ──
+
+    public boolean hasChunkLoader() {
+        return chunkLoader;
+    }
+
+    /** Instala el cargador; false si ya lo tenía. */
+    public boolean installChunkLoader() {
+        if (chunkLoader) {
+            return false;
+        }
+        chunkLoader = true;
+        markForSync();
+        return true;
+    }
+
+    /** Mantiene el chunk del pad cargado (mismo ticket que las quarries) mientras tenga el cargador. */
+    private void updateChunkTicket(ServerLevel level) {
+        boolean wanted = chunkLoader && QuarryConfig.get().chunkLoading;
+        if (wanted && !chunkForced) {
+            ModTickets.force(level, ChunkPos.containing(worldPosition), true);
+            chunkForced = true;
+        } else if (!wanted && chunkForced) {
+            releaseChunk(level);
+        }
+    }
+
+    private void releaseChunk(ServerLevel level) {
+        if (chunkForced) {
+            ModTickets.force(level, ChunkPos.containing(worldPosition), false);
+            chunkForced = false;
+        }
+    }
+
     private boolean hasRoomFor(DroneKind kind) {
         return switch (kind) {
             case CARGO -> usedSlots(inbox) < BOX_SLOTS;
@@ -419,7 +483,7 @@ public class DronePadBlockEntity extends BlockEntity {
             setStatus(DronePadStatus.READY);
             return;
         }
-        List<BlockPos> route = surveyRoute(pos);
+        List<BlockPos> route = surveyRoute(pos, surveyUpgrades);
         long cost = tripCost(pos, route.getFirst()) * 4;
         if (energy.amount < cost) {
             setStatus(DronePadStatus.NO_POWER);
@@ -431,7 +495,7 @@ public class DronePadBlockEntity extends BlockEntity {
     }
 
     /** Un barrido en espiral cuadrada alrededor del pad, con pasadas separadas por el ancho que mira el dron. */
-    private static List<BlockPos> surveyRoute(BlockPos pos) {
+    private static List<BlockPos> surveyRoute(BlockPos pos, int upgrades) {
         QuarryConfig.Drones config = QuarryConfig.get().drones;
         int step = Math.max(4, config.surveyScanRadius * 2);
         List<BlockPos> route = new ArrayList<>();
@@ -440,7 +504,7 @@ public class DronePadBlockEntity extends BlockEntity {
         int[][] directions = {{1, 0}, {0, 1}, {-1, 0}, {0, -1}};
         int leg = 1;
         int direction = 0;
-        while (Math.max(Math.abs(x), Math.abs(z)) <= config.surveyRadius) {
+        while (Math.max(Math.abs(x), Math.abs(z)) <= config.surveyRadius + upgrades * config.surveyRangeBonus) {
             for (int repeat = 0; repeat < 2; repeat++) {
                 x += directions[direction][0] * leg * step;
                 z += directions[direction][1] * leg * step;
@@ -505,6 +569,7 @@ public class DronePadBlockEntity extends BlockEntity {
         if (drone.kind() == DroneKind.SURVEY) {
             if (!payload.sites.isEmpty() && level instanceof ServerLevel serverLevel) {
                 ModAdvancements.grant(serverLevel, worldPosition, ModAdvancements.PROSPECTOR);
+                DroneNetwork.get(serverLevel).addSites(payload.sites, worldPosition);
             }
             ItemStack report = new ItemStack(ModItems.SURVEY_REPORT);
             report.set(ModComponents.SURVEY_SITES, List.copyOf(payload.sites));
@@ -653,6 +718,42 @@ public class DronePadBlockEntity extends BlockEntity {
         return status;
     }
 
+    @Override
+    public InfoKind infoKind() {
+        return InfoKind.PAD;
+    }
+
+    @Override
+    public void fillInfo(long[] values) {
+        DroneKind kind = droneKind();
+        values[0] = status.ordinal();
+        values[1] = kind == null ? 0 : kind.ordinal() + 1;
+        values[2] = link == null ? 0 : 1;
+        values[3] = link == null ? 0 : link.getX();
+        values[4] = link == null ? 0 : link.getY();
+        values[5] = link == null ? 0 : link.getZ();
+        values[6] = energy.amount;
+        values[7] = energy.getCapacity();
+        values[8] = inEnergy.amount;
+        values[9] = inEnergy.getCapacity();
+        values[10] = outTank.amount / MB;
+        values[11] = outTank.getCapacity() / MB;
+        values[12] = inTank.amount / MB;
+        values[13] = inTank.getCapacity() / MB;
+        values[14] = usedSlots(outbox);
+        values[15] = usedSlots(inbox);
+        values[16] = link == null ? 0 : tripCost(worldPosition, link);
+        values[17] = chunkLoader ? 1 : 0;
+        values[18] = surveyUpgrades;
+    }
+
+    /** El botón de la GUI: manda a explorar al dron explorador. */
+    @Override
+    public void onInfoButton(ServerPlayer player) {
+        requestSurvey();
+        player.sendOverlayMessage(statusMessage());
+    }
+
     public Component statusMessage() {
         DroneKind kind = droneKind();
         Component droneName = kind != null ? kind.label() : Component.translatable("status.quarryindustrial.drone_pad.none");
@@ -698,6 +799,13 @@ public class DronePadBlockEntity extends BlockEntity {
         if (level != null && !level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
         }
+        if (level instanceof ServerLevel serverLevel) {
+            report(serverLevel);
+        }
+    }
+
+    private void report(ServerLevel level) {
+        DroneNetwork.get(level).updatePad(worldPosition, droneKind(), status, link);
     }
 
     /** Lo que se suelta al romper el pad: el dron (si está) y los dos buzones. */
@@ -706,6 +814,14 @@ public class DronePadBlockEntity extends BlockEntity {
         if (flight == null && !drone.isEmpty()) {
             all.add(drone);
             drone = ItemStack.EMPTY;
+        }
+        if (surveyUpgrades > 0) {
+            all.add(new ItemStack(ModItems.SURVEY_RANGE_UPGRADE, surveyUpgrades));
+            surveyUpgrades = 0;
+        }
+        if (chunkLoader) {
+            all.add(new ItemStack(ModItems.PAD_CHUNK_LOADER));
+            chunkLoader = false;
         }
         all.addAll(outbox.removeAllItems());
         all.addAll(inbox.removeAllItems());
@@ -718,6 +834,10 @@ public class DronePadBlockEntity extends BlockEntity {
             for (ItemStack stack : contentsToDrop()) {
                 Block.popResource(level, pos, stack);
             }
+        }
+        if (level instanceof ServerLevel serverLevel) {
+            releaseChunk(serverLevel);
+            DroneNetwork.get(serverLevel).removePad(pos);
         }
         super.preRemoveSideEffects(pos, state);
     }
@@ -754,6 +874,8 @@ public class DronePadBlockEntity extends BlockEntity {
         output.store("Inbox", ItemStack.OPTIONAL_CODEC.listOf(), inbox.getItems());
         SingleVariantStorage.writeValue(outTank, FluidVariant.CODEC, output.child("OutTank"));
         SingleVariantStorage.writeValue(inTank, FluidVariant.CODEC, output.child("InTank"));
+        output.putBoolean("ChunkLoader", chunkLoader);
+        output.putInt("SurveyUpgrades", surveyUpgrades);
         output.putLong("Energy", energy.amount);
         output.putLong("InEnergy", inEnergy.amount);
     }
@@ -777,6 +899,8 @@ public class DronePadBlockEntity extends BlockEntity {
         load(inbox, input.read("Inbox", ItemStack.OPTIONAL_CODEC.listOf()).orElse(List.of()));
         SingleVariantStorage.readValue(outTank, FluidVariant.CODEC, FluidVariant::blank, input.childOrEmpty("OutTank"));
         SingleVariantStorage.readValue(inTank, FluidVariant.CODEC, FluidVariant::blank, input.childOrEmpty("InTank"));
+        chunkLoader = input.getBooleanOr("ChunkLoader", false);
+        surveyUpgrades = input.getIntOr("SurveyUpgrades", 0);
         energy.amount = Math.min(input.getLongOr("Energy", 0L), energy.getCapacity());
         inEnergy.amount = Math.min(input.getLongOr("InEnergy", 0L), inEnergy.getCapacity());
     }

@@ -5,6 +5,14 @@
       "values": [
         "alaindustrial"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:advanced_circuit",
+        "alaindustrial:insulated_electrum_cable"
+      ]
     }
   ],
   "type": "minecraft:crafting_shaped",

@@ -207,20 +207,110 @@ DRONE_COLORS = {"cargo": (0xE6, 0xAE, 0x12), "tanker": (0x2A, 0x5B, 0xD8), "powe
                 "maintenance": (0x3C, 0xE8, 0x7A), "survey": (0xB0, 0x50, 0xFF)}
 
 
+# Dron en 3/4, letra por pixel ('.' = transparente). La carga se dibuja encima, debajo del cuerpo.
+DRONE_FRAME = [
+    "................",
+    ".rRBr......rBRr.",
+    "rRRRRr....rRRRRr",
+    ".rrMr......rMrr.",
+    "...m.oooooo.m...",
+    "...aoCWCCCkoa...",
+    "...aoCCCCkkoa...",
+    "....ohhhhllo....",
+    "..aaodddGgdoaa..",
+    ".La..oddddo..aN.",
+    "rrMRr.oooo.rRMrr",
+    "RRBRRr....rRRBRR",
+    ".rrrr......rrrr.",
+    "................",
+    "................",
+    "................",
+]
+
+DRONE_PAYLOAD = {
+    "cargo": [None]*11 + [
+        "......w..w......",
+        ".....xxxxxx.....",
+        ".....xYCYYx.....",
+        ".....xyCyyx.....",
+        ".....xxxxxx.....",
+    ],
+    "tanker": [None]*11 + [
+        "......w..w......",
+        ".....xTTTTx.....",
+        "....xTCCCCTx....",
+        "....xttttttx....",
+        ".....xxxxxx.....",
+    ],
+    "power": [None]*11 + [
+        ".......QQ.......",
+        ".....xxxxxx.....",
+        ".....xCCZZx.....",
+        ".....xZZCCx.....",
+        ".....xxxxxx.....",
+    ],
+    "maintenance": [None]*11 + [
+        ".....wwwwww.....",
+        ".....C.ss.C.....",
+        ".....CsssSC.....",
+        "......CssC......",
+        ".......S........",
+    ],
+    "survey": [None]*11 + [
+        "......xwwx......",
+        ".....xCCCCx.....",
+        ".....xgGVgx.....",
+        ".....xggggx.....",
+        "......xxxx......",
+    ],
+}
+
+
 def drone_icon(kind):
-    """Cuadricóptero visto desde arriba: cruz de brazos, cuatro hélices y el cuerpo con el color del tipo."""
+    """Cuadricóptero en 3/4: hélices girando, carcasa del color del tipo, lente, luces de navegación y la
+    carga que lleva colgando (caja, tanque, batería, garra con broca o cámara)."""
     color = DRONE_COLORS[kind]
+    pal = {
+        "o": (0x16, 0x18, 0x1C, 255),
+        "d": (0x23, 0x27, 0x2E, 255),
+        "b": (0x34, 0x39, 0x41, 255),
+        "l": (0x4C, 0x53, 0x5D, 255),
+        "h": (0x76, 0x7F, 0x8A, 255),
+        "a": (0x8A, 0x92, 0x9C, 255),
+        "m": (0x3E, 0x43, 0x49, 255),
+        "M": (0xC8, 0xD0, 0xD8, 255),
+        "r": (0xB4, 0xC4, 0xD4, 90),
+        "R": (0xE4, 0xEE, 0xF8, 150),
+        "B": (0x50, 0x58, 0x62, 210),
+        "W": shade(color, 80) + (255,),
+        "C": color + (255,),
+        "k": shade(color, -70) + (255,),
+        "G": (0x8F, 0xE8, 0xFF, 255),
+        "g": (0x0C, 0x1C, 0x2C, 255),
+        "w": (0x5A, 0x60, 0x68, 255),
+        "x": (0x1E, 0x1F, 0x22, 255),
+        "y": (0x7A, 0x52, 0x2A, 255),
+        "Y": (0xB8, 0x84, 0x48, 255),
+        "L": (0xFF, 0x40, 0x40, 255),
+        "N": (0x50, 0xFF, 0x70, 255),
+        "t": (0x4A, 0x52, 0x5C, 255),
+        "T": (0xB8, 0xC2, 0xCC, 255),
+        "Q": (0xC8, 0xD0, 0xD8, 255),
+        "Z": (0xFF, 0xF0, 0x60, 255),
+        "s": (0x9C, 0xA4, 0xAD, 255),
+        "S": (0xE8, 0xF4, 0xFF, 255),
+        "V": color + (255,),
+    }
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    steel = (0x9C, 0xA4, 0xAD, 255)
-    d.line((3, 3, 12, 12), fill=steel)
-    d.line((12, 3, 3, 12), fill=steel)
-    for cx, cy in ((3, 3), (12, 3), (3, 12), (12, 12)):
-        d.ellipse((cx - 2, cy - 2, cx + 2, cy + 2), outline=(0x3E, 0x43, 0x49, 255))
-        px(img, cx, cy, (0x1E, 0x1F, 0x22))
-    d.rectangle((5, 5, 10, 10), fill=(0x3E, 0x43, 0x49, 255))
-    d.rectangle((6, 6, 9, 9), fill=color + (255,))
-    px(img, 6, 6, shade(color, 60))
+    for layer in (DRONE_FRAME, DRONE_PAYLOAD[kind]):
+        for y, row in enumerate(layer):
+            if row is None:
+                continue
+            assert len(row) == 16, row
+            for x, ch in enumerate(row):
+                if ch != ".":
+                    img.putpixel((x, y), pal[ch])
+    # Luces: punta delantera del color del tipo, con un brillo
     return img
 
 
@@ -248,6 +338,62 @@ def drone_pad_side():
     d.line((0, 12, 15, 12), fill=SAFETY_YELLOW + (255,))
     for x in range(1, 16, 4):
         px(img, x, 14, (0x3C, 0xE8, 0x7A))
+    return img
+
+
+CONSOLE_STEEL = (0x3E, 0x43, 0x49)
+RADAR_GREEN = (0x4A, 0xCF, 0x8A)
+
+
+def console_face(kind, frame=0):
+    """Centralita de drones. Frente: pantalla de radar (el barrido gira en 8 cuadros) con blips de pads, un dron y
+    un géiser, y abajo el teclado con sus luces. Costados con rejilla y franja de peligro; arriba, la antena."""
+    img = Image.new("RGBA", (16, 16))
+    noisy_fill(img, (0, 0, 16, 16), CONSOLE_STEEL, 5, streak=True)
+    d = ImageDraw.Draw(img)
+    d.rectangle((0, 0, 15, 15), outline=(0x22, 0x24, 0x28, 255))
+    if kind == "front":
+        d.rectangle((2, 1, 13, 10), fill=(0x16, 0x18, 0x1C, 255))
+        d.rectangle((3, 2, 12, 9), fill=(0x07, 0x13, 0x21, 255))
+        for gx in range(3, 13, 3):
+            for gy in range(2, 10, 3):
+                px(img, gx, gy, (0x17, 0x3A, 0x5E))
+        cx, cy = 7.5, 5.5
+        for i in range(24):
+            a = i * math.pi / 12
+            x, y = round(cx + math.cos(a) * 3.6), round(cy + math.sin(a) * 3.6)
+            if 3 <= x <= 12 and 2 <= y <= 9:
+                px(img, x, y, (0x1F, 0x5A, 0x40))
+        # Barrido con estela: el cuadro actual brillante, los dos anteriores más apagados
+        for trail, color in ((2, (0x1C, 0x50, 0x38)), (1, (0x2C, 0x84, 0x5A)), (0, RADAR_GREEN)):
+            a = (frame - trail) * math.pi / 4
+            for r in (1, 2, 3, 4):
+                x, y = round(cx + math.cos(a) * r), round(cy + math.sin(a) * r)
+                if 3 <= x <= 12 and 2 <= y <= 9:
+                    px(img, x, y, color)
+        px(img, 5, 4, (0xFF, 0xD2, 0x4A))      # pad
+        px(img, 10, 7, (0xB0, 0x50, 0xFF))     # géiser
+        px(img, 10, 3, (0x6F, 0xD0, 0xFF))     # dron
+        px(img, 7, 5, (0xE6, 0xF0, 0xFF))      # la centralita
+        # Teclado y luces
+        d.rectangle((2, 12, 13, 13), fill=(0x22, 0x25, 0x29, 255))
+        for x in range(3, 13, 2):
+            px(img, x, 12, (0x8A, 0x92, 0x9C))
+        px(img, 3, 14, RADAR_GREEN)
+        px(img, 5, 14, (0xFF, 0xD2, 0x4A))
+        px(img, 12, 14, (0xFF, 0x3D, 0x5A) if frame % 2 else (0x60, 0x20, 0x28))
+    elif kind == "top":
+        d.ellipse((4, 4, 11, 11), fill=(0x2A, 0x2D, 0x31, 255), outline=(0x9C, 0xA4, 0xAD, 255))
+        d.ellipse((6, 6, 9, 9), fill=(0x5A, 0x60, 0x68, 255))
+        px(img, 7, 7, (0x6F, 0xD0, 0xFF))
+        for x in (1, 14):
+            d.line((x, 2, x, 13), fill=(0x22, 0x25, 0x29, 255))
+    else:
+        for y in range(3, 10, 2):
+            d.line((3, y, 12, y), fill=(0x1E, 0x20, 0x24, 255))
+        for x in range(1, 15):
+            px(img, x, 13, SAFETY_YELLOW if x % 4 < 2 else (0x22, 0x22, 0x24))
+        px(img, 2, 2, RADAR_GREEN)
     return img
 
 
@@ -311,6 +457,9 @@ def main():
     save(drone_pad_top(), "block/drone_pad_top.png")
     save(drone_pad_side(), "block/drone_pad_side.png")
     save(linker_icon(), "item/drone_linker.png")
+    save_animated([console_face("front", f) for f in range(8)], "block/drone_console_front.png", 3)
+    save(console_face("side"), "block/drone_console_side.png")
+    save(console_face("top"), "block/drone_console_top.png")
     save(survey_report_icon(), "item/survey_report.png")
     save(manual_icon(), "item/manual.png")
 

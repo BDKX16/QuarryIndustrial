@@ -1,0 +1,42 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:advanced_circuit",
+              "alaindustrial:machine_casing"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "IEI",
+    "DRD",
+    "III"
+  ],
+  "key": {
+    "I": "#c:ingots/iron",
+    "E": "minecraft:ender_eye",
+    "D": "minecraft:diamond",
+    "R": "minecraft:redstone_block"
+  },
+  "result": {
+    "id": "quarryindustrial:pad_chunk_loader"
+  }
+}

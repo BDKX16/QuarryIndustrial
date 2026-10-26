@@ -11,6 +11,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.example.pz.quarryindustrial.Quarryindustrial;
+import org.example.pz.quarryindustrial.block.drone.DroneConsoleBlock;
+import org.example.pz.quarryindustrial.block.drone.RadarBlock;
 import org.example.pz.quarryindustrial.block.drone.DronePadBlock;
 import org.example.pz.quarryindustrial.block.generator.GeneratorBlock;
 import org.example.pz.quarryindustrial.block.offshore.OffshoreDeckBlock;
@@ -103,6 +105,21 @@ public final class ModBlocks {
 
     /** Pad de drones: donde aterrizan, cargan y descargan. */
     public static final DronePadBlock DRONE_PAD = register("drone_pad", DronePadBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(3.0f)
+                    .requiresCorrectToolForDrops()
+                    .noOcclusion()
+                    .sound(SoundType.METAL));
+    /** Centralita: mapa y lista de todos los pads y drones de la zona. La pantalla brilla un poco. */
+    public static final DroneConsoleBlock DRONE_CONSOLE = register("drone_console", DroneConsoleBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(3.0f)
+                    .requiresCorrectToolForDrops()
+                    .lightLevel(state -> 6)
+                    .sound(SoundType.METAL));
+
+    /** Radar repetidor: extiende hasta dónde llega la centralita. */
+    public static final RadarBlock RADAR = register("drone_radar", RadarBlock::new,
             BlockBehaviour.Properties.of()
                     .strength(3.0f)
                     .requiresCorrectToolForDrops()

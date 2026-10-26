@@ -19,6 +19,7 @@
     "fabric-client-gametest": [
       "org.example.pz.quarryindustrial.gametest.ShowcaseClientGameTest",
       "org.example.pz.quarryindustrial.gametest.ExpansionShowcaseClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.DroneConsoleClientGameTest",
       "org.example.pz.quarryindustrial.gametest.CompatClientGameTest",
       "org.example.pz.quarryindustrial.gametest.NuclearClientGameTest",
       "org.example.pz.quarryindustrial.gametest.PumpjackClientGameTest",

@@ -170,7 +170,7 @@ public class OffshoreRigBlock extends BaseEntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
-        player.sendOverlayMessage(rig.statusMessage());
+        player.openMenu(rig);
         return InteractionResult.SUCCESS;
     }
 }

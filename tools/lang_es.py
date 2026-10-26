@@ -8,6 +8,7 @@ VOSEO = {
     "conectá": "conecta", "Elegí": "Elige", "Ponela": "Ponla", "Fijate": "Fíjate", "Ponelo": "Ponlo", "vinculá": "vincula",
     "hacia vos": "hacia ti", "por vos": "por ti", "Parate": "Ponte", "Mandalo": "Mándalo",
     "Usala": "Úsala", "Instalale": "Instálale", "vinculalo": "vincúlalo", "golpeás": "golpeas", "Entrá": "Entra",
+    "mandalo": "mándalo", "arrastrá": "arrastra", "mandás": "mandas", "tenés": "tienes", "podés": "puedes",
 }
 
 

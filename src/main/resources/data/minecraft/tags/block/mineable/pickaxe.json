@@ -13,6 +13,8 @@
     "quarryindustrial:steam_turbine",
     "quarryindustrial:offshore_rig",
     "quarryindustrial:offshore_deck",
-    "quarryindustrial:drone_pad"
+    "quarryindustrial:drone_pad",
+    "quarryindustrial:drone_console",
+    "quarryindustrial:drone_radar"
   ]
 }

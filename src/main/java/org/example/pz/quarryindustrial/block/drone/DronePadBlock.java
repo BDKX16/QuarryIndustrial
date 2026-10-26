@@ -19,7 +19,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.item.DroneItem;
+import org.example.pz.quarryindustrial.registry.ModItems;
 
 /**
  * Pad de drones: una plataforma baja con una "H". Clic derecho con un dron lo pone; agachado y con la mano
@@ -64,6 +66,31 @@ public class DronePadBlock extends BaseEntityBlock {
     @Override
     protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
                                           Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.is(ModItems.PAD_CHUNK_LOADER)) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof DronePadBlockEntity pad) {
+                if (pad.installChunkLoader()) {
+                    stack.consume(1, player);
+                    player.sendOverlayMessage(Component.translatable("message.quarryindustrial.drone_pad.chunk_loader"));
+                } else {
+                    player.sendOverlayMessage(
+                            Component.translatable("message.quarryindustrial.drone_pad.chunk_loader.already"));
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
+        if (stack.is(ModItems.SURVEY_RANGE_UPGRADE)) {
+            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof DronePadBlockEntity pad) {
+                if (pad.installSurveyUpgrade()) {
+                    stack.consume(1, player);
+                    player.sendOverlayMessage(Component.translatable("message.quarryindustrial.drone_pad.survey_upgrade",
+                            pad.surveyUpgrades(), QuarryConfig.get().drones.surveyRangeMax));
+                } else {
+                    player.sendOverlayMessage(
+                            Component.translatable("message.quarryindustrial.drone_pad.survey_upgrade.full"));
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
         if (!(stack.getItem() instanceof DroneItem)) {
             return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
@@ -90,8 +117,7 @@ public class DronePadBlock extends BaseEntityBlock {
             }
             return InteractionResult.SUCCESS;
         }
-        pad.requestSurvey();
-        player.sendOverlayMessage(pad.statusMessage());
+        player.openMenu(pad);
         return InteractionResult.SUCCESS;
     }
 }

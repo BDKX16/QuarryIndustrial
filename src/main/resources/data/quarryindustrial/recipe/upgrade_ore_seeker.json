@@ -5,6 +5,15 @@
       "values": [
         "alaindustrial"
       ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:drill_column_module",
+        "alaindustrial:magnet_filter_module",
+        "alaindustrial:module_blank"
+      ]
     }
   ],
   "type": "minecraft:crafting_shaped",
@@ -15,7 +24,7 @@
     " C "
   ],
   "key": {
-    "R": "alaindustrial:drill_row_module",
+    "R": "alaindustrial:magnet_filter_module",
     "L": "minecraft:spyglass",
     "B": "alaindustrial:module_blank",
     "C": "alaindustrial:drill_column_module"

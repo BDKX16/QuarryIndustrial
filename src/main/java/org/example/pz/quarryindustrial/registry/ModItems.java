@@ -56,6 +56,10 @@ public final class ModItems {
 
     public static final DroneLinkerItem DRONE_LINKER = register("drone_linker", DroneLinkerItem::new,
             new Item.Properties().stacksTo(1));
+    public static final Item PAD_CHUNK_LOADER = register("pad_chunk_loader", Item::new,
+            new Item.Properties().stacksTo(16));
+    public static final Item SURVEY_RANGE_UPGRADE = register("survey_range_upgrade", Item::new,
+            new Item.Properties().stacksTo(16));
     public static final SurveyReportItem SURVEY_REPORT = register("survey_report", SurveyReportItem::new,
             new Item.Properties().stacksTo(1));
     public static final ManualItem MANUAL = register("manual", ManualItem::new, new Item.Properties().stacksTo(1));
@@ -78,7 +82,11 @@ public final class ModItems {
                         output.accept(ModBlocks.DIESEL_GENERATOR);
                         output.accept(ModBlocks.STEAM_TURBINE);
                         output.accept(ModBlocks.DRONE_PAD);
+                        output.accept(ModBlocks.DRONE_CONSOLE);
                         output.accept(DRONE_LINKER);
+                        output.accept(PAD_CHUNK_LOADER);
+                        output.accept(SURVEY_RANGE_UPGRADE);
+                        output.accept(ModBlocks.RADAR);
                         DRONES.values().forEach(output::accept);
                         BITS.values().forEach(output::accept);
                         UPGRADES.values().forEach(output::accept);

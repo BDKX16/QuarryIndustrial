@@ -97,7 +97,7 @@ public class GeneratorBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player,
                                                BlockHitResult hit) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof GeneratorBlockEntity generator) {
-            player.sendOverlayMessage(generator.statusMessage());
+            player.openMenu(generator);
         }
         return InteractionResult.SUCCESS;
     }

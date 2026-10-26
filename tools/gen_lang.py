@@ -210,6 +210,62 @@ KEYS = {
         "oil geyser it saw.",
         "Clic derecho en su pad para mandarlo: recorre un radio de 128 bloques y vuelve con un informe de todos los "
         "géiseres que vio."),
+    # ── Centralita de drones ──
+    "block.quarryindustrial.drone_console": ("Drone Control Station", "Centralita de drones"),
+    "gui.quarryindustrial.console.tab.map": ("Map", "Mapa"),
+    "gui.quarryindustrial.console.tab.drones": ("Drones (%s)", "Drones (%s)"),
+    "gui.quarryindustrial.console.tab.wells": ("Wells (%s)", "Pozos (%s)"),
+    "gui.quarryindustrial.console.connecting": ("Connecting to the drone network…", "Conectando con la red de drones…"),
+    "gui.quarryindustrial.console.empty_pad": ("Empty pad", "Pad vacío"),
+    "gui.quarryindustrial.console.no_pads": (
+        "No drone pads within %s blocks of this station. Place a pad and put a drone on it.",
+        "No hay pads a menos de %s bloques de la centralita. Poné un pad y un dron arriba."),
+    "gui.quarryindustrial.console.no_wells": (
+        "No oil geysers found yet. Put a survey drone on a pad and send it out: everything it finds shows up here "
+        "and on the map.",
+        "Todavía no se encontró ningún géiser. Poné un dron explorador en un pad y mandalo a explorar: todo lo que "
+        "encuentre aparece acá y en el mapa."),
+    "gui.quarryindustrial.console.no_signal": ("No signal (chunk unloaded)", "Sin señal (chunk descargado)"),
+    "gui.quarryindustrial.console.energy": ("Energy: %s%%", "Energía: %s %%"),
+    "gui.quarryindustrial.console.link": ("→ %s (%s m)", "→ %s (%s m)"),
+    "gui.quarryindustrial.console.no_link": ("No destination", "Sin destino"),
+    "gui.quarryindustrial.console.distance": ("%s m away", "a %s m"),
+    "gui.quarryindustrial.console.range": ("Sees everything within %s blocks", "Ve todo a menos de %s bloques"),
+    "gui.quarryindustrial.console.button.view": ("View", "Ver"),
+    "gui.quarryindustrial.console.button.link": ("Link", "Vincular"),
+    "gui.quarryindustrial.console.button.target": ("Pick", "Elegir"),
+    "gui.quarryindustrial.console.button.unlink": ("Unlink", "Desvincular"),
+    "gui.quarryindustrial.console.button.survey": ("Survey", "Explorar"),
+    "gui.quarryindustrial.console.button.forget": ("Forget", "Olvidar"),
+    "gui.quarryindustrial.console.button.cancel": ("Cancel", "Cancelar"),
+    "gui.quarryindustrial.console.linking": ("Pick the destination pad · right-click to cancel",
+                                             "Elegí el pad de destino · clic derecho para cancelar"),
+    "gui.quarryindustrial.console.link_here": ("Click: send the cargo here", "Clic: mandar la carga acá"),
+    "gui.quarryindustrial.console.map_hint": ("Click a pad to select it · drag to move · wheel to zoom",
+                                              "Clic en un pad para elegirlo · arrastrá para mover · rueda para zoom"),
+    "gui.quarryindustrial.console.list_hint": ("Every pad within range of the station",
+                                               "Todos los pads al alcance de la centralita"),
+    "gui.quarryindustrial.console.cursor": ("X %s  Z %s  ·  %s", "X %s  Z %s  ·  %s"),
+    "gui.quarryindustrial.console.legend.pad": ("Pad", "Pad"),
+    "gui.quarryindustrial.console.legend.well": ("Geyser", "Géiser"),
+    "gui.quarryindustrial.console.legend.route": ("Route", "Ruta"),
+    "gui.quarryindustrial.console.site": ("Oil geyser", "Géiser de petróleo"),
+    "gui.quarryindustrial.console.site_finder": ("found from the pad at %s", "lo encontró el pad de %s"),
+    "gui.quarryindustrial.console.site_hint": ("Right-click: remove from the map", "Clic derecho: sacarlo del mapa"),
+    "gui.quarryindustrial.console.flight_to": ("Flying to %s", "Volando a %s"),
+    "gui.quarryindustrial.console.flight_home": ("Returning to its pad at %s", "Volviendo a su pad en %s"),
+    "gui.quarryindustrial.console.surveying": ("Surveying: %s waypoints left", "Explorando: le faltan %s puntos"),
+    "message.quarryindustrial.console.not_a_pad": ("That is not a drone pad anymore", "Eso ya no es un pad de drones"),
+    "message.quarryindustrial.console.not_survey": ("That pad has no survey drone", "Ese pad no tiene un dron explorador"),
+    "message.quarryindustrial.console.survey_busy": ("The survey drone is already out", "El explorador ya está volando"),
+    "message.quarryindustrial.console.survey_sent": ("Survey drone on its way", "Explorador en camino"),
+    "message.quarryindustrial.console.site_forgotten": ("Geyser removed from the map", "Géiser sacado del mapa"),
+    "info.quarryindustrial.drone_console": (
+        "A map of every drone pad within 1024 blocks: links, drones in flight (with the survey drone's sweep) and "
+        "the oil geysers your survey drones found. Link pads and launch surveys from here, without walking to them.",
+        "Un mapa de todos los pads a menos de 1024 bloques: vínculos, drones en vuelo (con el barrido del explorador) "
+        "y los géiseres que encontraron tus exploradores. Desde acá vinculás pads y mandás a explorar sin ir hasta "
+        "ellos."),
     # ── Sonidos ──
     "subtitles.quarryindustrial.drill": ("Quarry drilling", "Quarry perforando"),
     "subtitles.quarryindustrial.diesel": ("Diesel engine runs", "Motor diésel en marcha"),
