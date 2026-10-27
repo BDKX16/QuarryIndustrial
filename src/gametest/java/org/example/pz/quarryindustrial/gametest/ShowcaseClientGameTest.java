@@ -200,10 +200,24 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
     }
 
     /** Altura del suelo en (x, z), con los chunks ya cargados alrededor. */
+    /**
+     * Espera a que el cliente tenga el centro y las esquinas de la zona (no a que termine de bajar todo, que en un
+     * mundo recién generado no vuelve nunca).
+     */
+    static void waitForArea(ClientGameTestContext context, int chunkX, int chunkZ) {
+        context.waitFor(minecraft -> minecraft.level != null
+                && minecraft.level.getChunkSource().hasChunk(chunkX, chunkZ)
+                && minecraft.level.getChunkSource().hasChunk(chunkX - 4, chunkZ - 4)
+                && minecraft.level.getChunkSource().hasChunk(chunkX - 4, chunkZ + 4)
+                && minecraft.level.getChunkSource().hasChunk(chunkX + 4, chunkZ - 4)
+                && minecraft.level.getChunkSource().hasChunk(chunkX + 4, chunkZ + 4), CHUNK_TIMEOUT);
+        context.waitTicks(20);
+    }
+
     static BlockPos surface(TestSingleplayerContext world, ClientGameTestContext context, BlockPos around) {
         world.getServer().runCommand(String.format("tp @a %d 120 %d", around.getX(), around.getZ()));
         // En un mundo normal la generación es lenta: más margen que el que trae por defecto
-        world.getConnection().waitForChunksDownload(CHUNK_TIMEOUT);
+        waitForArea(context, around.getX() >> 4, around.getZ() >> 4);
         context.waitTicks(5);
         return world.getServer().computeOnServer(server -> {
             ServerLevel level = server.overworld();
@@ -335,7 +349,7 @@ public class ShowcaseClientGameTest implements FabricClientGameTest {
         // tp ubica los pies; la cámara queda 1.62 más arriba
         command(world, "tp @a %.2f %.2f %.2f facing %.2f %.2f %.2f", eye.getX() + 0.5, eye.getY() - 1.12,
                 eye.getZ() + 0.5, target.getX() + 0.5, target.getY() + 0.5, target.getZ() + 0.5);
-        world.getConnection().waitForChunksRender(true, CHUNK_TIMEOUT);
+        waitForArea(context, eye.getX() >> 4, eye.getZ() >> 4);
         context.waitTicks(8);
         Path file = context.takeScreenshot(TestScreenshotOptions.of(name).withSize(1920, 1080)
                 .withDestinationDir(output).disableCounterPrefix());

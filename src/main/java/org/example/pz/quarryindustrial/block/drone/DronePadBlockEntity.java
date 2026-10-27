@@ -43,6 +43,7 @@ import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlockEntity;
 import org.example.pz.quarryindustrial.block.offshore.OffshoreStatus;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryStatus;
+import org.example.pz.quarryindustrial.compat.AlaDistillery;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.drone.DroneEntity;
 import org.example.pz.quarryindustrial.drone.DroneFlights;
@@ -400,10 +401,7 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
             return;
         }
         int bitSlot = firstBitSlot();
-        if (bitSlot < 0) {
-            return;
-        }
-        BlockPos machine = findWornMachine(level, pos);
+        BlockPos machine = findWornMachine(level, pos, bitSlot >= 0);
         if (machine == null) {
             return;
         }
@@ -418,7 +416,10 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         }
         energy.amount -= cost;
         DronePayload payload = new DronePayload();
-        payload.items.add(outbox.removeItem(bitSlot, 1));
+        // Las columnas de destilación se limpian, no llevan broca
+        if (!AlaDistillery.isColumn(level.getBlockEntity(machine))) {
+            payload.items.add(outbox.removeItem(bitSlot, 1));
+        }
         launch(level, DroneKind.MAINTENANCE, machine, payload, List.of(), id);
     }
 
@@ -431,7 +432,8 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         return -1;
     }
 
-    private @Nullable BlockPos findWornMachine(ServerLevel level, BlockPos pos) {
+    /** Una quarry o plataforma que necesite broca (si hay una para llevar) o una columna de destilación sucia. */
+    private @Nullable BlockPos findWornMachine(ServerLevel level, BlockPos pos, boolean hasBit) {
         QuarryConfig.Drones config = QuarryConfig.get().drones;
         int chunks = (config.maintenanceRadius >> 4) + 1;
         ChunkPos center = ChunkPos.containing(pos);
@@ -447,7 +449,8 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
                     if (machine.distSqr(pos) > radiusSqr || DroneFlights.claimed(machine)) {
                         continue;
                     }
-                    if (needsBit(be, config.maintenanceWear)) {
+                    if ((hasBit && needsBit(be, config.maintenanceWear))
+                            || AlaDistillery.fouling(be) >= Math.max(1, config.maintenanceFouling)) {
                         return machine;
                     }
                 }
@@ -805,7 +808,7 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     }
 
     private void report(ServerLevel level) {
-        DroneNetwork.get(level).updatePad(worldPosition, droneKind(), status, link);
+        DroneNetwork.get(level).updatePad(worldPosition, droneKind(), status, link, surveyUpgrades);
     }
 
     /** Lo que se suelta al romper el pad: el dron (si está) y los dos buzones. */

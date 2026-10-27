@@ -98,26 +98,36 @@ public class DroneConsoleClientGameTest implements FabricClientGameTest {
             context.waitTicks(80);
 
             command(world, "tp @a %d %d %d", console.getX() + 2, console.getY() + 1, console.getZ() + 2);
-            world.getConnection().waitForChunksRender(true, CHUNK_TIMEOUT);
+            ShowcaseClientGameTest.waitForArea(context, console.getX() >> 4, console.getZ() >> 4);
             context.setScreen(() -> new DroneConsoleScreen(console));
             context.waitTicks(40);
             screenshot(context, output, "30_console_map");
             context.getInput().pressKey(InputConstants.KEY_2);
             context.waitTicks(4);
             screenshot(context, output, "31_console_drones");
-            // "Ver" en la primera fila: elige el pad más cercano y vuelve al mapa con su ficha
-            context.runOnClient(minecraft -> {
-                double guiScale = minecraft.getWindow().getGuiScale();
-                int width = minecraft.getWindow().getGuiScaledWidth();
-                int height = minecraft.getWindow().getGuiScaledHeight();
-                int panelW = Math.min(440, width - 16);
-                int panelH = Math.min(270, height - 16);
-                int right = (width - panelW) / 2 + 6 + panelW - 12 - 6 - 4;
-                int y = (height - panelH) / 2 + 24 + 12;
-                context.getInput().setCursorPos((right - 8) * guiScale, (y + 6) * guiScale);
+            // El pad del explorador, con dos mejoras de alcance, elegido en el mapa: se ve su cuadrado de alcance
+            BlockPos surveyPad = world.getServer().computeOnServer(server -> {
+                ServerLevel level = server.overworld();
+                BlockPos pos = ground(level, console.offset(-12, 0, 34));
+                DronePadBlockEntity pad = (DronePadBlockEntity) level.getBlockEntity(pos);
+                pad.installSurveyUpgrade();
+                pad.installSurveyUpgrade();
+                return pos;
             });
-            context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
-            context.waitTicks(4);
+            context.runOnClient(minecraft -> {
+                try {
+                    Object screen = minecraft.gui.screen();
+                    java.lang.reflect.Field tab = DroneConsoleScreen.class.getDeclaredField("tab");
+                    tab.setAccessible(true);
+                    tab.set(screen, tab.getType().getEnumConstants()[0]);
+                    java.lang.reflect.Field selected = DroneConsoleScreen.class.getDeclaredField("selected");
+                    selected.setAccessible(true);
+                    selected.set(screen, surveyPad);
+                } catch (ReflectiveOperationException e) {
+                    throw new AssertionError(e);
+                }
+            });
+            context.waitTicks(60);
             screenshot(context, output, "32_console_selected");
             context.getInput().pressKey(InputConstants.KEY_3);
             context.waitTicks(4);

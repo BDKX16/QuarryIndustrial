@@ -125,7 +125,7 @@
   "status.quarryindustrial.drone_pad.loading": "Cargando",
   "status.quarryindustrial.drone_pad.destination_full": "Destino lleno",
   "status.quarryindustrial.drone_pad.standby": "En espera",
-  "status.quarryindustrial.drone_pad.ready": "Listo: abrí el pad y apretá \"Mandar a explorar\"",
+  "status.quarryindustrial.drone_pad.ready": "Listo: clic en el pad para mandarlo a explorar",
   "status.quarryindustrial.drone_pad.in_flight": "En vuelo",
   "status.quarryindustrial.drone_pad.lost": "Dron perdido (volvió sin la carga)",
   "subtitles.quarryindustrial.drill": "Quarry perforando",
@@ -261,5 +261,6 @@
   "message.quarryindustrial.console.survey_busy": "El explorador ya está volando",
   "message.quarryindustrial.console.survey_sent": "Explorador en camino",
   "message.quarryindustrial.console.site_forgotten": "Géiser sacado del mapa",
-  "info.quarryindustrial.drone_console": "Un mapa de todos los pads a menos de 1024 bloques: vínculos, drones en vuelo (con el barrido del explorador) y los géiseres que encontraron tus exploradores. Desde acá vinculás pads y mandás a explorar sin ir hasta ellos."
+  "info.quarryindustrial.drone_console": "Un mapa de todos los pads a menos de 1024 bloques: vínculos, drones en vuelo (con el barrido del explorador) y los géiseres que encontraron tus exploradores. Desde acá vinculás pads y mandás a explorar sin ir hasta ellos.",
+  "gui.quarryindustrial.console.pad_range": "Alcance: %s bloques"
 }

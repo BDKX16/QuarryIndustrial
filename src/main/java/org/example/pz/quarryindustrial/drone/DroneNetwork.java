@@ -31,15 +31,17 @@ public class DroneNetwork extends SavedData {
     private static final int SAME_SITE = 16;
 
     /** Lo último que se supo de un pad: su dron (o null), qué estaba haciendo y a dónde está vinculado. */
-    public record PadInfo(BlockPos pos, @Nullable DroneKind kind, DronePadStatus status, Optional<BlockPos> link) {
+    public record PadInfo(BlockPos pos, @Nullable DroneKind kind, DronePadStatus status, Optional<BlockPos> link,
+                          int upgrades) {
         static final Codec<PadInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 BlockPos.CODEC.fieldOf("pos").forGetter(PadInfo::pos),
                 Codec.STRING.optionalFieldOf("kind").forGetter(info -> Optional.ofNullable(info.kind())
                         .map(DroneKind::name)),
                 Codec.STRING.fieldOf("status").forGetter(info -> info.status().name()),
-                BlockPos.CODEC.optionalFieldOf("link").forGetter(PadInfo::link)
-        ).apply(instance, (pos, kind, status, link) -> new PadInfo(pos, kind.map(DroneNetwork::kindOrNull)
-                .orElse(null), statusOr(status), link)));
+                BlockPos.CODEC.optionalFieldOf("link").forGetter(PadInfo::link),
+                Codec.INT.optionalFieldOf("upgrades", 0).forGetter(PadInfo::upgrades)
+        ).apply(instance, (pos, kind, status, link, upgrades) -> new PadInfo(pos, kind.map(DroneNetwork::kindOrNull)
+                .orElse(null), statusOr(status), link, upgrades)));
     }
 
     /** Un géiser visto desde el aire y el pad del explorador que lo encontró. */
@@ -77,8 +79,9 @@ public class DroneNetwork extends SavedData {
         return level.getDataStorage().computeIfAbsent(TYPE);
     }
 
-    public void updatePad(BlockPos pos, @Nullable DroneKind kind, DronePadStatus status, @Nullable BlockPos link) {
-        PadInfo info = new PadInfo(pos.immutable(), kind, status, Optional.ofNullable(link));
+    public void updatePad(BlockPos pos, @Nullable DroneKind kind, DronePadStatus status, @Nullable BlockPos link,
+                          int upgrades) {
+        PadInfo info = new PadInfo(pos.immutable(), kind, status, Optional.ofNullable(link), upgrades);
         if (!info.equals(pads.get(info.pos()))) {
             pads.put(info.pos(), info);
             setDirty();

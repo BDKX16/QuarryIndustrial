@@ -11,17 +11,21 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import org.example.pz.quarryindustrial.block.drone.DronePadBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.OilFluids;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
+import org.example.pz.quarryindustrial.compat.AlaDistillery;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.drone.DroneKind;
 import org.example.pz.quarryindustrial.drone.DroneNetwork;
@@ -147,6 +151,58 @@ public class DroneGameTests {
         helper.succeedWhen(() -> {
             helper.assertTrue(quarry.installedBit() == BitTier.DIAMOND, "broca instalada por el dron: " + quarry.installedBit() + " " + quarry.status() + " pad " + pad.status() + " drones " + drones(helper));
             helper.assertTrue(pad.droneDocked(), "el dron volvió");
+        });
+    }
+
+    /** Una columna de destilación de Ala sucia cerca de un pad con dron de mantenimiento (sin brocas): la limpia. */
+    @GameTest(maxTicks = 600, skyAccess = true)
+    public void maintenanceDroneCleansADistillationColumn(GameTestHelper helper) {
+        if (!FabricLoader.getInstance().isModLoaded("alaindustrial")) {
+            helper.succeed();
+            return;
+        }
+        fastDrones();
+        // Que no vaya a atender las máquinas de las otras pruebas
+        QuarryConfig.get().drones.maintenanceRadius = 10;
+        QuarryConfig.get().drones.maintenanceFouling = 50;
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.MAINTENANCE);
+        BlockPos columnPos = new BlockPos(4, 1, 6);
+        helper.setBlock(columnPos, BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(
+                "alaindustrial", "distillation_column")).defaultBlockState());
+        BlockEntity column = helper.getBlockEntity(columnPos, BlockEntity.class);
+        try {
+            java.lang.reflect.Field fouling = column.getClass().getDeclaredField("fouling");
+            fouling.setAccessible(true);
+            fouling.setInt(column, 80);
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError(e);
+        }
+        helper.assertTrue(AlaDistillery.fouling(column) == 80, "la columna quedó sucia: " + AlaDistillery.fouling(column));
+        helper.succeedWhen(() -> {
+            helper.assertTrue(AlaDistillery.fouling(column) == 0, "el dron limpió la columna: " + AlaDistillery.fouling(column)
+                    + " pad " + pad.status() + " drones " + drones(helper));
+            helper.assertTrue(pad.droneDocked(), "el dron volvió");
+            helper.assertTrue(pad.peekInbox().is(Items.COAL), "trajo el carbón: " + pad.peekInbox());
+        });
+    }
+
+    /** La centralita informa el alcance del dron según las mejoras instaladas. */
+    @GameTest(maxTicks = 100)
+    public void consoleReportsDroneRange(GameTestHelper helper) {
+        QuarryConfig.Drones config = QuarryConfig.get().drones;
+        config.surveyRadius = 100;
+        config.surveyRangeBonus = 50;
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.SURVEY);
+        pad.installSurveyUpgrade();
+        pad.installSurveyUpgrade();
+        BlockPos consolePos = new BlockPos(3, 1, 3);
+        helper.setBlock(consolePos, ModBlocks.DRONE_CONSOLE);
+        BlockPos console = helper.absolutePos(consolePos);
+        BlockPos a = helper.absolutePos(PAD_A);
+        helper.succeedWhen(() -> {
+            ConsolePayloads.Pad seenPad = seen(DroneConsoleService.snapshot(helper.getLevel(), console), a)
+                    .orElseThrow(() -> helper.assertionException(Component.literal("la centralita no ve el pad")));
+            helper.assertValueEqual(seenPad.range(), 200, "alcance del explorador con 2 mejoras");
         });
     }
 

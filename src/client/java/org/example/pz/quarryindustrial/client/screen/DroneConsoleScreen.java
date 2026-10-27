@@ -508,6 +508,10 @@ public class DroneConsoleScreen extends Screen {
             circle(graphics, screenX(linkSource.getX() + 0.5), screenZ(linkSource.getZ() + 0.5),
                     snapshot.maxLinkDistance() / scale(), 0x80FFD24A);
         }
+        Pad ranged = selected == null ? null : pad(selected);
+        if (ranged != null) {
+            drawRange(graphics, ranged);
+        }
         for (Pad pad : pads()) {
             pad.link().ifPresent(target -> drawLink(graphics, pad, target));
         }
@@ -756,12 +760,35 @@ public class DroneConsoleScreen extends Screen {
         graphics.text(font, route, tx, y + 2, DIM, false);
     }
 
+    /**
+     * Hasta dónde llega el dron del pad elegido, con lo que le dan sus mejoras: un círculo para el vínculo de los
+     * de transporte y la búsqueda del de mantenimiento, un cuadrado para el barrido del explorador.
+     */
+    private void drawRange(GuiGraphicsExtractor graphics, Pad pad) {
+        DroneKind kind = kind(pad.kind());
+        if (kind == null || pad.range() <= 0) {
+            return;
+        }
+        int color = 0xB0000000 | (kind.color() & 0xFFFFFF);
+        int cx = screenX(pad.pos().getX() + 0.5);
+        int cz = screenZ(pad.pos().getZ() + 0.5);
+        double radius = pad.range() / scale();
+        if (kind == DroneKind.SURVEY) {
+            int side = (int) Math.round(radius * 2);
+            graphics.fill(cx - (int) radius, cz - (int) radius, cx - (int) radius + side, cz - (int) radius + side,
+                    0x18000000 | (kind.color() & 0xFFFFFF));
+            graphics.outline(cx - (int) radius, cz - (int) radius, side, side, color);
+        } else {
+            circle(graphics, cx, cz, radius, color);
+        }
+    }
+
     /** Ficha del pad elegido, arriba a la izquierda del mapa, con sus botones. */
     private void drawPadCard(GuiGraphicsExtractor graphics, Pad pad, int mouseX, int mouseY) {
         int x = mapX + 4;
         int y = mapY + 4;
         int w = 150;
-        int h = 66;
+        int h = pad.range() > 0 ? 76 : 66;
         DronePadStatus status = status(pad);
         // La ficha tapa el mapa: los clics y tooltips no pasan a lo que hay debajo (los botones van después y ganan)
         hits.add(new Hit(x, y, w, h, () -> {
@@ -783,6 +810,10 @@ public class DroneConsoleScreen extends Screen {
         } else {
             graphics.text(font, Component.translatable("gui.quarryindustrial.console.no_signal"), x + 4, y + 43,
                     0xFF5A7090, false);
+        }
+        if (pad.range() > 0) {
+            graphics.text(font, Component.translatable("gui.quarryindustrial.console.pad_range", pad.range()), x + 4,
+                    y + 52, DIM, false);
         }
         int right = x + w - 4;
         int by = y + h - BUTTON_H - 3;

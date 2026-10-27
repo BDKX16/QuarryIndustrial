@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.2.6 — Destilerías limpias y alcance en el mapa
+
+### Nuevo
+
+- **El dron de mantenimiento limpia las columnas de destilación de Ala Industrial.** Cuando una columna de los
+  alrededores del pad llega al 50 % de ensuciamiento (`maintenanceFouling`), el dron vuela hasta ahí, la deja limpia
+  y vuelve con el carbón que rinde la limpieza, que cae en el buzón de llegada del pad (igual que con la llave
+  inglesa). Para esto no necesita brocas. Sin Ala Industrial no hace nada distinto.
+- **El mapa de la centralita muestra el alcance del dron del pad elegido**, según sus mejoras: un círculo para el
+  vínculo de los drones de transporte y para el radio de búsqueda del de mantenimiento, y un cuadrado para el barrido
+  del explorador, que crece con cada mejora de alcance instalada. La ficha del pad dice el alcance en bloques.
+
 ## 1.2.5 — El mapa como imagen
 
 ### Mejorado

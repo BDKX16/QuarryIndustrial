@@ -227,6 +227,7 @@ KEYS = {
         "encuentre aparece acá y en el mapa."),
     "gui.quarryindustrial.console.no_signal": ("No signal (chunk unloaded)", "Sin señal (chunk descargado)"),
     "gui.quarryindustrial.console.energy": ("Energy: %s%%", "Energía: %s %%"),
+    "gui.quarryindustrial.console.pad_range": ("Range: %s blocks", "Alcance: %s bloques"),
     "gui.quarryindustrial.console.link": ("→ %s (%s m)", "→ %s (%s m)"),
     "gui.quarryindustrial.console.no_link": ("No destination", "Sin destino"),
     "gui.quarryindustrial.console.distance": ("%s m away", "a %s m"),

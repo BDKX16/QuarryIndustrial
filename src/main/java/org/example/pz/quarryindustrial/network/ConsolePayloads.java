@@ -85,9 +85,10 @@ public final class ConsolePayloads {
 
     /**
      * Un pad: {@code kind} es el ordinal del dron (-1 sin dron), {@code energy} en tanto por mil (-1 si el chunk
-     * no está cargado y no se sabe).
+     * no está cargado y no se sabe), {@code range} el alcance del dron en bloques según sus mejoras (0 sin dron).
      */
-    public record Pad(BlockPos pos, int kind, int status, Optional<BlockPos> link, boolean loaded, int energy) {
+    public record Pad(BlockPos pos, int kind, int status, Optional<BlockPos> link, boolean loaded, int energy,
+                      int range) {
         public static final StreamCodec<ByteBuf, Pad> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, Pad::pos,
                 ByteBufCodecs.VAR_INT, Pad::kind,
@@ -95,6 +96,7 @@ public final class ConsolePayloads {
                 ByteBufCodecs.optional(BlockPos.STREAM_CODEC), Pad::link,
                 ByteBufCodecs.BOOL, Pad::loaded,
                 ByteBufCodecs.VAR_INT, Pad::energy,
+                ByteBufCodecs.VAR_INT, Pad::range,
                 Pad::new);
     }
 

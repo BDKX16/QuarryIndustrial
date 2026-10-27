@@ -125,7 +125,7 @@
   "status.quarryindustrial.drone_pad.loading": "Loading",
   "status.quarryindustrial.drone_pad.destination_full": "Destination full",
   "status.quarryindustrial.drone_pad.standby": "Standing by",
-  "status.quarryindustrial.drone_pad.ready": "Ready: open the pad and press \"Send survey\"",
+  "status.quarryindustrial.drone_pad.ready": "Ready: click the pad to launch a survey",
   "status.quarryindustrial.drone_pad.in_flight": "In flight",
   "status.quarryindustrial.drone_pad.lost": "Drone lost (it came back without its cargo)",
   "subtitles.quarryindustrial.drill": "Quarry drilling",
@@ -261,5 +261,6 @@
   "message.quarryindustrial.console.survey_busy": "The survey drone is already out",
   "message.quarryindustrial.console.survey_sent": "Survey drone on its way",
   "message.quarryindustrial.console.site_forgotten": "Geyser removed from the map",
-  "info.quarryindustrial.drone_console": "A map of every drone pad within 1024 blocks: links, drones in flight (with the survey drone's sweep) and the oil geysers your survey drones found. Link pads and launch surveys from here, without walking to them."
+  "info.quarryindustrial.drone_console": "A map of every drone pad within 1024 blocks: links, drones in flight (with the survey drone's sweep) and the oil geysers your survey drones found. Link pads and launch surveys from here, without walking to them.",
+  "gui.quarryindustrial.console.pad_range": "Range: %s blocks"
 }

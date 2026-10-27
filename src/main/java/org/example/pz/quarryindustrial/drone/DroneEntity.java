@@ -14,6 +14,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -22,6 +24,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import org.example.pz.quarryindustrial.registry.ModAdvancements;
 import org.example.pz.quarryindustrial.block.drone.DronePadBlockEntity;
+import org.example.pz.quarryindustrial.compat.AlaDistillery;
 import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.OilFluids;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
@@ -263,8 +266,18 @@ public class DroneEntity extends Entity {
         startLeg();
     }
 
-    /** Cambia la broca: deja la nueva (la única que lleva) y se lleva la gastada. */
+    /** Cambia la broca (deja la nueva, que es la única que lleva, y se lleva la gastada) o limpia una columna. */
     private void service(ServerLevel level) {
+        BlockEntity machine = level.getBlockEntity(target);
+        if (AlaDistillery.isColumn(machine)) {
+            // Una columna de destilación sucia: se limpia y el carbón vuelve al pad
+            int coal = AlaDistillery.clean(machine);
+            if (coal > 0) {
+                payload.items.add(new ItemStack(Items.COAL, coal));
+                level.playSound(null, target, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.4f, 1.4f);
+            }
+            return;
+        }
         ItemStack fresh = payload.items.isEmpty() ? ItemStack.EMPTY : payload.items.removeFirst();
         if (fresh.isEmpty()) {
             return;

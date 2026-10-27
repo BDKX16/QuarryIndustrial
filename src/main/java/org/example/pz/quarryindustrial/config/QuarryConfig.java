@@ -192,6 +192,8 @@ public final class QuarryConfig {
         /** Mantenimiento: radio de búsqueda y desde qué desgaste cambia la broca. */
         public int maintenanceRadius = 48;
         public double maintenanceWear = 0.9;
+        /** Mantenimiento: desde qué ensuciamiento (0-100) limpia una columna de destilación de Ala Industrial. */
+        public int maintenanceFouling = 50;
         /** Explorador: radio del vuelo de reconocimiento y ancho de la franja que mira por pasada. */
         public int surveyRadius = 128;
         public int surveyScanRadius = 6;

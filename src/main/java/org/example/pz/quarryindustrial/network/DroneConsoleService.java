@@ -149,6 +149,22 @@ public final class DroneConsoleService {
 
     // ── Lo que se ve ──
 
+    /**
+     * Hasta dónde llega un dron, en bloques: el vínculo de los de transporte, el radio de búsqueda del de
+     * mantenimiento y el del barrido del explorador, que suma lo que dan sus mejoras.
+     */
+    static int range(@Nullable DroneKind kind, int surveyUpgrades) {
+        if (kind == null) {
+            return 0;
+        }
+        QuarryConfig.Drones config = QuarryConfig.get().drones;
+        return switch (kind) {
+            case CARGO, TANKER, POWER -> config.maxLinkDistance;
+            case MAINTENANCE -> config.maintenanceRadius;
+            case SURVEY -> config.surveyRadius + surveyUpgrades * config.surveyRangeBonus;
+        };
+    }
+
     /** Los pads (con lo último que se supo de los que están descargados), los drones en vuelo y los géiseres. */
     public static Snapshot snapshot(ServerLevel level, BlockPos console) {
         DroneNetwork network = DroneNetwork.get(level);
@@ -167,9 +183,10 @@ public final class DroneConsoleService {
                 }
                 long capacity = Math.max(1, pad.energy.getCapacity());
                 pads.add(new Pad(pos, ordinal(pad.droneKind()), pad.status().ordinal(), Optional.ofNullable(pad.link()),
-                        true, (int) (pad.energy.amount * 1000 / capacity)));
+                        true, (int) (pad.energy.amount * 1000 / capacity), range(pad.droneKind(), pad.surveyUpgrades())));
             } else {
-                pads.add(new Pad(pos, ordinal(info.kind()), info.status().ordinal(), info.link(), false, -1));
+                pads.add(new Pad(pos, ordinal(info.kind()), info.status().ordinal(), info.link(), false, -1,
+                        range(info.kind(), info.upgrades())));
             }
         }
         List<Flight> flights = new ArrayList<>();
