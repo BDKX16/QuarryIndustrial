@@ -26,8 +26,8 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Memoria del terreno que el jugador ya vio, para el mapa de la centralita. El cliente solo tiene cargados los
  * chunks de su distancia de visión, así que sin esto el mapa mostraba nada más que ese círculo. Se guarda, por
- * mundo y dimensión, el color de mapa y la altura de cada columna cuando un chunk se descarga (o al abrir la
- * centralita), y se persiste en disco para la próxima sesión.
+ * mundo y dimensión, el color de mapa y la altura de cada columna cuando un chunk se carga y cuando se descarga
+ * (o al abrir la centralita), y se persiste en disco cada tanto, al cerrar el juego y al salir del mundo.
  */
 public final class ExploredTerrain {
     private static final int VERSION = 1;
@@ -53,10 +53,25 @@ public final class ExploredTerrain {
     private ExploredTerrain() {
     }
 
-    /** Se engancha a la descarga de chunks y a la salida del mundo. */
+    /** Cada cuántos ticks se escribe a disco lo que cambió, para no perder la sesión si el juego se cierra de golpe. */
+    private static final int AUTOSAVE_TICKS = 1200;
+    private static int sinceSave;
+
+    /** Se engancha a la carga y descarga de chunks, al guardado periódico y a la salida del mundo. */
     public static void init() {
+        // Al cargar también: no depender de que el aviso de descarga llegue con el chunk todavía legible
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD.register(
+                (level, chunk) -> remember(level, chunk));
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD.register(
                 (level, chunk) -> remember(level, chunk));
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (++sinceSave >= AUTOSAVE_TICKS) {
+                sinceSave = 0;
+                saveAll();
+            }
+        });
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents.CLIENT_STOPPING.register(
+                client -> saveAll());
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             if (client.level != null) {
                 rememberAround(client.level, client.player == null ? ChunkPos.ZERO : client.player.chunkPosition(),
@@ -65,6 +80,8 @@ public final class ExploredTerrain {
             saveAll();
             MAPS.clear();
             DIRTY.clear();
+            keyedLevel = null;
+            keyed = null;
         });
     }
 
@@ -78,7 +95,8 @@ public final class ExploredTerrain {
             for (int x = 0; x < 16; x++) {
                 int worldX = pos.getMinBlockX() + x;
                 int worldZ = pos.getMinBlockZ() + z;
-                int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, worldX, worldZ) - 1;
+                // Del propio chunk: level.getHeight devuelve la altura mínima si el chunk ya salió del mundo
+                int top = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
                 if (top < level.getMinY()) {
                     continue;
                 }
@@ -130,8 +148,20 @@ public final class ExploredTerrain {
         return MAPS.computeIfAbsent(key, ExploredTerrain::load);
     }
 
+    /** El último nivel consultado y su clave: el mapa pregunta miles de veces por rebuild. */
+    private static ClientLevel keyedLevel;
+    private static String keyed;
+
     /** Mundo (o servidor) + dimensión: cada uno tiene su archivo. */
     private static String key(ClientLevel level) {
+        if (level != keyedLevel || keyed == null) {
+            keyed = computeKey(level);
+            keyedLevel = level;
+        }
+        return keyed;
+    }
+
+    private static String computeKey(ClientLevel level) {
         Minecraft minecraft = Minecraft.getInstance();
         String world;
         if (minecraft.getSingleplayerServer() != null) {

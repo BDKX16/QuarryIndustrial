@@ -10,7 +10,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
@@ -590,33 +589,38 @@ public class DroneConsoleScreen extends Screen {
         }
         int[] heights = new int[cols * rows];
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        // Alejado, una celda cubre varios bloques: se promedian hasta 4×4 en vez de quedarse con uno solo
+        double blocksPerCell = CELL * scale();
+        int samples = Math.clamp((int) Math.ceil(blocksPerCell), 1, 4);
+        double step = blocksPerCell / samples;
         for (int row = 0; row < rows; row++) {
-            int z = (int) Math.floor(worldZ(mapY + row * CELL + CELL / 2.0));
+            double originZ = worldZ(mapY + row * CELL);
             for (int col = 0; col < cols; col++) {
-                int x = (int) Math.floor(worldX(mapX + col * CELL + CELL / 2.0));
-                int i = row * cols + col;
-                if (!level.hasChunk(x >> 4, z >> 4)) {
-                    // Fuera de lo cargado: lo que se vio antes, un poco más apagado
-                    ExploredTerrain.Chunk seen = ExploredTerrain.get(level, x >> 4, z >> 4);
-                    if (seen != null && seen.color(x, z) != 0) {
-                        heights[i] = seen.height(x, z);
-                        int argb = MapColor.byId(seen.color(x, z)).calculateARGBColor(MapColor.Brightness.NORMAL);
-                        terrain[i] = dim(argb | 0xFF000000);
+                double originX = worldX(mapX + col * CELL);
+                long red = 0;
+                long green = 0;
+                long blue = 0;
+                long height = 0;
+                int found = 0;
+                for (int sz = 0; sz < samples; sz++) {
+                    int z = (int) Math.floor(originZ + (sz + 0.5) * step);
+                    for (int sx = 0; sx < samples; sx++) {
+                        int x = (int) Math.floor(originX + (sx + 0.5) * step);
+                        int argb = sampleColumn(level, pos, x, z);
+                        if (argb != 0) {
+                            red += (argb >> 16) & 0xFF;
+                            green += (argb >> 8) & 0xFF;
+                            blue += argb & 0xFF;
+                            height += sampleHeight;
+                            found++;
+                        }
                     }
-                    continue;
                 }
-                int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
-                if (top < level.getMinY()) {
-                    continue;
+                if (found > 0) {
+                    int i = row * cols + col;
+                    heights[i] = (int) (height / found);
+                    terrain[i] = 0xFF000000 | (int) (red / found) << 16 | (int) (green / found) << 8 | (int) (blue / found);
                 }
-                pos.set(x, top, z);
-                BlockState state = level.getBlockState(pos);
-                MapColor mapColor = state.getMapColor(level, pos);
-                if (mapColor == MapColor.NONE) {
-                    continue;
-                }
-                heights[i] = top;
-                terrain[i] = mapColor.calculateARGBColor(MapColor.Brightness.NORMAL) | 0xFF000000;
             }
         }
         // Relieve: más claro si sube respecto de la celda de arriba (como los mapas vanilla), más oscuro si baja
@@ -633,6 +637,34 @@ public class DroneConsoleScreen extends Screen {
                 terrain[i] = tint(terrain[i], shade);
             }
         }
+    }
+
+    /** Altura de la columna de la última {@link #sampleColumn} que devolvió color. */
+    private int sampleHeight;
+
+    /** Color del bloque más alto de la columna (cargada o recordada), o 0 si no hay datos. */
+    private int sampleColumn(ClientLevel level, BlockPos.MutableBlockPos pos, int x, int z) {
+        // ClientLevel.hasChunk responde siempre true: hay que preguntarle al origen de chunks
+        if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
+            // Fuera de lo cargado: lo que se vio antes, un poco más apagado
+            ExploredTerrain.Chunk seen = ExploredTerrain.get(level, x >> 4, z >> 4);
+            if (seen == null || seen.color(x, z) == 0) {
+                return 0;
+            }
+            sampleHeight = seen.height(x, z);
+            return dim(MapColor.byId(seen.color(x, z)).calculateARGBColor(MapColor.Brightness.NORMAL) | 0xFF000000);
+        }
+        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
+        if (top < level.getMinY()) {
+            return 0;
+        }
+        pos.set(x, top, z);
+        MapColor mapColor = level.getBlockState(pos).getMapColor(level, pos);
+        if (mapColor == MapColor.NONE) {
+            return 0;
+        }
+        sampleHeight = top;
+        return mapColor.calculateARGBColor(MapColor.Brightness.NORMAL) | 0xFF000000;
     }
 
     /** Lo recordado (no cargado ahora) se ve más oscuro que lo que el cliente tiene delante. */

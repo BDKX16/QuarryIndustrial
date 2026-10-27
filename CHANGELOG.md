@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.2.3 — El mapa por fin muestra lo recorrido
+
+### Arreglado
+
+- **El mapa de la centralita no dibujaba el terreno recordado.** `ClientLevel.hasChunk` responde siempre «sí», así que
+  el mapa nunca llegaba a consultar la memoria y solo se veía lo que el cliente tenía cargado en ese momento. Ahora
+  pregunta al origen de chunks. Es solo del cliente.
+- **El mapa perdía resolución al alejar el zoom.** Cada celda se quedaba con un solo bloque de los que cubría. Ahora
+  promedia hasta 4×4 bloques por celda, y la clave del mundo recordado se calcula una vez en vez de en cada consulta.
+
+## 1.2.2 — Mapa recordado
+
+### Arreglado
+
+- **El mapa de la centralita no recordaba todo lo explorado.** La altura de cada columna se pedía al mundo cuando el
+  chunk ya podía no estar, y esas columnas se descartaban. Ahora se lee del propio chunk y se anota al cargarse y al
+  descargarse.
+- **Lo explorado se perdía si el juego se cerraba de golpe.** Ahora se guarda a disco cada minuto (si hubo cambios) y
+  al cerrar el cliente, además de al salir del mundo. Es solo del cliente.
+
 ## 1.2.1 — Radares, cargadores y GUIs
 
 ### Nuevo
