@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.5 — El mapa como imagen
+
+### Mejorado
+
+- **El mapa de la centralita se dibuja como imágenes ya pintadas**, a la manera de Xaero. El terreno se divide en
+  regiones de 256×256 píxeles (una por nivel de zoom) que se pintan una sola vez y se guardan como texturas; mover o
+  acercar el mapa es solo dibujarlas en otro lugar, sin recalcular nada ni dibujar miles de rectángulos. Una región
+  se repinta solo cuando cambia algún chunk que cubre, y pintarla cuesta de 1 a 4 ms. Además el mapa gana detalle:
+  al acercar, un píxel es un bloque. Es solo del cliente.
+
+## 1.2.4 — Mapa más fluido
+
+### Mejorado
+
+- **El mapa de la centralita va más rápido**, sobre todo con la pantalla grande y el zoom alejado. Lee el terreno de la
+  memoria del mapa (sin consultar el mundo en cada muestra), con los colores precalculados, y mientras se arrastra
+  desplaza el terreno ya armado y lo rearma cada ~0,1 s en vez de en cada cuadro. En un mapa de 640×345 celdas,
+  rearmarlo pasó de 33 a 11 ms (zoom 2) y de 60 a 27 ms (alejado).
+
 ## 1.2.3 — El mapa por fin muestra lo recorrido
 
 ### Arreglado

@@ -4,10 +4,12 @@ import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.screenshot.TestScreenshotOptions;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import org.example.pz.quarryindustrial.Quarryindustrial;
 import org.example.pz.quarryindustrial.client.ExploredTerrain;
 import org.example.pz.quarryindustrial.client.screen.DroneConsoleScreen;
+import org.example.pz.quarryindustrial.client.screen.TerrainTiles;
 import org.example.pz.quarryindustrial.network.ConsolePayloads;
 
 import java.lang.reflect.Field;
@@ -90,6 +92,12 @@ public class ExploredTerrainClientGameTest implements FabricClientGameTest {
             Quarryindustrial.LOGGER.info("Mapa de la centralita, alejado: {} celdas con terreno", zoomedOut);
             Quarryindustrial.LOGGER.info("Captura: {}", context.takeScreenshot(
                     TestScreenshotOptions.of("explored_map_zoomed_out").withSize(1920, 1080)));
+            // Cuánto tarda pintar una región (se hace una sola vez; después mover el mapa no recalcula nada)
+            for (int lod : new int[]{0, 2, TerrainTiles.MAX_LOD}) {
+                double millis = context.computeOnClient(minecraft -> timeFill(minecraft.level, lod));
+                Quarryindustrial.LOGGER.info("Pintar una región de {}x{} (nivel {}): {} ms",
+                        TerrainTiles.TILE, TerrainTiles.TILE, lod, millis);
+            }
             context.setScreen(() -> null);
 
             if (zoomedOut == 0) {
@@ -102,6 +110,19 @@ public class ExploredTerrainClientGameTest implements FabricClientGameTest {
                 throw new AssertionError("El mapa no dibujó el terreno recordado de una zona ya descargada");
             }
         }
+    }
+
+    private static double timeFill(ClientLevel level, int lod) {
+        int[] out = new int[TerrainTiles.TILE * TerrainTiles.TILE];
+        for (int warmup = 0; warmup < 3; warmup++) {
+            TerrainTiles.fill(level, lod, 0, 0, out);
+        }
+        long start = System.nanoTime();
+        int runs = 10;
+        for (int run = 0; run < runs; run++) {
+            TerrainTiles.fill(level, lod, 0, 0, out);
+        }
+        return (System.nanoTime() - start) / 1_000_000.0 / runs;
     }
 
     private static void setZoom(Object target, int zoom) {
@@ -124,22 +145,8 @@ public class ExploredTerrainClientGameTest implements FabricClientGameTest {
         }
     }
 
-    /** Celdas del terreno del mapa de la centralita abierta que tienen color. */
+    /** Píxeles con terreno que dibujó el mapa de la centralita abierta en el último cuadro. */
     private static int coloredCells(ClientGameTestContext context) {
-        return context.computeOnClient(minecraft -> {
-            try {
-                Field field = DroneConsoleScreen.class.getDeclaredField("terrain");
-                field.setAccessible(true);
-                int colored = 0;
-                for (int cell : (int[]) field.get(minecraft.gui.screen())) {
-                    if (cell != 0) {
-                        colored++;
-                    }
-                }
-                return colored;
-            } catch (ReflectiveOperationException e) {
-                throw new AssertionError(e);
-            }
-        });
+        return context.computeOnClient(minecraft -> ((DroneConsoleScreen) minecraft.gui.screen()).terrainPixels());
     }
 }

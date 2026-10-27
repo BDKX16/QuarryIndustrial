@@ -19,7 +19,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,6 +51,19 @@ public final class ExploredTerrain {
 
     private static final Map<String, Map<Long, Chunk>> MAPS = new HashMap<>();
     private static final Map<String, Boolean> DIRTY = new HashMap<>();
+    /** Los chunks que el cliente tiene cargados ahora, por mundo y dimensión (lo demás es solo recuerdo). */
+    private static final Map<String, Set<Long>> LOADED = new HashMap<>();
+
+    /** Avisa de un chunk cuyo terreno recordado cambió o que se cargó o descargó. */
+    public interface Listener {
+        void changed(int chunkX, int chunkZ);
+    }
+
+    private static @Nullable Listener listener;
+
+    public static void setListener(@Nullable Listener listener) {
+        ExploredTerrain.listener = listener;
+    }
 
     private ExploredTerrain() {
     }
@@ -60,10 +75,15 @@ public final class ExploredTerrain {
     /** Se engancha a la carga y descarga de chunks, al guardado periódico y a la salida del mundo. */
     public static void init() {
         // Al cargar también: no depender de que el aviso de descarga llegue con el chunk todavía legible
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD.register(
-                (level, chunk) -> remember(level, chunk));
-        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD.register(
-                (level, chunk) -> remember(level, chunk));
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_LOAD.register((level, chunk) -> {
+            loaded(level).add(chunk.getPos().pack());
+            remember(level, chunk);
+        });
+        net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) -> {
+            remember(level, chunk);
+            loaded(level).remove(chunk.getPos().pack());
+            notifyChanged(chunk.getPos().x(), chunk.getPos().z());
+        });
         net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (++sinceSave >= AUTOSAVE_TICKS) {
                 sinceSave = 0;
@@ -80,6 +100,7 @@ public final class ExploredTerrain {
             saveAll();
             MAPS.clear();
             DIRTY.clear();
+            LOADED.clear();
             keyedLevel = null;
             keyed = null;
         });
@@ -114,7 +135,23 @@ public final class ExploredTerrain {
             String key = key(level);
             maps(key).put(pos.pack(), sample);
             DIRTY.put(key, true);
+            notifyChanged(pos.x(), pos.z());
         }
+    }
+
+    private static void notifyChanged(int chunkX, int chunkZ) {
+        if (listener != null) {
+            listener.changed(chunkX, chunkZ);
+        }
+    }
+
+    private static Set<Long> loaded(ClientLevel level) {
+        return LOADED.computeIfAbsent(key(level), k -> new HashSet<>());
+    }
+
+    /** Si el cliente tiene ese chunk cargado ahora (si no, lo que hay es lo recordado). */
+    public static boolean isLoaded(ClientLevel level, int chunkX, int chunkZ) {
+        return loaded(level).contains(ChunkPos.pack(chunkX, chunkZ));
     }
 
     /** Anota todos los chunks cargados alrededor del jugador. */

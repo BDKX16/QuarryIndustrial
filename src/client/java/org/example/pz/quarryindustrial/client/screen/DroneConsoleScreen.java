@@ -6,12 +6,9 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.Vec3;
 import org.example.pz.quarryindustrial.block.drone.DronePadStatus;
 import org.example.pz.quarryindustrial.client.ExploredTerrain;
@@ -62,8 +59,6 @@ public class DroneConsoleScreen extends Screen {
     private static final int BUTTON_H = 12;
     /** Bloques por pixel de cada nivel de zoom. */
     private static final float[] ZOOMS = {0.25f, 0.5f, 1, 2, 4, 8, 16};
-    /** El terreno se calcula en celdas de 2×2 px. */
-    private static final int CELL = 2;
     private static final int REFRESH_TICKS = 20;
 
     private static final int FRAME = 0xFF06111F;
@@ -118,14 +113,8 @@ public class DroneConsoleScreen extends Screen {
     private int mapY;
     private int mapW;
     private int mapH;
-    /** Colores del terreno por celda (0 = sin datos: chunk no cargado en el cliente). */
-    private int[] terrain = new int[0];
-    private int terrainCols;
-    private int terrainRows;
-    private double terrainX = Double.NaN;
-    private double terrainZ = Double.NaN;
-    private int terrainZoom = -1;
-    private boolean terrainStale = true;
+    /** El terreno como texturas por región: mover el mapa solo las dibuja en otro lugar. */
+    private @Nullable TerrainTiles tiles;
 
     private @Nullable BlockPos selected;
     /** Pad de origen mientras se elige el destino de un vínculo. */
@@ -151,12 +140,16 @@ public class DroneConsoleScreen extends Screen {
             ExploredTerrain.rememberAround(minecraft.level, minecraft.player.chunkPosition(),
                     minecraft.options.getEffectiveRenderDistance());
         }
-        terrainStale = true;
     }
 
     @Override
     public void removed() {
         super.removed();
+        ExploredTerrain.setListener(null);
+        if (tiles != null) {
+            tiles.close();
+            tiles = null;
+        }
         ExploredTerrain.saveAll();
     }
 
@@ -169,9 +162,6 @@ public class DroneConsoleScreen extends Screen {
         ticks++;
         if (ticks % REFRESH_TICKS == 0) {
             request();
-        }
-        if (ticks % 40 == 0) {
-            terrainStale = true;
         }
         if (noticeTicks > 0) {
             noticeTicks--;
@@ -242,6 +232,11 @@ public class DroneConsoleScreen extends Screen {
         mapY = bodyY();
         mapW = bodyW();
         mapH = bodyH();
+    }
+
+    /** Píxeles con terreno que se dibujaron en el último cuadro (para los tests). */
+    public int terrainPixels() {
+        return tiles == null ? 0 : tiles.drawnPixels();
     }
 
     private double scale() {
@@ -550,138 +545,16 @@ public class DroneConsoleScreen extends Screen {
         }
     }
 
-    /** El terreno que tiene el cliente, con sombreado de relieve y teñido de azul de radar. */
+    /** El terreno que tiene el cliente (y el recordado), con sombreado de relieve y teñido de azul de radar. */
     private void drawTerrain(GuiGraphicsExtractor graphics) {
-        int cols = (mapW + CELL - 1) / CELL;
-        int rows = (mapH + CELL - 1) / CELL;
-        if (terrainStale || cols != terrainCols || rows != terrainRows || zoom != terrainZoom
-                || centerX != terrainX || centerZ != terrainZ) {
-            buildTerrain(cols, rows);
-        }
-        for (int row = 0; row < rows; row++) {
-            int py = mapY + row * CELL;
-            int col = 0;
-            while (col < cols) {
-                int color = terrain[row * cols + col];
-                int end = col + 1;
-                while (end < cols && terrain[row * cols + end] == color) {
-                    end++;
-                }
-                if (color != 0) {
-                    graphics.fill(mapX + col * CELL, py, mapX + end * CELL, py + CELL, color);
-                }
-                col = end;
-            }
-        }
-    }
-
-    private void buildTerrain(int cols, int rows) {
-        terrainCols = cols;
-        terrainRows = rows;
-        terrainZoom = zoom;
-        terrainX = centerX;
-        terrainZ = centerZ;
-        terrainStale = false;
-        terrain = new int[cols * rows];
-        ClientLevel level = minecraft.level;
-        if (level == null) {
+        if (minecraft.level == null) {
             return;
         }
-        int[] heights = new int[cols * rows];
-        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
-        // Alejado, una celda cubre varios bloques: se promedian hasta 4×4 en vez de quedarse con uno solo
-        double blocksPerCell = CELL * scale();
-        int samples = Math.clamp((int) Math.ceil(blocksPerCell), 1, 4);
-        double step = blocksPerCell / samples;
-        for (int row = 0; row < rows; row++) {
-            double originZ = worldZ(mapY + row * CELL);
-            for (int col = 0; col < cols; col++) {
-                double originX = worldX(mapX + col * CELL);
-                long red = 0;
-                long green = 0;
-                long blue = 0;
-                long height = 0;
-                int found = 0;
-                for (int sz = 0; sz < samples; sz++) {
-                    int z = (int) Math.floor(originZ + (sz + 0.5) * step);
-                    for (int sx = 0; sx < samples; sx++) {
-                        int x = (int) Math.floor(originX + (sx + 0.5) * step);
-                        int argb = sampleColumn(level, pos, x, z);
-                        if (argb != 0) {
-                            red += (argb >> 16) & 0xFF;
-                            green += (argb >> 8) & 0xFF;
-                            blue += argb & 0xFF;
-                            height += sampleHeight;
-                            found++;
-                        }
-                    }
-                }
-                if (found > 0) {
-                    int i = row * cols + col;
-                    heights[i] = (int) (height / found);
-                    terrain[i] = 0xFF000000 | (int) (red / found) << 16 | (int) (green / found) << 8 | (int) (blue / found);
-                }
-            }
+        if (tiles == null) {
+            tiles = new TerrainTiles();
+            ExploredTerrain.setListener(tiles::invalidate);
         }
-        // Relieve: más claro si sube respecto de la celda de arriba (como los mapas vanilla), más oscuro si baja
-        for (int row = rows - 1; row >= 0; row--) {
-            for (int col = 0; col < cols; col++) {
-                int i = row * cols + col;
-                if (terrain[i] == 0) {
-                    continue;
-                }
-                int shade = 0;
-                if (row > 0 && terrain[i - cols] != 0) {
-                    shade = Integer.signum(heights[i] - heights[i - cols]);
-                }
-                terrain[i] = tint(terrain[i], shade);
-            }
-        }
-    }
-
-    /** Altura de la columna de la última {@link #sampleColumn} que devolvió color. */
-    private int sampleHeight;
-
-    /** Color del bloque más alto de la columna (cargada o recordada), o 0 si no hay datos. */
-    private int sampleColumn(ClientLevel level, BlockPos.MutableBlockPos pos, int x, int z) {
-        // ClientLevel.hasChunk responde siempre true: hay que preguntarle al origen de chunks
-        if (!level.getChunkSource().hasChunk(x >> 4, z >> 4)) {
-            // Fuera de lo cargado: lo que se vio antes, un poco más apagado
-            ExploredTerrain.Chunk seen = ExploredTerrain.get(level, x >> 4, z >> 4);
-            if (seen == null || seen.color(x, z) == 0) {
-                return 0;
-            }
-            sampleHeight = seen.height(x, z);
-            return dim(MapColor.byId(seen.color(x, z)).calculateARGBColor(MapColor.Brightness.NORMAL) | 0xFF000000);
-        }
-        int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
-        if (top < level.getMinY()) {
-            return 0;
-        }
-        pos.set(x, top, z);
-        MapColor mapColor = level.getBlockState(pos).getMapColor(level, pos);
-        if (mapColor == MapColor.NONE) {
-            return 0;
-        }
-        sampleHeight = top;
-        return mapColor.calculateARGBColor(MapColor.Brightness.NORMAL) | 0xFF000000;
-    }
-
-    /** Lo recordado (no cargado ahora) se ve más oscuro que lo que el cliente tiene delante. */
-    private static int dim(int argb) {
-        int r = (int) (((argb >> 16) & 0xFF) * 0.7f);
-        int g = (int) (((argb >> 8) & 0xFF) * 0.7f);
-        int b = (int) ((argb & 0xFF) * 0.7f);
-        return 0xFF000000 | r << 16 | g << 8 | b;
-    }
-
-    /** Mezcla el color del mapa con el azul de fondo, para que el terreno quede como "pantalla". */
-    private static int tint(int argb, int shade) {
-        float light = shade > 0 ? 1.12f : shade < 0 ? 0.78f : 0.95f;
-        int r = (int) (((argb >> 16) & 0xFF) * 0.62f * light + 0x07 * 0.38f);
-        int g = (int) (((argb >> 8) & 0xFF) * 0.62f * light + 0x13 * 0.38f);
-        int b = (int) ((argb & 0xFF) * 0.62f * light + 0x21 * 0.38f);
-        return 0xFF000000 | Math.min(255, r) << 16 | Math.min(255, g) << 8 | Math.min(255, b);
+        tiles.draw(graphics, minecraft.level, centerX, centerZ, scale(), mapX, mapY, mapW, mapH);
     }
 
     /** Cuadrícula alineada a chunks: la separación crece con el zoom para no quedar menos de 32 px. */
