@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:root",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:steam_turbine"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.waste_not.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.waste_not.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:electronic_circuit",
+              "alaindustrial:fluid_tank",
+              "alaindustrial:generator",
+              "alaindustrial:iron_gear"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " T ",
+    "GXG",
+    "PCP"
+  ],
+  "key": {
+    "T": "minecraft:bucket",
+    "G": "minecraft:piston",
+    "X": "minecraft:blast_furnace",
+    "P": "#c:ingots/iron",
+    "C": "minecraft:redstone"
+  },
+  "result": {
+    "id": "quarryindustrial:diesel_generator"
+  }
+}

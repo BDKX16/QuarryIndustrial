@@ -215,9 +215,9 @@ CHAPTERS = [
          [Q + "drone_pad"]),
         ("Linking", "Vincular",
          "Sneak + right-click the source pad with the Drone Linker, then right-click the destination pad (up to "
-         "512 blocks away). Transport drones fly from source to destination and back.",
+         "3000 blocks away). Transport drones fly from source to destination and back.",
          "Con el vinculador, agachado + clic derecho en el pad de origen y después clic derecho en el de destino "
-         "(hasta 512 bloques). Los drones de transporte van del origen al destino y vuelven.",
+         "(hasta 3000 bloques). Los drones de transporte van del origen al destino y vuelven.",
          [Q + "drone_linker"]),
         ("Transport drones", "Drones de transporte",
          "Cargo Drone: items (leaves with 4 stacks or after 10 s).\nTanker Drone: fluids, 16 buckets.\nPower "
@@ -226,10 +226,10 @@ CHAPTERS = [
          "energía: una batería voladora de 400k EU.\n\nLo que el destino no puede recibir vuelve con el dron.",
          [Q + "cargo_drone", Q + "tanker_drone", Q + "power_drone"]),
         ("Maintenance and survey", "Mantenimiento y exploración",
-         "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 48 blocks and "
+         "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and "
          "swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad "
          "to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
-         "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 48 bloques "
+         "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) "
          "y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho "
          "en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres "
          "que vio.",

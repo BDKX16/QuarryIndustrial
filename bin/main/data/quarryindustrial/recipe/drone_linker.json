@@ -1,0 +1,32 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:electronic_circuit"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " A ",
+    "IRI",
+    "III"
+  ],
+  "key": {
+    "A": "minecraft:lightning_rod",
+    "I": "#c:plates/iron",
+    "R": "alaindustrial:electronic_circuit"
+  },
+  "result": {
+    "id": "quarryindustrial:drone_linker"
+  }
+}

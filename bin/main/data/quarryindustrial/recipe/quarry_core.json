@@ -1,0 +1,36 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:advanced_machine_casing",
+        "alaindustrial:netherite_drill_head",
+        "alaindustrial:reactor_circuit"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "SRS",
+    "NHN",
+    "SXS"
+  ],
+  "key": {
+    "S": "#c:plates/shielding_alloy",
+    "R": "alaindustrial:reactor_circuit",
+    "N": "alaindustrial:netherite_drill_head",
+    "H": "quarryindustrial:quarry_hv",
+    "X": "alaindustrial:advanced_machine_casing"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_core"
+  }
+}

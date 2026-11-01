@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "waterlogged=false": {
+      "model": "quarryindustrial:block/offshore_leg"
+    },
+    "waterlogged=true": {
+      "model": "quarryindustrial:block/offshore_leg"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "quarryindustrial",
+  "version": "${version}",
+  "name": "Quarry Industrial",
+  "description": "Animated industrial quarries that scale from LV up to a multi-reactor nuclear quarry, plus oil pumpjacks for Ala Industrial geysers. Runs on EU (Team Reborn Energy).",
+  "authors": [
+    "BDKX16"
+  ],
+  "contact": {
+    "homepage": "https://github.com/BDKX16/QuarryIndustrial",
+    "sources": "https://github.com/BDKX16/QuarryIndustrial",
+    "issues": "https://github.com/BDKX16/QuarryIndustrial/issues"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/quarryindustrial/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.example.pz.quarryindustrial.client.QuarryindustrialDataGenerator"
+    ],
+    "client": [
+      "org.example.pz.quarryindustrial.client.QuarryindustrialClient"
+    ],
+    "main": [
+      "org.example.pz.quarryindustrial.Quarryindustrial"
+    ],
+    "jade": [
+      "org.example.pz.quarryindustrial.compat.jade.QuarryJadePlugin"
+    ],
+    "jei_mod_plugin": [
+      "org.example.pz.quarryindustrial.client.compat.JeiCompat"
+    ],
+    "rei_client": [
+      "org.example.pz.quarryindustrial.client.compat.ReiCompat"
+    ]
+  },
+  "mixins": [
+    "quarryindustrial.mixins.json",
+    {
+      "config": "quarryindustrial.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "team_reborn_energy": "*"
+  },
+  "suggests": {
+    "alaindustrial": "*",
+    "jade": "*",
+    "jei": "*",
+    "roughlyenoughitems": "*"
+  }
+}

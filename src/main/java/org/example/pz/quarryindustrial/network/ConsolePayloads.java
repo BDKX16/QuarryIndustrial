@@ -55,15 +55,32 @@ public final class ConsolePayloads {
         }
     }
 
-    public record LaunchSurvey(BlockPos console, BlockPos pad) implements CustomPacketPayload {
+    /** Manda a explorar al dron de {@code pad}: alrededor de {@code target}, o del pad si no hay. */
+    public record LaunchSurvey(BlockPos console, BlockPos pad, Optional<BlockPos> target)
+            implements CustomPacketPayload {
         public static final Type<LaunchSurvey> TYPE = payloadType("survey");
         public static final StreamCodec<ByteBuf, LaunchSurvey> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, LaunchSurvey::console,
                 BlockPos.STREAM_CODEC, LaunchSurvey::pad,
+                ByteBufCodecs.optional(BlockPos.STREAM_CODEC), LaunchSurvey::target,
                 LaunchSurvey::new);
 
         @Override
         public Type<LaunchSurvey> type() {
+            return TYPE;
+        }
+    }
+
+    /** Anula la salida del explorador que espera energía. */
+    public record CancelSurvey(BlockPos console, BlockPos pad) implements CustomPacketPayload {
+        public static final Type<CancelSurvey> TYPE = payloadType("cancel_survey");
+        public static final StreamCodec<ByteBuf, CancelSurvey> CODEC = StreamCodec.composite(
+                BlockPos.STREAM_CODEC, CancelSurvey::console,
+                BlockPos.STREAM_CODEC, CancelSurvey::pad,
+                CancelSurvey::new);
+
+        @Override
+        public Type<CancelSurvey> type() {
             return TYPE;
         }
     }
@@ -86,9 +103,11 @@ public final class ConsolePayloads {
     /**
      * Un pad: {@code kind} es el ordinal del dron (-1 sin dron), {@code energy} en tanto por mil (-1 si el chunk
      * no está cargado y no se sabe), {@code range} el alcance del dron en bloques según sus mejoras (0 sin dron).
+     * Si el explorador tiene una salida pedida, {@code surveyCenter} es dónde va a barrer (el pad mismo si es
+     * alrededor suyo), {@code surveyCost} lo que cuesta el recorrido y {@code stored} la energía que tiene el pad (EU).
      */
     public record Pad(BlockPos pos, int kind, int status, Optional<BlockPos> link, boolean loaded, int energy,
-                      int range) {
+                      int range, Optional<BlockPos> surveyCenter, long surveyCost, long stored) {
         public static final StreamCodec<ByteBuf, Pad> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, Pad::pos,
                 ByteBufCodecs.VAR_INT, Pad::kind,
@@ -97,6 +116,9 @@ public final class ConsolePayloads {
                 ByteBufCodecs.BOOL, Pad::loaded,
                 ByteBufCodecs.VAR_INT, Pad::energy,
                 ByteBufCodecs.VAR_INT, Pad::range,
+                ByteBufCodecs.optional(BlockPos.STREAM_CODEC), Pad::surveyCenter,
+                ByteBufCodecs.VAR_LONG, Pad::surveyCost,
+                ByteBufCodecs.VAR_LONG, Pad::stored,
                 Pad::new);
     }
 

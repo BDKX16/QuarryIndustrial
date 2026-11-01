@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.material.Fluids;
 import org.example.pz.quarryindustrial.block.drone.DronePadBlockEntity;
+import org.example.pz.quarryindustrial.block.drone.DronePadStatus;
 import org.example.pz.quarryindustrial.block.pumpjack.OilFluids;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
@@ -228,6 +229,40 @@ public class DroneGameTests {
             helper.assertTrue(DroneNetwork.get(helper.getLevel()).sites().stream()
                     .anyMatch(site -> site.pos().equals(expected)), "la centralita ve el géiser en el mapa");
         });
+    }
+
+    /** Viaje del explorador a otra zona: espera la energía de todo el recorrido y sale apenas la junta. */
+    @GameTest(maxTicks = 300, skyAccess = true)
+    public void surveyTravelWaitsForEnergy(GameTestHelper helper) {
+        fastDrones();
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.SURVEY);
+        BlockPos far = helper.absolutePos(PAD_A).offset(40, 0, 0);
+        long cost = pad.surveyCost(far);
+        helper.assertTrue(cost > pad.surveyCost(null), "ir lejos cuesta más que explorar alrededor del pad");
+        pad.energy.amount = cost - 1;
+        helper.assertTrue(pad.requestSurvey(far), "el pad acepta el viaje aunque todavía no tenga la energía");
+        helper.runAfterDelay(5, () -> {
+            helper.assertValueEqual(pad.status(), DronePadStatus.CHARGING, "espera la energía");
+            pad.energy.amount = cost;
+        });
+        helper.succeedWhen(() -> {
+            helper.assertTrue(pad.status() == DronePadStatus.IN_FLIGHT || pad.droneDocked(),
+                    "salió al juntar la energía: " + pad.status());
+            helper.assertTrue(!pad.surveyPending(), "ya no hay salida pendiente");
+            helper.assertTrue(pad.energy.amount == 0, "el viaje costó toda la energía: " + pad.energy.amount);
+        });
+    }
+
+    /** Si el recorrido cuesta más de lo que el pad puede guardar, no se acepta (nunca saldría). */
+    @GameTest(maxTicks = 20)
+    public void surveyTravelTooCostlyIsRejected(GameTestHelper helper) {
+        fastDrones();
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.SURVEY);
+        BlockPos far = helper.absolutePos(PAD_A).offset(2_000_000, 0, 0);
+        helper.assertTrue(pad.surveyCost(far) > pad.energy.getCapacity(), "el recorrido no entra en el pad");
+        helper.assertTrue(!pad.requestSurvey(far), "se rechaza");
+        helper.assertTrue(!pad.surveyPending(), "no queda nada pendiente");
+        helper.succeed();
     }
 
     private static Optional<ConsolePayloads.Pad> seen(ConsolePayloads.Snapshot snapshot, BlockPos pos) {

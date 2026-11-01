@@ -124,6 +124,8 @@ KEYS = {
     "status.quarryindustrial.drone_pad.in_flight": ("In flight", "En vuelo"),
     "status.quarryindustrial.drone_pad.lost": ("Drone lost (it came back without its cargo)",
                                                "Dron perdido (volvió sin la carga)"),
+    "status.quarryindustrial.drone_pad.charging": ("Charging energy for the survey",
+                                                   "Juntando energía para la exploración"),
     # ── Jade ──
     "jade.quarryindustrial.status": ("Status: %s", "Estado: %s"),
     "jade.quarryindustrial.energy": ("Energy: %s / %s EU", "Energía: %s / %s EU"),
@@ -203,8 +205,8 @@ KEYS = {
     "info.quarryindustrial.power_drone": ("Carries EU between two linked pads: power for quarries far from the grid.",
                                           "Lleva EU entre dos pads vinculados: energía para quarries lejos de la red."),
     "info.quarryindustrial.maintenance_drone": (
-        "Put spare drill bits in its pad: it swaps worn bits on quarries and rigs within 48 blocks.",
-        "Poné brocas de repuesto en su pad: cambia las brocas gastadas de quarries y plataformas a 48 bloques."),
+        "Put spare drill bits in its pad: it swaps worn bits on quarries and rigs within 512 blocks (up to 2048 with Survey Range Upgrades).",
+        "Poné brocas de repuesto en su pad: cambia las brocas gastadas de quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance)."),
     "info.quarryindustrial.survey_drone": (
         "Right-click its pad to launch a survey: it sweeps a 128-block radius and brings back a report with every "
         "oil geyser it saw.",
@@ -237,10 +239,15 @@ KEYS = {
     "gui.quarryindustrial.console.button.target": ("Pick", "Elegir"),
     "gui.quarryindustrial.console.button.unlink": ("Unlink", "Desvincular"),
     "gui.quarryindustrial.console.button.survey": ("Survey", "Explorar"),
+    "gui.quarryindustrial.console.button.travel": ("Travel", "Viajar"),
     "gui.quarryindustrial.console.button.forget": ("Forget", "Olvidar"),
     "gui.quarryindustrial.console.button.cancel": ("Cancel", "Cancelar"),
     "gui.quarryindustrial.console.linking": ("Pick the destination pad · right-click to cancel",
                                              "Elegí el pad de destino · clic derecho para cancelar"),
+    "gui.quarryindustrial.console.traveling": ("Click the map where the drone should survey · right-click to cancel",
+                                               "Hacé clic en el mapa donde explorar · clic derecho para cancelar"),
+    "gui.quarryindustrial.console.travel_here": ("Click: survey around here", "Clic: explorar alrededor de acá"),
+    "gui.quarryindustrial.console.survey_pending": ("Survey at %s: %s / %s EU", "Exploración en %s: %s / %s EU"),
     "gui.quarryindustrial.console.link_here": ("Click: send the cargo here", "Clic: mandar la carga acá"),
     "gui.quarryindustrial.console.map_hint": ("Click a pad to select it · drag to move · wheel to zoom",
                                               "Clic en un pad para elegirlo · arrastrá para mover · rueda para zoom"),
@@ -260,6 +267,15 @@ KEYS = {
     "message.quarryindustrial.console.not_survey": ("That pad has no survey drone", "Ese pad no tiene un dron explorador"),
     "message.quarryindustrial.console.survey_busy": ("The survey drone is already out", "El explorador ya está volando"),
     "message.quarryindustrial.console.survey_sent": ("Survey drone on its way", "Explorador en camino"),
+    "message.quarryindustrial.console.survey_queued": (
+        "The survey needs %s EU and the pad has %s: it will leave as soon as it charges",
+        "La exploración necesita %s EU y el pad tiene %s: saldrá apenas junte la carga"),
+    "message.quarryindustrial.console.survey_too_costly": (
+        "The survey needs %s EU but the pad only stores %s",
+        "La exploración necesita %s EU y el pad solo guarda %s"),
+    "message.quarryindustrial.console.survey_out_of_range": (
+        "That spot is out of the station's range", "Ese punto queda fuera del alcance de la centralita"),
+    "message.quarryindustrial.console.survey_cancelled": ("Survey cancelled", "Exploración cancelada"),
     "message.quarryindustrial.console.site_forgotten": ("Geyser removed from the map", "Géiser sacado del mapa"),
     "info.quarryindustrial.drone_console": (
         "A map of every drone pad within 1024 blocks: links, drones in flight (with the survey drone's sweep) and "

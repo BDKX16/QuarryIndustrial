@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:black_gold",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:diesel_generator"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.self_sufficient.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.self_sufficient.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

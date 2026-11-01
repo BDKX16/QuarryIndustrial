@@ -1,0 +1,41 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:electronic_circuit",
+              "alaindustrial:machine_casing"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "YYY",
+    "CXC"
+  ],
+  "key": {
+    "Y": "minecraft:yellow_concrete",
+    "C": "minecraft:redstone",
+    "X": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "quarryindustrial:drone_pad",
+    "count": 2
+  }
+}

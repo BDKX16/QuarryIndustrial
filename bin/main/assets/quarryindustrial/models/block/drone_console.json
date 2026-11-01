@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "quarryindustrial:block/drone_console_top",
+    "front": "quarryindustrial:block/drone_console_front",
+    "side": "quarryindustrial:block/drone_console_side"
+  }
+}

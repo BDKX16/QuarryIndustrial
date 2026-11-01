@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "TST",
+    "SIS",
+    "TST"
+  ],
+  "key": {
+    "T": "#c:plates/tempered_iron",
+    "S": "#c:plates/shielding_alloy",
+    "I": "#c:ingots/iron"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_casing",
+    "count": 4
+  }
+}

@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import org.example.pz.quarryindustrial.block.drone.DronePadStatus;
 import org.example.pz.quarryindustrial.client.ExploredTerrain;
 import org.example.pz.quarryindustrial.drone.DroneKind;
+import org.example.pz.quarryindustrial.network.ConsolePayloads.CancelSurvey;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.Flight;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.ForgetSite;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.LaunchSurvey;
@@ -37,7 +38,8 @@ import java.util.Optional;
  * <ul>
  *   <li>Mapa: el terreno que tiene cargado el cliente, visto de arriba, con los pads, sus vínculos, los drones
  *   en vuelo (y el barrido que le falta al explorador) y los géiseres encontrados. Arrastrar mueve, la rueda
- *   acerca. Clic en un pad lo elige; con "Vincular", el siguiente clic en otro pad es el destino.</li>
+ *   acerca. Clic en un pad lo elige; con "Vincular", el siguiente clic en otro pad es el destino; con "Viajar"
+ *   (explorador), el siguiente clic en el mapa es el centro de la zona que va a barrer.</li>
  *   <li>Drones: todos los pads del alcance, con su estado, a dónde van y botones para vincular o explorar.</li>
  *   <li>Pozos: los géiseres que vieron los exploradores.</li>
  * </ul>
@@ -119,6 +121,8 @@ public class DroneConsoleScreen extends Screen {
     private @Nullable BlockPos selected;
     /** Pad de origen mientras se elige el destino de un vínculo. */
     private @Nullable BlockPos linkSource;
+    /** Pad del explorador mientras se elige en el mapa la zona a explorar. */
+    private @Nullable BlockPos travelSource;
     private int scroll;
     private @Nullable Component notice;
     private boolean noticeOk;
@@ -184,6 +188,9 @@ public class DroneConsoleScreen extends Screen {
         }
         if (linkSource != null && pad(linkSource) == null) {
             linkSource = null;
+        }
+        if (travelSource != null && pad(travelSource) == null) {
+            travelSource = null;
         }
     }
 
@@ -337,6 +344,7 @@ public class DroneConsoleScreen extends Screen {
     private static int statusColor(DronePadStatus status) {
         return switch (status) {
             case LOADING, STANDBY, READY -> GOOD;
+            case CHARGING -> WARN;
             case IN_FLIGHT -> FLYING;
             case NO_LINK, DESTINATION_FULL -> WARN;
             case BAD_LINK, NO_POWER, LOST -> BAD;
@@ -387,6 +395,7 @@ public class DroneConsoleScreen extends Screen {
     private void startLink(Pad pad) {
         linkSource = pad.pos();
         selected = pad.pos();
+        travelSource = null;
     }
 
     private void unlink(Pad pad) {
@@ -394,7 +403,27 @@ public class DroneConsoleScreen extends Screen {
     }
 
     private void survey(Pad pad) {
-        ClientPlayNetworking.send(new LaunchSurvey(console, pad.pos()));
+        ClientPlayNetworking.send(new LaunchSurvey(console, pad.pos(), Optional.empty()));
+    }
+
+    private void startTravel(Pad pad) {
+        travelSource = pad.pos();
+        selected = pad.pos();
+        linkSource = null;
+        tab = Tab.MAP;
+    }
+
+    private void travelTo(double screenX, double screenY) {
+        if (travelSource != null) {
+            BlockPos target = new BlockPos((int) Math.floor(worldX(screenX)), travelSource.getY(),
+                    (int) Math.floor(worldZ(screenY)));
+            ClientPlayNetworking.send(new LaunchSurvey(console, travelSource, Optional.of(target)));
+            travelSource = null;
+        }
+    }
+
+    private void cancelSurvey(Pad pad) {
+        ClientPlayNetworking.send(new CancelSurvey(console, pad.pos()));
     }
 
     private void forget(Site site) {
@@ -471,6 +500,9 @@ public class DroneConsoleScreen extends Screen {
         if (noticeTicks > 0 && notice != null) {
             text = notice;
             color = noticeOk ? GOOD : BAD;
+        } else if (travelSource != null) {
+            text = Component.translatable("gui.quarryindustrial.console.traveling");
+            color = ACCENT;
         } else if (linkSource != null) {
             text = Component.translatable("gui.quarryindustrial.console.linking");
             color = ACCENT;
@@ -514,6 +546,10 @@ public class DroneConsoleScreen extends Screen {
         }
         for (Pad pad : pads()) {
             pad.link().ifPresent(target -> drawLink(graphics, pad, target));
+            pad.surveyCenter().ifPresent(center -> drawPendingSurvey(graphics, pad, center));
+        }
+        if (travelSource != null && pad(travelSource) != null && inMap(mouseX, mouseY) && !overHit(mouseX, mouseY)) {
+            drawTravelPreview(graphics, pad(travelSource), mouseX, mouseY);
         }
         for (Flight flight : flights()) {
             drawFlightPath(graphics, flight);
@@ -532,8 +568,9 @@ public class DroneConsoleScreen extends Screen {
 
         drawMapControls(graphics, mouseX, mouseY);
         drawLegend(graphics);
-        if (linkSource != null) {
-            Component banner = Component.translatable("gui.quarryindustrial.console.linking");
+        if (linkSource != null || travelSource != null) {
+            Component banner = Component.translatable(travelSource != null ? "gui.quarryindustrial.console.traveling"
+                    : "gui.quarryindustrial.console.linking");
             int w = font.width(banner) + 12;
             int bx = mapX + (mapW - w) / 2;
             graphics.fill(bx, mapY + 4, bx + w, mapY + 17, 0xE0201A08);
@@ -541,7 +578,7 @@ public class DroneConsoleScreen extends Screen {
             graphics.text(font, banner, bx + 6, mapY + 7, ACCENT, false);
         }
         Pad current = selected == null ? null : pad(selected);
-        if (current != null) {
+        if (current != null && travelSource == null) {
             drawPadCard(graphics, current, mouseX, mouseY);
         }
         if (inMap(mouseX, mouseY) && !dragging) {
@@ -760,6 +797,38 @@ public class DroneConsoleScreen extends Screen {
         graphics.text(font, route, tx, y + 2, DIM, false);
     }
 
+    /** El cuadrado que barrería el explorador si se lo manda al punto bajo el mouse, con la distancia al pad. */
+    private void drawTravelPreview(GuiGraphicsExtractor graphics, Pad pad, int mouseX, int mouseY) {
+        int side = (int) Math.round(pad.range() / scale()) * 2;
+        int x = mouseX - side / 2;
+        int z = mouseY - side / 2;
+        graphics.fill(x, z, x + side, z + side, 0x22000000 | (OIL_RIM & 0xFFFFFF));
+        graphics.outline(x, z, side, side, OIL_RIM);
+        line(graphics, screenX(pad.pos().getX() + 0.5), screenZ(pad.pos().getZ() + 0.5), mouseX, mouseY,
+                0xA0000000 | (OIL_RIM & 0xFFFFFF), 4);
+        graphics.fill(mouseX - 3, mouseY, mouseX + 4, mouseY + 1, ACCENT);
+        graphics.fill(mouseX, mouseY - 3, mouseX + 1, mouseY + 4, ACCENT);
+        int meters = (int) Math.sqrt(pad.pos().distSqr(new BlockPos((int) Math.floor(worldX(mouseX)), pad.pos().getY(),
+                (int) Math.floor(worldZ(mouseY)))));
+        graphics.setComponentTooltipForNextFrame(font, List.of(
+                Component.translatable("gui.quarryindustrial.console.travel_here"),
+                Component.translatable("gui.quarryindustrial.console.distance", meters).withColor(DIM)), mouseX, mouseY);
+    }
+
+    /** Zona que el explorador va a barrer cuando junte la energía: el cuadrado, con una cruz en el centro. */
+    private void drawPendingSurvey(GuiGraphicsExtractor graphics, Pad pad, BlockPos center) {
+        int cx = screenX(center.getX() + 0.5);
+        int cz = screenZ(center.getZ() + 0.5);
+        int half = (int) Math.round(pad.range() / scale());
+        int color = 0x90000000 | (OIL_RIM & 0xFFFFFF);
+        graphics.outline(cx - half, cz - half, half * 2 + 1, half * 2 + 1, color);
+        graphics.fill(cx - 3, cz, cx + 4, cz + 1, color);
+        graphics.fill(cx, cz - 3, cx + 1, cz + 4, color);
+        if (!center.equals(pad.pos())) {
+            line(graphics, screenX(pad.pos().getX() + 0.5), screenZ(pad.pos().getZ() + 0.5), cx, cz, color, 4);
+        }
+    }
+
     /**
      * Hasta dónde llega el dron del pad elegido, con lo que le dan sus mejoras: un círculo para el vínculo de los
      * de transporte y la búsqueda del de mantenimiento, un cuadrado para el barrido del explorador.
@@ -787,8 +856,9 @@ public class DroneConsoleScreen extends Screen {
     private void drawPadCard(GuiGraphicsExtractor graphics, Pad pad, int mouseX, int mouseY) {
         int x = mapX + 4;
         int y = mapY + 4;
-        int w = 150;
-        int h = pad.range() > 0 ? 76 : 66;
+        boolean explorer = kind(pad.kind()) == DroneKind.SURVEY;
+        int w = explorer ? 178 : 150;
+        int h = (pad.range() > 0 ? 76 : 66) + (pad.surveyCenter().isPresent() ? 10 : 0);
         DronePadStatus status = status(pad);
         // La ficha tapa el mapa: los clics y tooltips no pasan a lo que hay debajo (los botones van después y ganan)
         hits.add(new Hit(x, y, w, h, () -> {
@@ -815,6 +885,13 @@ public class DroneConsoleScreen extends Screen {
             graphics.text(font, Component.translatable("gui.quarryindustrial.console.pad_range", pad.range()), x + 4,
                     y + 52, DIM, false);
         }
+        if (pad.surveyCenter().isPresent()) {
+            boolean enough = pad.stored() >= pad.surveyCost();
+            graphics.text(font, font.plainSubstrByWidth(Component.translatable(
+                            "gui.quarryindustrial.console.survey_pending", coords(pad.surveyCenter().get()),
+                            pad.stored(), pad.surveyCost()).getString(), w - 8), x + 4, y + 62,
+                    enough ? GOOD : WARN, false);
+        }
         int right = x + w - 4;
         int by = y + h - BUTTON_H - 3;
         right = button(graphics, right, by, Component.literal("✕"), DIM, mouseX, mouseY, () -> selected = null);
@@ -831,7 +908,13 @@ public class DroneConsoleScreen extends Screen {
             right = button(graphics, right, by, Component.translatable("gui.quarryindustrial.console.button.unlink"),
                     BAD, mouseX, mouseY, () -> unlink(pad));
         }
-        if (kind(pad.kind()) == DroneKind.SURVEY && status != DronePadStatus.IN_FLIGHT) {
+        if (explorer && status != DronePadStatus.IN_FLIGHT) {
+            if (pad.surveyCenter().isPresent()) {
+                right = button(graphics, right, by, Component.translatable(
+                        "gui.quarryindustrial.console.button.cancel"), BAD, mouseX, mouseY, () -> cancelSurvey(pad));
+            }
+            right = button(graphics, right, by, Component.translatable("gui.quarryindustrial.console.button.travel"),
+                    OIL_RIM, mouseX, mouseY, () -> startTravel(pad));
             button(graphics, right, by, Component.translatable("gui.quarryindustrial.console.button.survey"),
                     OIL_RIM, mouseX, mouseY, () -> survey(pad));
         }
@@ -981,6 +1064,8 @@ public class DroneConsoleScreen extends Screen {
                             "gui.quarryindustrial.console.button.link"), ACCENT, mouseX, mouseY, () -> startLink(pad));
                 }
                 if (kind(pad.kind()) == DroneKind.SURVEY && status != DronePadStatus.IN_FLIGHT) {
+                    right = button(graphics, right, by, Component.translatable(
+                            "gui.quarryindustrial.console.button.travel"), OIL_RIM, mouseX, mouseY, () -> startTravel(pad));
                     right = button(graphics, right, by, Component.translatable(
                             "gui.quarryindustrial.console.button.survey"), OIL_RIM, mouseX, mouseY, () -> survey(pad));
                 }
@@ -1176,7 +1261,9 @@ public class DroneConsoleScreen extends Screen {
         }
         if (snapshot != null && tab == Tab.MAP && inMap(mx, my)) {
             if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
-                if (linkSource != null) {
+                if (travelSource != null) {
+                    travelSource = null;
+                } else if (linkSource != null) {
                     linkSource = null;
                 } else {
                     Site site = siteAt(mx, my);
@@ -1187,7 +1274,7 @@ public class DroneConsoleScreen extends Screen {
                 return true;
             }
             if (event.button() == InputConstants.MOUSE_BUTTON_LEFT) {
-                Pad pad = padAt(mx, my);
+                Pad pad = travelSource == null ? padAt(mx, my) : null;
                 if (pad != null) {
                     select(pad);
                     return true;
@@ -1197,8 +1284,9 @@ public class DroneConsoleScreen extends Screen {
                 return true;
             }
         }
-        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT && linkSource != null) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_RIGHT && (linkSource != null || travelSource != null)) {
             linkSource = null;
+            travelSource = null;
             return true;
         }
         return super.mouseClicked(event, doubleClick);
@@ -1219,7 +1307,10 @@ public class DroneConsoleScreen extends Screen {
     public boolean mouseReleased(MouseButtonEvent event) {
         if (dragging) {
             dragging = false;
-            if (!dragMoved && linkSource == null) {
+            if (!dragMoved && travelSource != null) {
+                // Clic en el mapa sin arrastrar: ahí va el explorador
+                travelTo(event.x(), event.y());
+            } else if (!dragMoved && linkSource == null) {
                 // Clic en el vacío: suelta el pad elegido
                 selected = null;
             }
@@ -1248,8 +1339,9 @@ public class DroneConsoleScreen extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == InputConstants.KEY_ESCAPE && linkSource != null) {
+        if (event.key() == InputConstants.KEY_ESCAPE && (linkSource != null || travelSource != null)) {
             linkSource = null;
+            travelSource = null;
             return true;
         }
         // 1, 2, 3: las pestañas

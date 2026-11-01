@@ -14,6 +14,7 @@ import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.drone.DroneEntity;
 import org.example.pz.quarryindustrial.drone.DroneKind;
 import org.example.pz.quarryindustrial.drone.DroneNetwork;
+import org.example.pz.quarryindustrial.network.ConsolePayloads.CancelSurvey;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.Flight;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.ForgetSite;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.LaunchSurvey;
@@ -44,6 +45,7 @@ public final class DroneConsoleService {
         PayloadTypeRegistry.serverboundPlay().register(RequestSnapshot.TYPE, RequestSnapshot.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(SetLink.TYPE, SetLink.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(LaunchSurvey.TYPE, LaunchSurvey.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(CancelSurvey.TYPE, CancelSurvey.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(ForgetSite.TYPE, ForgetSite.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Snapshot.TYPE, Snapshot.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(Notice.TYPE, Notice.CODEC);
@@ -61,8 +63,18 @@ public final class DroneConsoleService {
         });
         ServerPlayNetworking.registerGlobalReceiver(LaunchSurvey.TYPE, (payload, context) -> {
             ServerPlayer player = context.player();
+            if (atConsole(player, payload.console())) {
+                List<Coverage> zones = coverage(player.level(), payload.console());
+                if (inRange(zones, payload.pad())) {
+                    respond(player, payload.console(), survey(player.level(), payload.pad(),
+                            payload.target().orElse(null), zones));
+                }
+            }
+        });
+        ServerPlayNetworking.registerGlobalReceiver(CancelSurvey.TYPE, (payload, context) -> {
+            ServerPlayer player = context.player();
             if (atConsole(player, payload.console()) && inRange(coverage(player.level(), payload.console()), payload.pad())) {
-                respond(player, payload.console(), survey(player.level(), payload.pad()));
+                respond(player, payload.console(), cancelSurvey(player.level(), payload.pad()));
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(ForgetSite.TYPE, (payload, context) -> {
@@ -160,7 +172,7 @@ public final class DroneConsoleService {
         QuarryConfig.Drones config = QuarryConfig.get().drones;
         return switch (kind) {
             case CARGO, TANKER, POWER -> config.maxLinkDistance;
-            case MAINTENANCE -> config.maintenanceRadius;
+            case MAINTENANCE -> config.maintenanceRadius + surveyUpgrades * config.maintenanceRangeBonus;
             case SURVEY -> config.surveyRadius + surveyUpgrades * config.surveyRangeBonus;
         };
     }
@@ -183,10 +195,13 @@ public final class DroneConsoleService {
                 }
                 long capacity = Math.max(1, pad.energy.getCapacity());
                 pads.add(new Pad(pos, ordinal(pad.droneKind()), pad.status().ordinal(), Optional.ofNullable(pad.link()),
-                        true, (int) (pad.energy.amount * 1000 / capacity), range(pad.droneKind(), pad.surveyUpgrades())));
+                        true, (int) (pad.energy.amount * 1000 / capacity), range(pad.droneKind(), pad.surveyUpgrades()),
+                        pad.surveyPending() ? Optional.of(pad.surveyTarget() != null ? pad.surveyTarget() : pos)
+                                : Optional.empty(),
+                        pad.pendingSurveyCost(), pad.energy.amount));
             } else {
                 pads.add(new Pad(pos, ordinal(info.kind()), info.status().ordinal(), info.link(), false, -1,
-                        range(info.kind(), info.upgrades())));
+                        range(info.kind(), info.upgrades()), Optional.empty(), 0, 0));
             }
         }
         List<Flight> flights = new ArrayList<>();
@@ -239,8 +254,12 @@ public final class DroneConsoleService {
                 source.getZ(), target.getX(), target.getY(), target.getZ(), (int) Math.sqrt(source.distSqr(target))));
     }
 
-    /** Manda a explorar al dron del pad. Si el pad está lejos, le mantiene el chunk andando unos segundos para que salga. */
-    private static Notice survey(ServerLevel level, BlockPos pos) {
+    /**
+     * Manda a explorar al dron del pad, alrededor de {@code target} (o del pad). Si falta energía para todo el
+     * recorrido, el dron sale cuando el pad la junte. Si el pad está lejos, le mantiene el chunk andando unos
+     * segundos para que salga.
+     */
+    private static Notice survey(ServerLevel level, BlockPos pos, @Nullable BlockPos target, List<Coverage> zones) {
         level.getChunkAt(pos);
         if (!(level.getBlockEntity(pos) instanceof DronePadBlockEntity pad) || pad.droneKind() != DroneKind.SURVEY) {
             return error(Component.translatable("message.quarryindustrial.console.not_survey"));
@@ -248,8 +267,27 @@ public final class DroneConsoleService {
         if (pad.status() == DronePadStatus.IN_FLIGHT) {
             return error(Component.translatable("message.quarryindustrial.console.survey_busy"));
         }
-        pad.requestSurvey();
+        if (target != null && !inRange(zones, target)) {
+            return error(Component.translatable("message.quarryindustrial.console.survey_out_of_range"));
+        }
+        long cost = pad.surveyCost(target);
+        if (!pad.requestSurvey(target)) {
+            return error(Component.translatable("message.quarryindustrial.console.survey_too_costly", cost,
+                    pad.energy.getCapacity()));
+        }
         ModTickets.keepDroneLoaded(level, ChunkPos.containing(pos));
+        if (pad.energy.amount < cost) {
+            return ok(Component.translatable("message.quarryindustrial.console.survey_queued", cost, pad.energy.amount));
+        }
         return ok(Component.translatable("message.quarryindustrial.console.survey_sent"));
+    }
+
+    private static Notice cancelSurvey(ServerLevel level, BlockPos pos) {
+        level.getChunkAt(pos);
+        if (!(level.getBlockEntity(pos) instanceof DronePadBlockEntity pad) || !pad.surveyPending()) {
+            return error(Component.translatable("message.quarryindustrial.console.not_survey"));
+        }
+        pad.cancelSurvey();
+        return ok(Component.translatable("message.quarryindustrial.console.survey_cancelled"));
     }
 }

@@ -139,14 +139,14 @@ reflexión (si la API de Ala cambia, simplemente no toma vapor de la nozzle).
 Un dron vive en un **pad de drones**. El pad tiene un buzón de salida (lo llenan los caños y tolvas, y además tira
 de cofres y tanques pegados) y uno de llegada (lo que traen otros drones, que reparte a sus vecinos). Cada viaje
 cuesta 1000 EU + 8 EU por bloque de la energía del pad. El **vinculador** une un pad de origen con uno de destino
-(agachado + clic en el origen, clic en el destino; hasta 512 bloques).
+(agachado + clic en el origen, clic en el destino; hasta 3000 bloques).
 
 | Dron | Qué hace |
 |---|---|
 | Carga | Items entre dos pads (sale con 4 stacks o a los 10 s) |
 | Cisterna | Fluidos, 16 cubos por viaje (el petróleo de la offshore a la costa) |
 | Energía | Una batería voladora de 400 000 EU para quarries lejos de la red |
-| Mantenimiento | Con brocas de repuesto en su pad, cambia las gastadas (≥ 90 %) de quarries y plataformas a 48 bloques |
+| Mantenimiento | Con brocas de repuesto en su pad, cambia las gastadas (≥ 90 %) de quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) |
 | Explorador | Clic en su pad: recorre un radio de 128 bloques y vuelve con un informe de los géiseres que vio |
 
 Despegan en vertical, vuelan en línea recta por arriba de todo y aterrizan; mantienen cargado el chunk donde

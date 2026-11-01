@@ -197,7 +197,7 @@
   "info.quarryindustrial.cargo_drone": "Put it on a pad and link the pad: it carries items between them.",
   "info.quarryindustrial.tanker_drone": "Carries fluids between two linked pads: perfect for offshore oil.",
   "info.quarryindustrial.power_drone": "Carries EU between two linked pads: power for quarries far from the grid.",
-  "info.quarryindustrial.maintenance_drone": "Put spare drill bits in its pad: it swaps worn bits on quarries and rigs within 48 blocks.",
+  "info.quarryindustrial.maintenance_drone": "Put spare drill bits in its pad: it swaps worn bits on quarries and rigs within 512 blocks (up to 2048 with Survey Range Upgrades).",
   "info.quarryindustrial.survey_drone": "Right-click its pad to launch a survey: it sweeps a 128-block radius and brings back a report with every oil geyser it saw.",
   "block.quarryindustrial.drone_console": "Drone Control Station",
   "block.quarryindustrial.drone_radar": "Drone Radar",
@@ -262,5 +262,14 @@
   "message.quarryindustrial.console.survey_sent": "Survey drone on its way",
   "message.quarryindustrial.console.site_forgotten": "Geyser removed from the map",
   "info.quarryindustrial.drone_console": "A map of every drone pad within 1024 blocks: links, drones in flight (with the survey drone's sweep) and the oil geysers your survey drones found. Link pads and launch surveys from here, without walking to them.",
-  "gui.quarryindustrial.console.pad_range": "Range: %s blocks"
+  "gui.quarryindustrial.console.pad_range": "Range: %s blocks",
+  "status.quarryindustrial.drone_pad.charging": "Charging energy for the survey",
+  "gui.quarryindustrial.console.button.travel": "Travel",
+  "gui.quarryindustrial.console.traveling": "Click the map where the drone should survey · right-click to cancel",
+  "gui.quarryindustrial.console.travel_here": "Click: survey around here",
+  "gui.quarryindustrial.console.survey_pending": "Survey at %s: %s / %s EU",
+  "message.quarryindustrial.console.survey_queued": "The survey needs %s EU and the pad has %s: it will leave as soon as it charges",
+  "message.quarryindustrial.console.survey_too_costly": "The survey needs %s EU but the pad only stores %s",
+  "message.quarryindustrial.console.survey_out_of_range": "That spot is out of the station's range",
+  "message.quarryindustrial.console.survey_cancelled": "Survey cancelled"
 }

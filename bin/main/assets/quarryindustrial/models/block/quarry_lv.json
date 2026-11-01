@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "quarryindustrial:block/quarry_lv_top",
+    "front": "quarryindustrial:block/quarry_lv_front",
+    "side": "quarryindustrial:block/quarry_lv_side"
+  }
+}

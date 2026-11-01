@@ -121,6 +121,8 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     /** Ticks que lleva esperando la carga en el buzón de salida. */
     private int waitingTicks;
     private boolean surveyRequested;
+    /** Centro del barrido pedido; null: alrededor del pad. */
+    private @Nullable BlockPos surveyTarget;
     /** Tiene el cargador de chunks instalado. */
     private boolean chunkLoader;
     /** Mejoras de alcance del explorador instaladas. */
@@ -435,11 +437,18 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     /** Una quarry o plataforma que necesite broca (si hay una para llevar) o una columna de destilación sucia. */
     private @Nullable BlockPos findWornMachine(ServerLevel level, BlockPos pos, boolean hasBit) {
         QuarryConfig.Drones config = QuarryConfig.get().drones;
-        int chunks = (config.maintenanceRadius >> 4) + 1;
+        int radius = config.maintenanceRadius + surveyUpgrades * config.maintenanceRangeBonus;
+        int chunks = (radius >> 4) + 1;
         ChunkPos center = ChunkPos.containing(pos);
-        double radiusSqr = (double) config.maintenanceRadius * config.maintenanceRadius;
+        double radiusSqr = (double) radius * radius;
         for (int cx = center.x() - chunks; cx <= center.x() + chunks; cx++) {
             for (int cz = center.z() - chunks; cz <= center.z() + chunks; cz++) {
+                // El radio es grande: los chunks de las esquinas, que quedan fuera del círculo, ni se consultan
+                double dx = Math.max(0, Math.abs(cx - center.x()) * 16.0 - 16);
+                double dz = Math.max(0, Math.abs(cz - center.z()) * 16.0 - 16);
+                if (dx * dx + dz * dz > radiusSqr) {
+                    continue;
+                }
                 LevelChunk chunk = level.getChunkSource().getChunkNow(cx, cz);
                 if (chunk == null) {
                     continue;
@@ -474,11 +483,64 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
 
     // ── Exploración ──
 
-    /** Clic derecho en el pad con el explorador: lo manda a volar. */
-    public void requestSurvey() {
-        if (drone.getItem() instanceof DroneItem item && item.kind() == DroneKind.SURVEY && flight == null) {
-            surveyRequested = true;
+    /**
+     * Manda a volar al explorador: a barrer alrededor de {@code center} (null: alrededor del pad). Si no alcanza la
+     * energía, espera en el pad a juntarla y sale solo; si ya la tiene, sale enseguida. False si no se puede (no hay
+     * explorador, ya está volando o el recorrido cuesta más de lo que el pad puede guardar).
+     */
+    public boolean requestSurvey(@Nullable BlockPos center) {
+        if (!(drone.getItem() instanceof DroneItem item) || item.kind() != DroneKind.SURVEY || flight != null
+                || surveyCost(center) > energy.getCapacity()) {
+            return false;
         }
+        surveyRequested = true;
+        surveyTarget = center == null ? null : center.immutable();
+        markForSync();
+        return true;
+    }
+
+    /** Clic derecho en el pad con el explorador: lo manda a volar alrededor del pad. */
+    public boolean requestSurvey() {
+        return requestSurvey(null);
+    }
+
+    /** Anula la salida pedida que todavía espera energía. */
+    public void cancelSurvey() {
+        if (surveyRequested) {
+            surveyRequested = false;
+            surveyTarget = null;
+            markForSync();
+        }
+    }
+
+    public boolean surveyPending() {
+        return surveyRequested;
+    }
+
+    public @Nullable BlockPos surveyTarget() {
+        return surveyTarget;
+    }
+
+    /** EU que cuesta el recorrido completo (ida, barrido y vuelta) del explorador sobre {@code center}. */
+    public long surveyCost(@Nullable BlockPos center) {
+        return surveyCost(worldPosition, surveyRoute(worldPosition, center == null ? worldPosition : center, surveyUpgrades));
+    }
+
+    /** EU de la salida pedida, o 0 si no hay ninguna. */
+    public long pendingSurveyCost() {
+        return surveyRequested ? surveyCost(surveyTarget) : 0;
+    }
+
+    private static long surveyCost(BlockPos pad, List<BlockPos> route) {
+        QuarryConfig.Drones config = QuarryConfig.get().drones;
+        double length = 0;
+        BlockPos previous = pad;
+        for (BlockPos point : route) {
+            length += Math.sqrt(previous.distSqr(point));
+            previous = point;
+        }
+        length += Math.sqrt(previous.distSqr(pad));
+        return config.tripBaseEu + Math.round(length * config.surveyEuPerBlock);
     }
 
     private void tickSurvey(ServerLevel level, BlockPos pos) {
@@ -486,21 +548,29 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
             setStatus(DronePadStatus.READY);
             return;
         }
-        List<BlockPos> route = surveyRoute(pos, surveyUpgrades);
-        long cost = tripCost(pos, route.getFirst()) * 4;
-        if (energy.amount < cost) {
+        List<BlockPos> route = surveyRoute(pos, surveyTarget == null ? pos : surveyTarget, surveyUpgrades);
+        long cost = surveyCost(pos, route);
+        if (cost > energy.getCapacity()) {
+            // Cambió la configuración o se sacaron mejoras: ya no entra, no se espera para siempre
+            cancelSurvey();
             setStatus(DronePadStatus.NO_POWER);
             return;
         }
+        if (energy.amount < cost) {
+            setStatus(DronePadStatus.CHARGING);
+            return;
+        }
         surveyRequested = false;
+        surveyTarget = null;
         energy.amount -= cost;
         launch(level, DroneKind.SURVEY, pos, new DronePayload(), route);
     }
 
-    /** Un barrido en espiral cuadrada alrededor del pad, con pasadas separadas por el ancho que mira el dron. */
-    private static List<BlockPos> surveyRoute(BlockPos pos, int upgrades) {
+    /** Un barrido en espiral cuadrada alrededor de {@code center}, con pasadas separadas por el ancho que mira el dron. */
+    private static List<BlockPos> surveyRoute(BlockPos pad, BlockPos center, int upgrades) {
         QuarryConfig.Drones config = QuarryConfig.get().drones;
         int step = Math.max(4, config.surveyScanRadius * 2);
+        BlockPos origin = new BlockPos(center.getX(), pad.getY(), center.getZ());
         List<BlockPos> route = new ArrayList<>();
         int x = 0;
         int z = 0;
@@ -511,7 +581,7 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
             for (int repeat = 0; repeat < 2; repeat++) {
                 x += directions[direction][0] * leg * step;
                 z += directions[direction][1] * leg * step;
-                route.add(pos.offset(x, 0, z));
+                route.add(origin.offset(x, 0, z));
                 direction = (direction + 1) % 4;
             }
             leg++;
@@ -753,7 +823,11 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     /** El botón de la GUI: manda a explorar al dron explorador. */
     @Override
     public void onInfoButton(ServerPlayer player) {
-        requestSurvey();
+        if (!requestSurvey() && droneKind() == DroneKind.SURVEY && flight == null) {
+            player.sendOverlayMessage(Component.translatable("message.quarryindustrial.console.survey_too_costly",
+                    surveyCost(null), energy.getCapacity()));
+            return;
+        }
         player.sendOverlayMessage(statusMessage());
     }
 
@@ -879,6 +953,10 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         SingleVariantStorage.writeValue(inTank, FluidVariant.CODEC, output.child("InTank"));
         output.putBoolean("ChunkLoader", chunkLoader);
         output.putInt("SurveyUpgrades", surveyUpgrades);
+        output.putBoolean("SurveyRequested", surveyRequested);
+        if (surveyTarget != null) {
+            output.store("SurveyTarget", BlockPos.CODEC, surveyTarget);
+        }
         output.putLong("Energy", energy.amount);
         output.putLong("InEnergy", inEnergy.amount);
     }
@@ -904,6 +982,8 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         SingleVariantStorage.readValue(inTank, FluidVariant.CODEC, FluidVariant::blank, input.childOrEmpty("InTank"));
         chunkLoader = input.getBooleanOr("ChunkLoader", false);
         surveyUpgrades = input.getIntOr("SurveyUpgrades", 0);
+        surveyRequested = input.getBooleanOr("SurveyRequested", false);
+        surveyTarget = input.read("SurveyTarget", BlockPos.CODEC).orElse(null);
         energy.amount = Math.min(input.getLongOr("Energy", 0L), energy.getCapacity());
         inEnergy.amount = Math.min(input.getLongOr("InEnergy", 0L), inEnergy.getCapacity());
     }

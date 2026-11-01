@@ -1,0 +1,36 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:advanced_circuit",
+        "alaindustrial:advanced_machine_casing",
+        "alaindustrial:electric_drill_diamond_tip"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "EAE",
+    "DQD",
+    "EXE"
+  ],
+  "key": {
+    "E": "#c:plates/electrum",
+    "A": "alaindustrial:advanced_circuit",
+    "D": "alaindustrial:electric_drill_diamond_tip",
+    "Q": "quarryindustrial:quarry_mv",
+    "X": "alaindustrial:advanced_machine_casing"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_hv"
+  }
+}

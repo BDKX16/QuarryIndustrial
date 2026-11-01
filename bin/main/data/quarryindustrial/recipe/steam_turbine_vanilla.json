@@ -1,0 +1,45 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:copper_coil",
+              "alaindustrial:iron_gear",
+              "alaindustrial:machine_casing",
+              "alaindustrial:steam_pipe"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "PBP",
+    "CXC",
+    "PSP"
+  ],
+  "key": {
+    "P": "#c:ingots/iron",
+    "B": "minecraft:iron_bars",
+    "C": "minecraft:copper_block",
+    "X": "minecraft:iron_block",
+    "S": "minecraft:bucket"
+  },
+  "result": {
+    "id": "quarryindustrial:steam_turbine"
+  }
+}

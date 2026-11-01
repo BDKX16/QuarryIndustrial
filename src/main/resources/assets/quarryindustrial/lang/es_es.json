@@ -197,7 +197,7 @@
   "info.quarryindustrial.cargo_drone": "Ponlo en un pad y vincula el pad: lleva items entre los dos.",
   "info.quarryindustrial.tanker_drone": "Lleva fluidos entre dos pads vinculados: ideal para el petróleo offshore.",
   "info.quarryindustrial.power_drone": "Lleva EU entre dos pads vinculados: energía para quarries lejos de la red.",
-  "info.quarryindustrial.maintenance_drone": "Pon brocas de repuesto en su pad: cambia las brocas gastadas de quarries y plataformas a 48 bloques.",
+  "info.quarryindustrial.maintenance_drone": "Pon brocas de repuesto en su pad: cambia las brocas gastadas de quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance).",
   "info.quarryindustrial.survey_drone": "Clic derecho en su pad para mandarlo: recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres que vio.",
   "block.quarryindustrial.drone_console": "Centralita de drones",
   "block.quarryindustrial.drone_radar": "Radar repetidor",
@@ -262,5 +262,14 @@
   "message.quarryindustrial.console.survey_sent": "Explorador en camino",
   "message.quarryindustrial.console.site_forgotten": "Géiser sacado del mapa",
   "info.quarryindustrial.drone_console": "Un mapa de todos los pads a menos de 1024 bloques: vínculos, drones en vuelo (con el barrido del explorador) y los géiseres que encontraron tus exploradores. Desde acá vinculas pads y mandas a explorar sin ir hasta ellos.",
-  "gui.quarryindustrial.console.pad_range": "Alcance: %s bloques"
+  "gui.quarryindustrial.console.pad_range": "Alcance: %s bloques",
+  "status.quarryindustrial.drone_pad.charging": "Juntando energía para la exploración",
+  "gui.quarryindustrial.console.button.travel": "Viajar",
+  "gui.quarryindustrial.console.traveling": "Haz clic en el mapa donde explorar · clic derecho para cancelar",
+  "gui.quarryindustrial.console.travel_here": "Clic: explorar alrededor de acá",
+  "gui.quarryindustrial.console.survey_pending": "Exploración en %s: %s / %s EU",
+  "message.quarryindustrial.console.survey_queued": "La exploración necesita %s EU y el pad tiene %s: saldrá apenas junte la carga",
+  "message.quarryindustrial.console.survey_too_costly": "La exploración necesita %s EU y el pad solo guarda %s",
+  "message.quarryindustrial.console.survey_out_of_range": "Ese punto queda fuera del alcance de la centralita",
+  "message.quarryindustrial.console.survey_cancelled": "Exploración cancelada"
 }

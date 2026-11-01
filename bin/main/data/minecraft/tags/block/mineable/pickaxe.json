@@ -1,0 +1,20 @@
+{
+  "values": [
+    "quarryindustrial:quarry_lv",
+    "quarryindustrial:quarry_mv",
+    "quarryindustrial:quarry_hv",
+    "quarryindustrial:quarry_frame",
+    "quarryindustrial:pumpjack",
+    "quarryindustrial:pumpjack_part",
+    "quarryindustrial:quarry_core",
+    "quarryindustrial:quarry_casing",
+    "quarryindustrial:energy_port",
+    "quarryindustrial:diesel_generator",
+    "quarryindustrial:steam_turbine",
+    "quarryindustrial:offshore_rig",
+    "quarryindustrial:offshore_deck",
+    "quarryindustrial:drone_pad",
+    "quarryindustrial:drone_console",
+    "quarryindustrial:drone_radar"
+  ]
+}

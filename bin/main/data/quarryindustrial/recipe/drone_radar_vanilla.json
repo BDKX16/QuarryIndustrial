@@ -1,0 +1,41 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:not",
+      "value": {
+        "condition": "fabric:and",
+        "values": [
+          {
+            "condition": "fabric:all_mods_loaded",
+            "values": [
+              "alaindustrial"
+            ]
+          },
+          {
+            "condition": "fabric:registry_contains",
+            "registry": "minecraft:item",
+            "values": [
+              "alaindustrial:electronic_circuit"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    " L ",
+    "GCG",
+    "III"
+  ],
+  "key": {
+    "L": "minecraft:lightning_rod",
+    "G": "minecraft:glass_pane",
+    "C": "minecraft:comparator",
+    "I": "#c:ingots/iron"
+  },
+  "result": {
+    "id": "quarryindustrial:drone_radar"
+  }
+}

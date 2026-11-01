@@ -169,7 +169,7 @@ public final class QuarryConfig {
 
     public static final class Drones {
         /** Distancia máxima entre dos pads vinculados. */
-        public int maxLinkDistance = 512;
+        public int maxLinkDistance = 3_000;
         /** Bloques por tick en crucero (0.6 = 12 bloques por segundo). */
         public double speed = 0.6;
         /** Altura de crucero sobre el más alto de los dos extremos. */
@@ -190,13 +190,17 @@ public final class QuarryConfig {
         public long powerCapacity = 400_000;
         public long powerLaunchEu = 100_000;
         /** Mantenimiento: radio de búsqueda y desde qué desgaste cambia la broca. */
-        public int maintenanceRadius = 48;
+        public int maintenanceRadius = 512;
+        /** Mantenimiento: bloques de radio que suma cada mejora de alcance instalada en el pad (4 llegan a 2048). */
+        public int maintenanceRangeBonus = 384;
         public double maintenanceWear = 0.9;
         /** Mantenimiento: desde qué ensuciamiento (0-100) limpia una columna de destilación de Ala Industrial. */
         public int maintenanceFouling = 50;
         /** Explorador: radio del vuelo de reconocimiento y ancho de la franja que mira por pasada. */
         public int surveyRadius = 128;
         public int surveyScanRadius = 6;
+        /** Explorador: EU por bloque de recorrido (ida, barrido y vuelta), además del costo base del viaje. */
+        public long surveyEuPerBlock = 1;
         /** Ticks sin noticias de un dron en vuelo para darlo por perdido (y devolverlo al pad, sin la carga). */
         public int lostAfterTicks = 6_000;
         /** Centralita: hasta qué distancia (horizontal) ve pads, drones y géiseres. */

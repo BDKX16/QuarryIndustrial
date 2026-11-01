@@ -1,6 +1,31 @@
 # Changelog
 
+## Sin publicar — Viajes del explorador
+
+### Nuevo
+
+- **Botón "Viajar" en la centralita.** Con un pad de explorador elegido (en el mapa o en la lista de drones), "Viajar"
+  deja elegir en el mapa el centro de la zona: el dron vuela hasta ahí, hace la misma espiral de siempre y vuelve. Antes
+  de elegir se ve el cuadrado que va a barrer. La zona tiene que estar dentro del alcance de la centralita.
+- **El pad calcula la energía de todo el recorrido** (ida, espiral y vuelta) y el dron no sale hasta tenerla: si ya la
+  tiene sale enseguida, si no queda en estado "Juntando energía" y sale solo cuando se carga. La ficha del pad muestra
+  `energía / costo` y la zona pendiente en el mapa; "Cancelar" anula la salida. La salida pendiente se guarda con el pad.
+  Si el recorrido cuesta más de lo que el pad puede guardar, se rechaza con un aviso.
+
+### Cambios
+
+- **La distancia máxima entre pads vinculados sube de 512 a 3000 bloques** (`maxLinkDistance`). Quien ya tenga el
+  archivo de configuración con el valor viejo debe subirlo a mano.
+- El costo del explorador pasó a ser el recorrido real: `tripBaseEu` + `surveyEuPerBlock` (1 por defecto) por cada bloque
+  volado. Con los valores por defecto, una exploración alrededor del pad cuesta unos 6.500 EU en vez de unos 4.400.
+
 ## 1.2.6 — Destilerías limpias y alcance en el mapa
+
+### Cambios
+
+- **El dron de mantenimiento llega mucho más lejos**: de 48 a 512 bloques de radio (`maintenanceRadius`), pensado para
+  una planta entera. Cada mejora de alcance instalada en el pad suma 384 bloques (`maintenanceRangeBonus`), hasta
+  2048 con las 4. Quien ya tenga el archivo de configuración con el valor viejo debe subir `maintenanceRadius` a mano.
 
 ### Nuevo
 

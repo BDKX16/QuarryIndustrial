@@ -1,0 +1,25 @@
+{
+  "parent": "quarryindustrial:air_mail",
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "display": {
+    "icon": {
+      "id": "quarryindustrial:maintenance_drone"
+    },
+    "title": {
+      "translate": "advancements.quarryindustrial.pit_crew.title"
+    },
+    "description": {
+      "translate": "advancements.quarryindustrial.pit_crew.description"
+    },
+    "frame": "task"
+  },
+  "requirements": [
+    [
+      "done"
+    ]
+  ]
+}

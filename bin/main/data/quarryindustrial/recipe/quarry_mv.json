@@ -1,0 +1,36 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:advanced_circuit",
+        "alaindustrial:copper_coil",
+        "alaindustrial:gold_gear"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "TAT",
+    "GQG",
+    "TCT"
+  ],
+  "key": {
+    "T": "#c:plates/tempered_iron",
+    "A": "alaindustrial:advanced_circuit",
+    "G": "alaindustrial:gold_gear",
+    "Q": "quarryindustrial:quarry_lv",
+    "C": "alaindustrial:copper_coil"
+  },
+  "result": {
+    "id": "quarryindustrial:quarry_mv"
+  }
+}
