@@ -194,8 +194,8 @@ public final class QuarryConfig {
         public long powerLaunchEu = 100_000;
         /** Mantenimiento: radio de búsqueda y desde qué desgaste cambia la broca. */
         public int maintenanceRadius = 512;
-        /** Mantenimiento: bloques de radio que suma cada mejora de alcance instalada en el pad (4 llegan a 2048). */
-        public int maintenanceRangeBonus = 384;
+        /** Mantenimiento: bloques de radio que suma cada mejora de alcance instalada en el pad (17 llegan a ~2048). */
+        public int maintenanceRangeBonus = 90;
         public double maintenanceWear = 0.9;
         /** Mantenimiento: desde qué ensuciamiento (0-100) limpia una columna de destilación de Ala Industrial. */
         public int maintenanceFouling = 50;
@@ -210,9 +210,15 @@ public final class QuarryConfig {
         public int consoleRange = 1_024;
         /** Radar repetidor: hasta dónde ve a su alrededor, si él mismo está dentro de lo que ya ve la centralita. */
         public int radarRange = 1_024;
-        /** Mejora de alcance del explorador: bloques de radio que suma cada una y cuántas entran en un pad. */
+        /**
+         * Mejora de alcance del explorador: bloques de radio de barrido que suma cada una y cuántas entran en un pad.
+         * Con 17 el radio llega a 1216 bloques (unos 500.000 EU el barrido, lo que guarda un pad). Valen también para
+         * el radio del dron de mantenimiento.
+         */
         public int surveyRangeBonus = 64;
-        public int surveyRangeMax = 4;
+        /** Explorador: hasta qué distancia del pad (en bloques) se lo puede mandar a barrer. */
+        public int surveyMaxTravel = 10_000;
+        public int surveyRangeMax = 17;
     }
 
     // ── Plataforma offshore ──

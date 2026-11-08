@@ -44,11 +44,15 @@ public class DroneNetwork extends SavedData {
                 .orElse(null), statusOr(status), link, upgrades)));
     }
 
-    /** Un géiser visto desde el aire y el pad del explorador que lo encontró. */
-    public record Site(BlockPos pos, BlockPos finder) {
+    /**
+     * Petróleo visto desde el aire y el pad del explorador que lo encontró. {@code geyser}: un géiser (caño y domo,
+     * se bombea para siempre); si no, un lago de superficie (finito). Lo guardado de antes eran todos géiseres.
+     */
+    public record Site(BlockPos pos, BlockPos finder, boolean geyser) {
         static final Codec<Site> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 BlockPos.CODEC.fieldOf("pos").forGetter(Site::pos),
-                BlockPos.CODEC.fieldOf("finder").forGetter(Site::finder)
+                BlockPos.CODEC.fieldOf("finder").forGetter(Site::finder),
+                Codec.BOOL.optionalFieldOf("geyser", true).forGetter(Site::geyser)
         ).apply(instance, Site::new));
     }
 
@@ -114,11 +118,17 @@ public class DroneNetwork extends SavedData {
         return pads.values();
     }
 
-    /** Suma los géiseres de un informe (los que ya estaban no se repiten). */
-    public void addSites(List<BlockPos> found, BlockPos finder) {
+    /** Suma los géiseres (o lagos) de un informe; los que ya estaban no se repiten. */
+    public void addSites(List<BlockPos> found, BlockPos finder, boolean geyser) {
         for (BlockPos pos : found) {
-            if (sites.stream().noneMatch(site -> site.pos().distSqr(pos) < SAME_SITE * SAME_SITE)) {
-                sites.add(new Site(pos.immutable(), finder.immutable()));
+            Site nearby = sites.stream().filter(site -> site.pos().distSqr(pos) < SAME_SITE * SAME_SITE)
+                    .findFirst().orElse(null);
+            if (nearby == null) {
+                sites.add(new Site(pos.immutable(), finder.immutable(), geyser));
+                setDirty();
+            } else if (geyser && !nearby.geyser()) {
+                // Un géiser pesa más que un charco que está al lado: se queda el géiser
+                sites.set(sites.indexOf(nearby), new Site(pos.immutable(), finder.immutable(), true));
                 setDirty();
             }
         }

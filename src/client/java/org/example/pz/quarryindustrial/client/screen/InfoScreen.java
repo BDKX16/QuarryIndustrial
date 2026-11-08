@@ -5,6 +5,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import org.example.pz.quarryindustrial.block.drone.DronePadStatus;
 import org.example.pz.quarryindustrial.drone.DroneKind;
 import org.example.pz.quarryindustrial.menu.InfoKind;
@@ -32,6 +34,22 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     private static final int DIM = 0xFF707070;
 
     private Button action;
+    /** Solo el pad: abre el panel con las mejoras instaladas, como ítems. */
+    private Button toggle;
+    private boolean upgradesOpen;
+
+    private static final int SLOT = 18;
+    private static final int UPGRADE_COLUMNS = 6;
+    private static final int UPGRADE_PANEL_W = UPGRADE_COLUMNS * SLOT + 8;
+    /** Índices de los valores que manda el pad (ver DronePadBlockEntity.fillInfo). */
+    private static final int V_CHUNK_LOADER = 17;
+    private static final int V_SURVEY_UPGRADES = 18;
+    private static final int V_SURVEY_MAX = 19;
+
+    private Component toggleLabel() {
+        return Component.translatable(upgradesOpen ? "gui.quarryindustrial.info.upgrades.close"
+                : "gui.quarryindustrial.info.upgrades.open");
+    }
 
     public InfoScreen(InfoMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, WIDTH, height(menu.kind()));
@@ -41,7 +59,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     private static int height(InfoKind kind) {
         int height = TOP;
         for (InfoKind.Field field : kind.fields()) {
-            height += field.type() == InfoKind.Type.BAR ? BAR_ROW : LINE;
+            if (!kind.hidden(field)) {
+                height += field.type() == InfoKind.Type.BAR ? BAR_ROW : LINE;
+            }
         }
         return height + (kind.hasAction() ? BUTTON_H + 8 : 0) + MARGIN;
     }
@@ -49,6 +69,14 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     @Override
     protected void init() {
         super.init();
+        if (menu.kind() == InfoKind.PAD) {
+            toggle = addRenderableWidget(Button.builder(toggleLabel(), button -> {
+                        upgradesOpen = !upgradesOpen;
+                        button.setMessage(toggleLabel());
+                    })
+                    .bounds(leftPos + WIDTH + 2, topPos, 74, 16)
+                    .build());
+        }
         if (menu.kind().hasAction()) {
             action = addRenderableWidget(Button.builder(Component.translatable("gui.quarryindustrial.info.survey"),
                             button -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
@@ -61,6 +89,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         bevel(graphics, leftPos, topPos, WIDTH, imageHeight, PANEL, LIGHT, SHADOW);
+        if (menu.kind() == InfoKind.PAD && upgradesOpen) {
+            drawUpgrades(graphics);
+        }
         InfoKind kind = menu.kind();
         int y = topPos + TOP;
         int x = leftPos + MARGIN;
@@ -68,6 +99,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         List<InfoKind.Field> fields = kind.fields();
         for (int i = 0; i < fields.size(); i++) {
             InfoKind.Field field = fields.get(i);
+            if (kind.hidden(field)) {
+                continue;
+            }
             int offset = kind.offset(i);
             switch (field.type()) {
                 case CHOICE -> {
@@ -103,6 +137,93 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         }
     }
 
+    // ── Panel desplegable de mejoras ──
+
+    private int panelX() {
+        return leftPos + WIDTH + 2;
+    }
+
+    private int panelY() {
+        return topPos + 18;
+    }
+
+    private int surveyMax() {
+        return (int) Math.max(1, menu.value(V_SURVEY_MAX));
+    }
+
+    private int surveyRows() {
+        return (surveyMax() + UPGRADE_COLUMNS - 1) / UPGRADE_COLUMNS;
+    }
+
+    /** Alto del panel: la fila del cargador, la grilla de mejoras de alcance y el contador. */
+    private int panelHeight() {
+        return 4 + SLOT + 6 + surveyRows() * SLOT + 14;
+    }
+
+    private int chunkSlotX() {
+        return panelX() + 4;
+    }
+
+    private int chunkSlotY() {
+        return panelY() + 4;
+    }
+
+    private int surveySlotX(int index) {
+        return panelX() + 4 + (index % UPGRADE_COLUMNS) * SLOT;
+    }
+
+    private int surveySlotY(int index) {
+        return panelY() + 4 + SLOT + 6 + (index / UPGRADE_COLUMNS) * SLOT;
+    }
+
+    private void drawUpgrades(GuiGraphicsExtractor graphics) {
+        bevel(graphics, panelX(), panelY(), UPGRADE_PANEL_W, panelHeight(), PANEL, LIGHT, SHADOW);
+        drawSlot(graphics, chunkSlotX(), chunkSlotY(), new ItemStack(ModItems.PAD_CHUNK_LOADER),
+                menu.value(V_CHUNK_LOADER) != 0);
+        int installed = (int) menu.value(V_SURVEY_UPGRADES);
+        for (int i = 0; i < surveyMax(); i++) {
+            drawSlot(graphics, surveySlotX(i), surveySlotY(i), new ItemStack(ModItems.SURVEY_RANGE_UPGRADE), i < installed);
+        }
+        String count = installed + " / " + surveyMax();
+        graphics.text(font, count, panelX() + 4, surveySlotY(surveyMax() - 1) + SLOT + 3, DIM, false);
+    }
+
+    /** Un casillero hundido; vacío muestra el ítem apagado, para ver qué falta instalar. */
+    private void drawSlot(GuiGraphicsExtractor graphics, int x, int y, ItemStack stack, boolean installed) {
+        bevel(graphics, x, y, SLOT, SLOT, 0xFF8B8B8B, SHADOW, LIGHT);
+        graphics.item(stack, x + 1, y + 1);
+        if (!installed) {
+            graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, 0xC08B8B8B);
+        }
+    }
+
+    private void upgradeTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        ItemStack stack = null;
+        boolean installed = false;
+        if (isInside(mouseX, mouseY, chunkSlotX(), chunkSlotY())) {
+            stack = new ItemStack(ModItems.PAD_CHUNK_LOADER);
+            installed = menu.value(V_CHUNK_LOADER) != 0;
+        } else {
+            for (int i = 0; i < surveyMax(); i++) {
+                if (isInside(mouseX, mouseY, surveySlotX(i), surveySlotY(i))) {
+                    stack = new ItemStack(ModItems.SURVEY_RANGE_UPGRADE);
+                    installed = i < menu.value(V_SURVEY_UPGRADES);
+                    break;
+                }
+            }
+        }
+        if (stack != null) {
+            graphics.setComponentTooltipForNextFrame(font, List.of(stack.getHoverName(),
+                    Component.translatable(installed ? "gui.quarryindustrial.info.upgrade.installed"
+                            : "gui.quarryindustrial.info.upgrade.free").withColor(installed ? 0xFF55FF55 : DIM)),
+                    mouseX, mouseY);
+        }
+    }
+
+    private static boolean isInside(int mouseX, int mouseY, int x, int y) {
+        return mouseX >= x && mouseX < x + SLOT && mouseY >= y && mouseY < y + SLOT;
+    }
+
     private void line(GuiGraphicsExtractor graphics, int left, int right, int y, Component label, Component value,
                       int valueColor) {
         graphics.text(font, label, left, y, DIM, false);
@@ -128,6 +249,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         }
         super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         extractValueTooltip(graphics, mouseX, mouseY);
+        if (menu.kind() == InfoKind.PAD && upgradesOpen) {
+            upgradeTooltip(graphics, mouseX, mouseY);
+        }
     }
 
     /** Valor exacto al pasar el mouse por una barra o un número (los de la pantalla van abreviados). */
@@ -136,6 +260,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         int y = TOP;
         for (int i = 0; i < kind.fields().size(); i++) {
             InfoKind.Field field = kind.fields().get(i);
+            if (kind.hidden(field)) {
+                continue;
+            }
             int rowH = field.type() == InfoKind.Type.BAR ? BAR_ROW : LINE;
             if (isHovering(MARGIN, y, WIDTH - MARGIN * 2, rowH, mouseX, mouseY)) {
                 int offset = kind.offset(i);

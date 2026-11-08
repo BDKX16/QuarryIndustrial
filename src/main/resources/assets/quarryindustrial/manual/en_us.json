@@ -245,7 +245,7 @@
         },
         {
           "title": "Maintenance and survey",
-          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
+          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius (up to 1216 with 17 Survey Range Upgrades; from the console you can send it up to 10,000 blocks from the pad) and brings back a Survey Report with every oil geyser it saw and every oil lake. Geysers are infinite: a pumpjack drains them forever. Lakes are finite surface pools.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",

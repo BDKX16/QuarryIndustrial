@@ -1,14 +1,50 @@
 # Changelog
 
+## 1.2.9 — Explorador de largo alcance, géiseres y lagos
+
+### Nuevo
+
+- **Más mejoras de alcance del explorador.** Entran 17 por pad (antes 4), +64 bloques de radio de barrido cada una
+  (`surveyRangeMax`, `surveyRangeBonus`): con todas barre hasta 1.216 bloques de radio, que cuesta unos 500.000 EU
+  (lo que guarda un pad) y tarda muchísimo. Además se lo puede mandar a barrer hasta 10.000 bloques del pad
+  (`surveyMaxTravel`; la energía del pad es el límite real, 1 EU por bloque). Las mejoras también suman al
+  radio del dron de mantenimiento: ahora +90 por mejora, unos 2.040 bloques con las 17 (`maintenanceRangeBonus`; si
+  tenías la config vieja con 384, bajalo a mano).
+- **Panel desplegable de mejoras en el pad.** El botón «Mejoras» de la pantalla del pad abre un panel con los ítems de
+  lo instalado (cargador de chunks y mejoras de alcance), apagados los que faltan, con tooltip. Reemplaza las líneas de
+  texto.
+- **El explorador distingue géiseres de lagos de petróleo.** Un géiser (caño de 1×1 sellado y domo debajo) se bombea
+  para siempre con una cigüeña; un lago es un charco finito de superficie, sin caño. En el mapa de la centralita los
+  géiseres son la gota violeta y los lagos un charco gris, con su propia entrada en la leyenda, el tooltip y la
+  pestaña de pozos. El informe del explorador lista los dos. Antes todo petróleo de superficie contaba como géiser.
+
+### Cambios
+
+- **Distribuidor de energía rediseñado.** Ahora es un modelo 3D discreto (cuerpo con brazos y collares, como el
+  interruptor de Ala) en vez de un cubo llamativo. La entrada es el brazo con el collar ámbar, del lado del bloque
+  contra el que lo colocás. Receta más barata y de drones: 2 cables de electrum, 1 circuito electrónico y 1 hormigón
+  amarillo (sin Ala Industrial: 2 lingotes de cobre, redstone y hormigón amarillo).
+
+### Arreglos
+
+- **Los distribuidores ahora se pasan la energía entre sí** (pegados o con un cable en el medio). Antes el pad
+  empujaba la energía de sus drones al distribuidor y este la tomaba por una entrada, y los cables de Ala no podían
+  sacarle energía a las salidas.
+- **El dron de mantenimiento ahora toma las brocas de los cofres pegados a su pad.** Antes solo llevaba las que ya
+  estaban dentro del pad, y un cofre con brocas al lado no servía.
+
 ## 1.2.8 — Distribuidor de energía y consola portátil
 
 ### Nuevo
 
-- **Distribuidor de energía** (`energy_splitter`). Recibe EU de un cable por cualquier cara y los reparte a partes
-  iguales entre todo lo que tenga pegado (cables, pads de drones, máquinas). Si un destino se llena, lo que sobra va a
-  los otros, así que con varios pads en la salida de un reactor ya no se llena primero el que está más cerca. Una cara
-  que le acaba de dar energía no recibe nada de vuelta, y nadie puede sacarle energía desde afuera. Guarda 8.192 EU y
-  mueve hasta 2.048 EU/t (`splitterCapacity` y `splitterMaxTransfer`). Tiene receta con y sin Ala Industrial.
+- **Distribuidor de energía** (`energy_splitter`). Reparte los EU de un cable en partes iguales entre todo lo que tenga
+  pegado (cables, pads de drones, máquinas). La energía entra solo por su cara de entrada, el brazo con el collar ámbar
+  (queda del lado del bloque contra el que lo colocás), y sale por las otras cinco: los pads o cables de salida no
+  pueden confundirse con una entrada. Si un destino se llena, lo que sobra va a los otros, así que con varios pads en
+  la salida de un reactor ya no se llena primero el que está más cerca. Se pueden encadenar (una salida al brazo ámbar
+  del siguiente), pegados o con un cable en el medio. Guarda 8.192 EU y mueve hasta 2.048 EU/t (`splitterCapacity` y
+  `splitterMaxTransfer`). Receta barata: 2 cables de electrum, 1 circuito electrónico y 1 hormigón amarillo (sin Ala
+  Industrial: 2 lingotes de cobre, redstone y hormigón amarillo).
 - **Consola portátil.** Clic derecho al aire con el vinculador de drones abre el mismo mapa que la centralita (pads,
   drones, vinculación y viajes), centrado donde estás y con el alcance de la centralita. Se cierra si soltás el
   vinculador o te alejás más de 48 bloques. Sobre un pad, el vinculador funciona igual que antes.

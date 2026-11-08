@@ -26,6 +26,13 @@ public final class ModComponents {
                     .persistent(BlockPos.CODEC.listOf())
                     .networkSynchronized(BlockPos.STREAM_CODEC.apply(ByteBufCodecs.collection(ArrayList::new)))
                     .build());
+    /** Informe del dron explorador: dónde vio lagos de petróleo (finitos, sin caño). */
+    public static final DataComponentType<List<BlockPos>> SURVEY_LAKES = Registry.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE, Quarryindustrial.id("survey_lakes"),
+            new DataComponentType.Builder<List<BlockPos>>()
+                    .persistent(BlockPos.CODEC.listOf())
+                    .networkSynchronized(BlockPos.STREAM_CODEC.apply(ByteBufCodecs.collection(ArrayList::new)))
+                    .build());
 
     private ModComponents() {
     }

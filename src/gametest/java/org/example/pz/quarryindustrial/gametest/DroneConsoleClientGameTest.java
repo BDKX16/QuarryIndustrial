@@ -92,7 +92,8 @@ public class DroneConsoleClientGameTest implements FabricClientGameTest {
                 ((DronePadBlockEntity) level.getBlockEntity(survey)).requestSurvey();
                 DroneNetwork.get(level).addSites(List.of(ground(level, console.offset(-58, 0, 58)),
                         ground(level, console.offset(24, 0, 70)), ground(level, console.offset(80, 0, -48)),
-                        ground(level, console.offset(-84, 0, -60))), survey);
+                        ground(level, console.offset(-84, 0, -60))), survey, true);
+                DroneNetwork.get(level).addSites(List.of(ground(level, console.offset(40, 0, -30))), survey, false);
             });
             // Que despeguen
             context.waitTicks(80);

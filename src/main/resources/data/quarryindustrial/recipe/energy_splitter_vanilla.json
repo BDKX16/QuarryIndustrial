@@ -15,8 +15,8 @@
             "condition": "fabric:registry_contains",
             "registry": "minecraft:item",
             "values": [
-              "alaindustrial:advanced_circuit",
-              "alaindustrial:insulated_electrum_cable"
+              "alaindustrial:electronic_circuit",
+              "alaindustrial:electrum_cable"
             ]
           }
         ]
@@ -26,14 +26,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "pattern": [
-    "C C",
-    " X ",
-    "CAC"
+    " Y ",
+    "ECE"
   ],
   "key": {
-    "C": "minecraft:redstone",
-    "X": "quarryindustrial:quarry_casing",
-    "A": "minecraft:hopper"
+    "Y": "minecraft:yellow_concrete",
+    "E": "minecraft:copper_ingot",
+    "C": "minecraft:redstone"
   },
   "result": {
     "id": "quarryindustrial:energy_splitter"

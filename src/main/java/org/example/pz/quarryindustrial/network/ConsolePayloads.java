@@ -104,8 +104,7 @@ public final class ConsolePayloads {
      * Un pad: {@code kind} es el ordinal del dron (-1 sin dron), {@code energy} en tanto por mil (-1 si el chunk
      * no está cargado y no se sabe), {@code range} el alcance del dron en bloques según sus mejoras (0 sin dron).
      * Si el explorador tiene una salida pedida, {@code surveyCenter} es dónde va a barrer (el pad mismo si es
-     * alrededor suyo), {@code surveyCost} lo que cuesta el recorrido y {@code stored} la energía que tiene el pad (EU).
-     */
+     * alrededor suyo), {@code surveyCost} lo que cuesta el recorrido y {@code stored} la energía que tiene el pad (EU).     */
     public record Pad(BlockPos pos, int kind, int status, Optional<BlockPos> link, boolean loaded, int energy,
                       int range, Optional<BlockPos> surveyCenter, long surveyCost, long stored) {
         public static final StreamCodec<ByteBuf, Pad> CODEC = StreamCodec.composite(
@@ -136,10 +135,12 @@ public final class ConsolePayloads {
                 Flight::new);
     }
 
-    public record Site(BlockPos pos, BlockPos finder) {
+    /** Petróleo visto por un explorador: un géiser (se bombea para siempre) o un lago de superficie (finito). */
+    public record Site(BlockPos pos, BlockPos finder, boolean geyser) {
         public static final StreamCodec<ByteBuf, Site> CODEC = StreamCodec.composite(
                 BlockPos.STREAM_CODEC, Site::pos,
                 BlockPos.STREAM_CODEC, Site::finder,
+                ByteBufCodecs.BOOL, Site::geyser,
                 Site::new);
     }
 

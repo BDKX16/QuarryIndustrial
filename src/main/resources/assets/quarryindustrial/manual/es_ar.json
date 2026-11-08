@@ -245,7 +245,7 @@
         },
         {
           "title": "Mantenimiento y exploración",
-          "text": "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres que vio.",
+          "text": "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques (hasta 1216 con 17 mejoras de alcance; desde la centralita lo mandás hasta 10.000 bloques del pad) y vuelve con un informe de todos los géiseres y lagos de petróleo que vio. Los géiseres son infinitos: una cigüeña los bombea para siempre. Los lagos son charcos finitos de superficie.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",

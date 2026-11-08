@@ -207,9 +207,9 @@ public class DroneGameTests {
         });
     }
 
-    /** Un charco de petróleo en la superficie: el explorador lo ve y vuelve con el informe. */
+    /** Un charco de petróleo en la superficie, sin caño: el explorador lo anota como lago (finito), no como géiser. */
     @GameTest(maxTicks = 600, skyAccess = true)
-    public void surveyDroneFindsAGeyser(GameTestHelper helper) {
+    public void surveyDroneFindsALake(GameTestHelper helper) {
         if (!FabricLoader.getInstance().isModLoaded("alaindustrial")) {
             helper.succeed();
             return;
@@ -224,10 +224,55 @@ public class DroneGameTests {
             helper.assertTrue(pad.droneDocked(), "el explorador volvió: " + pad.status() + " drones " + drones(helper));
             ItemStack report = pad.peekInbox();
             helper.assertTrue(report.is(ModItems.SURVEY_REPORT), "hay informe en el buzón: " + report);
+            List<BlockPos> lakes = report.getOrDefault(ModComponents.SURVEY_LAKES, List.of());
+            helper.assertTrue(lakes.contains(expected), "el informe marca el lago " + expected + ": " + lakes);
+            helper.assertTrue(report.getOrDefault(ModComponents.SURVEY_SITES, List.of()).isEmpty(),
+                    "un charco no es un géiser");
+            helper.assertTrue(DroneNetwork.get(helper.getLevel()).sites().stream()
+                    .anyMatch(site -> site.pos().equals(expected) && !site.geyser()), "la centralita ve el lago");
+        });
+    }
+
+    /**
+     * Un géiser en miniatura (caño de 1x1 sellado y una cavidad debajo, con el petróleo arriba de todo): el
+     * explorador lo anota como géiser, que se bombea para siempre.
+     */
+    @GameTest(maxTicks = 600, skyAccess = true)
+    public void surveyDroneFindsAGeyser(GameTestHelper helper) {
+        if (!FabricLoader.getInstance().isModLoaded("alaindustrial")) {
+            helper.succeed();
+            return;
+        }
+        fastDrones();
+        QuarryConfig.Pumpjack well = QuarryConfig.get().pumpjack;
+        well.minShaftLength = 1;
+        well.minCavityRadius = 1;
+        well.maxCavityCenterY = 10_000;
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.SURVEY);
+        // Anillo de roca alrededor del caño (y 3..4) y una cavidad abierta debajo (y 1..2)
+        for (int x = 4; x <= 6; x++) {
+            for (int z = 2; z <= 4; z++) {
+                helper.setBlock(x, 3, z, Blocks.STONE);
+                helper.setBlock(x, 4, z, Blocks.STONE);
+            }
+        }
+        for (int y = 3; y <= 4; y++) {
+            helper.setBlock(5, y, 3, Blocks.AIR);
+        }
+        BlockPos oil = new BlockPos(5, 4, 3);
+        helper.setBlock(oil, OilFluids.sourceFluid().defaultFluidState().createLegacyBlock());
+        pad.requestSurvey();
+        BlockPos expected = helper.absolutePos(oil);
+        helper.succeedWhen(() -> {
+            helper.assertTrue(pad.droneDocked(), "el explorador volvió: " + pad.status() + " drones " + drones(helper));
+            ItemStack report = pad.peekInbox();
+            helper.assertTrue(report.is(ModItems.SURVEY_REPORT), "hay informe en el buzón: " + report);
             List<BlockPos> sites = report.getOrDefault(ModComponents.SURVEY_SITES, List.of());
             helper.assertTrue(sites.contains(expected), "el informe marca el géiser " + expected + ": " + sites);
+            helper.assertTrue(report.getOrDefault(ModComponents.SURVEY_LAKES, List.of()).isEmpty(),
+                    "un géiser no es un lago");
             helper.assertTrue(DroneNetwork.get(helper.getLevel()).sites().stream()
-                    .anyMatch(site -> site.pos().equals(expected)), "la centralita ve el géiser en el mapa");
+                    .anyMatch(site -> site.pos().equals(expected) && site.geyser()), "la centralita ve el géiser");
         });
     }
 

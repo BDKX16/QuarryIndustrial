@@ -220,7 +220,7 @@ public final class DroneConsoleService {
         List<Site> sites = new ArrayList<>();
         for (DroneNetwork.Site site : network.sites()) {
             if (inRange(zones, site.pos())) {
-                sites.add(new Site(site.pos(), site.finder()));
+                sites.add(new Site(site.pos(), site.finder(), site.geyser()));
             }
         }
         QuarryConfig.Drones config = QuarryConfig.get().drones;
@@ -277,6 +277,9 @@ public final class DroneConsoleService {
         }
         if (target != null && !inRange(zones, target)) {
             return error(Component.translatable("message.quarryindustrial.console.survey_out_of_range"));
+        }
+        if (!pad.withinSurveyReach(target)) {
+            return error(Component.translatable("message.quarryindustrial.console.survey_too_far", pad.surveyReach()));
         }
         long cost = pad.surveyCost(target);
         if (!pad.requestSurvey(target)) {

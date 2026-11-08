@@ -80,6 +80,8 @@ public class DroneConsoleScreen extends Screen {
     private static final int EMPTY_PAD = 0xFF6A7380;
     private static final int OIL = 0xFF0E0E10;
     private static final int OIL_RIM = 0xFFB050FF;
+    /** Contorno de los lagos de petróleo (finitos): gris azulado, distinto del violeta de los géiseres. */
+    private static final int LAKE_RIM = 0xFF7C8A9A;
 
     /** Gota de petróleo de 5×7 para los géiseres ('#' petróleo, 'w' brillo). */
     private static final String[] DROP = {
@@ -566,7 +568,7 @@ public class DroneConsoleScreen extends Screen {
             drawFlightPath(graphics, flight);
         }
         for (Site site : sites()) {
-            drawDrop(graphics, screenX(site.pos().getX() + 0.5), screenZ(site.pos().getZ() + 0.5));
+            drawSite(graphics, screenX(site.pos().getX() + 0.5), screenZ(site.pos().getZ() + 0.5), site.geyser());
         }
         drawConsoleMarker(graphics);
         for (Pad pad : pads()) {
@@ -744,6 +746,22 @@ public class DroneConsoleScreen extends Screen {
         graphics.fill(x, z - 6, x + 1, z - 3, FLYING);
     }
 
+    /** Géiser: la gota con contorno violeta. Lago: un charco chato con contorno gris, para no confundirlos. */
+    private void drawSite(GuiGraphicsExtractor graphics, int cx, int cz, boolean geyser) {
+        if (geyser) {
+            drawDrop(graphics, cx, cz);
+        } else {
+            drawPuddle(graphics, cx, cz);
+        }
+    }
+
+    private void drawPuddle(GuiGraphicsExtractor graphics, int cx, int cz) {
+        graphics.fill(cx - 4, cz - 2, cx + 5, cz + 3, LAKE_RIM);
+        graphics.fill(cx - 3, cz - 3, cx + 4, cz + 4, LAKE_RIM);
+        graphics.fill(cx - 3, cz - 2, cx + 4, cz + 3, OIL);
+        graphics.fill(cx - 2, cz - 1, cx, cz, 0xFF8A8A9A);
+    }
+
     private void drawDrop(GuiGraphicsExtractor graphics, int cx, int cz) {
         int x0 = cx - 2;
         int z0 = cz - 4;
@@ -791,8 +809,9 @@ public class DroneConsoleScreen extends Screen {
         int y = mapY + mapH - 14;
         Component pad = Component.translatable("gui.quarryindustrial.console.legend.pad");
         Component well = Component.translatable("gui.quarryindustrial.console.legend.well");
+        Component lake = Component.translatable("gui.quarryindustrial.console.legend.lake");
         Component route = Component.translatable("gui.quarryindustrial.console.legend.route");
-        int w = 14 + font.width(pad) + 18 + font.width(well) + 22 + font.width(route) + 4;
+        int w = 14 + font.width(pad) + 18 + font.width(well) + 6 + 14 + font.width(lake) + 22 + font.width(route) + 4;
         graphics.fill(x, y, x + w, y + 11, 0xC0071321);
         graphics.fill(x + 3, y + 2, x + 10, y + 9, 0xFF2B313A);
         graphics.fill(x + 5, y + 4, x + 8, y + 7, ACCENT);
@@ -803,6 +822,10 @@ public class DroneConsoleScreen extends Screen {
         tx += 10;
         graphics.text(font, well, tx, y + 2, DIM, false);
         tx += font.width(well) + 6;
+        drawPuddle(graphics, tx + 4, y + 5);
+        tx += 10;
+        graphics.text(font, lake, tx, y + 2, DIM, false);
+        tx += font.width(lake) + 6;
         line(graphics, tx, y + 5, tx + 12, y + 5, 0xFFE6AE12, 2);
         tx += 16;
         graphics.text(font, route, tx, y + 2, DIM, false);
@@ -1012,7 +1035,10 @@ public class DroneConsoleScreen extends Screen {
                 lines.add(Component.translatable("gui.quarryindustrial.console.link_here").withColor(ACCENT));
             }
         } else if (site != null) {
-            lines.add(Component.translatable("gui.quarryindustrial.console.site").withColor(OIL_RIM));
+            lines.add(Component.translatable(site.geyser() ? "gui.quarryindustrial.console.site"
+                    : "gui.quarryindustrial.console.site_lake").withColor(site.geyser() ? OIL_RIM : LAKE_RIM));
+            lines.add(Component.translatable(site.geyser() ? "gui.quarryindustrial.console.site_geyser_note"
+                    : "gui.quarryindustrial.console.site_lake_note").withColor(DIM));
             lines.add(Component.literal(coords(site.pos())).withColor(DIM));
             lines.add(Component.translatable("gui.quarryindustrial.console.site_finder", coords(site.finder()))
                     .withColor(DIM));
@@ -1114,8 +1140,10 @@ public class DroneConsoleScreen extends Screen {
         }
         drawRows(graphics, sorted.size(), mouseX, mouseY, (index, x, y, w, hovered) -> {
             Site site = sorted.get(index);
-            drawDrop(graphics, x + 12, y + ROW / 2);
-            graphics.text(font, Component.translatable("gui.quarryindustrial.console.site"), x + 25, y + 3, OIL_RIM, false);
+            drawSite(graphics, x + 12, y + ROW / 2, site.geyser());
+            graphics.text(font, Component.translatable(site.geyser() ? "gui.quarryindustrial.console.site"
+                            : "gui.quarryindustrial.console.site_lake"), x + 25, y + 3,
+                    site.geyser() ? OIL_RIM : LAKE_RIM, false);
             int right = x + w - 4;
             int by = y + (ROW - BUTTON_H) / 2;
             right = button(graphics, right, by, Component.translatable("gui.quarryindustrial.console.button.view"),

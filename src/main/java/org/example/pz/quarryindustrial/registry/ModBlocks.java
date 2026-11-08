@@ -49,6 +49,7 @@ public final class ModBlocks {
     public static final EnergySplitterBlock ENERGY_SPLITTER = register("energy_splitter", EnergySplitterBlock::new,
             BlockBehaviour.Properties.of()
                     .strength(3.5f)
+                    .noOcclusion()
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL));
     /** Sin loot table: el marco lo pone la quarry gratis (con EU), no tiene que poder farmearse. */

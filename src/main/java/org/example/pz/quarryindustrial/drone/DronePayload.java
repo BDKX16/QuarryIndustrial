@@ -16,7 +16,10 @@ public final class DronePayload {
     /** En gotas de Fabric (81000 por cubo). */
     public long fluidAmount;
     public long energy;
+    /** Géiseres (infinitos: caño sellado y domo debajo). */
     public final List<BlockPos> sites = new ArrayList<>();
+    /** Lagos de petróleo en la superficie (finitos: un charco, sin caño). */
+    public final List<BlockPos> lakes = new ArrayList<>();
 
     public boolean isEmpty() {
         return items.stream().allMatch(ItemStack::isEmpty) && fluidAmount <= 0 && energy <= 0;
@@ -28,6 +31,7 @@ public final class DronePayload {
         output.putLong("FluidAmount", fluidAmount);
         output.putLong("Energy", energy);
         output.store("Sites", BlockPos.CODEC.listOf(), List.copyOf(sites));
+        output.store("Lakes", BlockPos.CODEC.listOf(), List.copyOf(lakes));
     }
 
     public void load(ValueInput input) {
@@ -39,5 +43,7 @@ public final class DronePayload {
         energy = input.getLongOr("Energy", 0L);
         sites.clear();
         sites.addAll(input.read("Sites", BlockPos.CODEC.listOf()).orElse(List.of()));
+        lakes.clear();
+        lakes.addAll(input.read("Lakes", BlockPos.CODEC.listOf()).orElse(List.of()));
     }
 }

@@ -24,8 +24,16 @@ public class SurveyReportItem extends Item {
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltip, TooltipFlag flag) {
         List<BlockPos> sites = stack.getOrDefault(ModComponents.SURVEY_SITES, List.of());
-        if (sites.isEmpty()) {
+        List<BlockPos> lakes = stack.getOrDefault(ModComponents.SURVEY_LAKES, List.of());
+        if (sites.isEmpty() && lakes.isEmpty()) {
             tooltip.accept(Component.translatable("tooltip.quarryindustrial.survey.none").withStyle(ChatFormatting.GRAY));
+            return;
+        }
+        if (!lakes.isEmpty()) {
+            tooltip.accept(Component.translatable("tooltip.quarryindustrial.survey.lakes", lakes.size())
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
+        if (sites.isEmpty()) {
             return;
         }
         tooltip.accept(Component.translatable("tooltip.quarryindustrial.survey.found", sites.size())

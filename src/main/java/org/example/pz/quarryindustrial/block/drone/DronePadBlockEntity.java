@@ -399,6 +399,9 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
     /** Busca, en los chunks cargados alrededor, una quarry o plataforma que necesite broca nueva. */
     private void tickMaintenance(ServerLevel level, BlockPos pos) {
         setStatus(DronePadStatus.STANDBY);
+        if (tickCounter % TRANSFER_INTERVAL == 0) {
+            pullBitsFromNeighbours(level, pos);
+        }
         if (tickCounter % MAINTENANCE_INTERVAL != 0) {
             return;
         }
@@ -423,6 +426,20 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
             payload.items.add(outbox.removeItem(bitSlot, 1));
         }
         launch(level, DroneKind.MAINTENANCE, machine, payload, List.of(), id);
+    }
+
+    /** El dron de mantenimiento toma las brocas de los cofres pegados (solo brocas, nada más). */
+    private void pullBitsFromNeighbours(ServerLevel level, BlockPos pos) {
+        for (Direction direction : Direction.values()) {
+            BlockPos neighbour = pos.relative(direction);
+            if (level.getBlockEntity(neighbour) instanceof DronePadBlockEntity) {
+                continue;
+            }
+            Storage<ItemVariant> source = ItemStorage.SIDED.find(level, neighbour, direction.getOpposite());
+            if (source != null && source.supportsExtraction()) {
+                StorageUtil.move(source, outboxStorage, variant -> variant.getItem() instanceof DrillBitItem, 64, null);
+            }
+        }
     }
 
     private int firstBitSlot() {
@@ -490,13 +507,29 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
      */
     public boolean requestSurvey(@Nullable BlockPos center) {
         if (!(drone.getItem() instanceof DroneItem item) || item.kind() != DroneKind.SURVEY || flight != null
-                || surveyCost(center) > energy.getCapacity()) {
+                || !withinSurveyReach(center) || surveyCost(center) > energy.getCapacity()) {
             return false;
         }
         surveyRequested = true;
         surveyTarget = center == null ? null : center.immutable();
         markForSync();
         return true;
+    }
+
+    /** Hasta qué distancia del pad (en horizontal) se puede mandar a barrer. */
+    public int surveyReach() {
+        return QuarryConfig.get().drones.surveyMaxTravel;
+    }
+
+    /** El centro del barrido (null: el pad) cae dentro del alcance del pad. */
+    public boolean withinSurveyReach(@Nullable BlockPos center) {
+        if (center == null) {
+            return true;
+        }
+        double reach = surveyReach();
+        double dx = center.getX() - worldPosition.getX();
+        double dz = center.getZ() - worldPosition.getZ();
+        return dx * dx + dz * dz <= reach * reach;
     }
 
     /** Clic derecho en el pad con el explorador: lo manda a volar alrededor del pad. */
@@ -640,12 +673,17 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         }
         DronePayload payload = drone.payload();
         if (drone.kind() == DroneKind.SURVEY) {
-            if (!payload.sites.isEmpty() && level instanceof ServerLevel serverLevel) {
-                ModAdvancements.grant(serverLevel, worldPosition, ModAdvancements.PROSPECTOR);
-                DroneNetwork.get(serverLevel).addSites(payload.sites, worldPosition);
+            if (level instanceof ServerLevel serverLevel && !(payload.sites.isEmpty() && payload.lakes.isEmpty())) {
+                if (!payload.sites.isEmpty()) {
+                    ModAdvancements.grant(serverLevel, worldPosition, ModAdvancements.PROSPECTOR);
+                }
+                DroneNetwork network = DroneNetwork.get(serverLevel);
+                network.addSites(payload.sites, worldPosition, true);
+                network.addSites(payload.lakes, worldPosition, false);
             }
             ItemStack report = new ItemStack(ModItems.SURVEY_REPORT);
             report.set(ModComponents.SURVEY_SITES, List.copyOf(payload.sites));
+            report.set(ModComponents.SURVEY_LAKES, List.copyOf(payload.lakes));
             payload.items.add(report);
         }
         // Lo que no se pudo entregar vuelve al buzón de salida; lo que trae (brocas gastadas, informes) al de llegada
@@ -818,6 +856,7 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         values[16] = link == null ? 0 : tripCost(worldPosition, link);
         values[17] = chunkLoader ? 1 : 0;
         values[18] = surveyUpgrades;
+        values[19] = QuarryConfig.get().drones.surveyRangeMax;
     }
 
     /** El botón de la GUI: manda a explorar al dron explorador. */

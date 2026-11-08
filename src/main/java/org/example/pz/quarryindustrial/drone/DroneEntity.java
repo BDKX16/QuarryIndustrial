@@ -27,6 +27,7 @@ import org.example.pz.quarryindustrial.block.drone.DronePadBlockEntity;
 import org.example.pz.quarryindustrial.compat.AlaDistillery;
 import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.OilFluids;
+import org.example.pz.quarryindustrial.block.pumpjack.OilWellValidator;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
 import org.example.pz.quarryindustrial.registry.ModEntities;
@@ -101,6 +102,8 @@ public class DroneEntity extends Entity {
         payload.energy = from.energy;
         payload.sites.clear();
         payload.sites.addAll(from.sites);
+        payload.lakes.clear();
+        payload.lakes.addAll(from.lakes);
         entityData.set(LOADED, !payload.isEmpty());
     }
 
@@ -226,13 +229,24 @@ public class DroneEntity extends Entity {
                 }
                 int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1;
                 BlockPos surface = new BlockPos(x, top, z);
-                if (OilFluids.isOil(level.getBlockState(surface)) && payload.sites.stream()
-                        .noneMatch(site -> site.distSqr(surface) < 32 * 32)) {
-                    payload.sites.add(surface);
-                    entityData.set(LOADED, true);
+                if (!OilFluids.isOil(level.getBlockState(surface)) || known(surface)) {
+                    continue;
                 }
+                // Un géiser tiene caño sellado y domo debajo (bomba infinita); un charco de superficie, no
+                if (OilWellValidator.validate(level, surface.above()) != null) {
+                    payload.sites.add(surface);
+                } else {
+                    payload.lakes.add(surface);
+                }
+                entityData.set(LOADED, true);
             }
         }
+    }
+
+    /** Ya anotado (como géiser o como lago) a menos de 32 bloques. */
+    private boolean known(BlockPos surface) {
+        return payload.sites.stream().anyMatch(site -> site.distSqr(surface) < 32 * 32)
+                || payload.lakes.stream().anyMatch(lake -> lake.distSqr(surface) < 32 * 32);
     }
 
     private void arrive(ServerLevel level) {

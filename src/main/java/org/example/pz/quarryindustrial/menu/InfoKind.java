@@ -28,7 +28,8 @@ public enum InfoKind {
             Field.number("items_in", ""),
             Field.number("trip_cost", "EU"),
             Field.choice("chunk_loader", yesNo(), null),
-            Field.number("survey_upgrades", ""))),
+            Field.number("survey_upgrades", ""),
+            Field.number("survey_max", ""))),
     PUMPJACK("pumpjack", List.of(
             Field.choice("status", options(PumpjackStatus.values(), PumpjackStatus::label),
                     statusColors(PumpjackStatus.values())),
@@ -119,6 +120,17 @@ public enum InfoKind {
 
     public Component title() {
         return Component.translatable("block.quarryindustrial." + blockId);
+    }
+
+    /**
+     * Campos que no se dibujan como fila de texto: en el pad, las mejoras se ven en el panel desplegable
+     * (con sus ítems), no como líneas.
+     */
+    public boolean hidden(Field field) {
+        return this == PAD && switch (field.name()) {
+            case "chunk_loader", "survey_upgrades", "survey_max" -> true;
+            default -> false;
+        };
     }
 
     /** El pad tiene un botón para mandar a explorar, que solo sirve con el explorador adentro. */
