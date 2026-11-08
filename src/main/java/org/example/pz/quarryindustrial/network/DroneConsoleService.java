@@ -26,6 +26,7 @@ import org.example.pz.quarryindustrial.network.ConsolePayloads.Site;
 import org.example.pz.quarryindustrial.network.ConsolePayloads.Snapshot;
 import org.example.pz.quarryindustrial.registry.ModBlocks;
 import org.example.pz.quarryindustrial.registry.ModEntities;
+import org.example.pz.quarryindustrial.registry.ModItems;
 import org.example.pz.quarryindustrial.registry.ModTickets;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +38,8 @@ import java.util.Optional;
 public final class DroneConsoleService {
     /** Hasta dónde puede estar el jugador de la centralita (como cualquier GUI de bloque). */
     private static final double REACH_SQR = 8 * 8;
+    /** Con el vinculador en la mano se puede caminar un poco sin que se cierre el mapa. */
+    private static final double HANDHELD_REACH_SQR = 48 * 48;
 
     private DroneConsoleService() {
     }
@@ -87,8 +90,13 @@ public final class DroneConsoleService {
     }
 
     private static boolean atConsole(ServerPlayer player, BlockPos console) {
-        return player.level().getBlockState(console).is(ModBlocks.DRONE_CONSOLE)
-                && player.distanceToSqr(Vec3.atCenterOf(console)) <= REACH_SQR;
+        if (player.level().getBlockState(console).is(ModBlocks.DRONE_CONSOLE)
+                && player.distanceToSqr(Vec3.atCenterOf(console)) <= REACH_SQR) {
+            return true;
+        }
+        // Consola portátil: el vinculador en la mano hace de centralita, centrada donde se abrió
+        return (player.getMainHandItem().is(ModItems.DRONE_LINKER) || player.getOffhandItem().is(ModItems.DRONE_LINKER))
+                && player.distanceToSqr(Vec3.atCenterOf(console)) <= HANDHELD_REACH_SQR;
     }
 
     /** Una zona circular (horizontal) que ve la centralita: ella misma o un radar repetidor. */

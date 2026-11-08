@@ -77,6 +77,7 @@ public final class ModItems {
                         output.accept(ModBlocks.QUARRY_CORE);
                         output.accept(ModBlocks.QUARRY_CASING);
                         output.accept(ModBlocks.ENERGY_PORT);
+                        output.accept(ModBlocks.ENERGY_SPLITTER);
                         output.accept(ModBlocks.PUMPJACK);
                         output.accept(ModBlocks.OFFSHORE_RIG);
                         output.accept(ModBlocks.DIESEL_GENERATOR);

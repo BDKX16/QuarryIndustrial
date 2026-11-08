@@ -14,7 +14,8 @@
       "org.example.pz.quarryindustrial.gametest.DrillBitGameTests",
       "org.example.pz.quarryindustrial.gametest.GeneratorGameTests",
       "org.example.pz.quarryindustrial.gametest.OffshoreGameTests",
-      "org.example.pz.quarryindustrial.gametest.DroneGameTests"
+      "org.example.pz.quarryindustrial.gametest.DroneGameTests",
+      "org.example.pz.quarryindustrial.gametest.CableConnectionGameTests"
     ],
     "fabric-client-gametest": [
       "org.example.pz.quarryindustrial.gametest.ShowcaseClientGameTest",

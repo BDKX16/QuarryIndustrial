@@ -3,6 +3,7 @@ package org.example.pz.quarryindustrial.item;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -18,12 +19,25 @@ import org.example.pz.quarryindustrial.registry.ModComponents;
 import java.util.function.Consumer;
 
 /**
- * Vinculador de drones. Agachado + clic en un pad: lo elige como origen. Clic en otro pad: el dron del origen
+ * Vinculador de drones. Clic derecho al aire abre el mapa de drones (centralita portátil). Agachado + clic en un pad: lo elige como origen. Clic en otro pad: el dron del origen
  * va a llevar la carga a ese pad. Agachado + clic en el mismo origen: le borra el destino.
  */
 public class DroneLinkerItem extends Item {
+    /** Lo engancha el cliente para abrir el mapa de drones centrado en el jugador; en el servidor no hace nada. */
+    public static Consumer<BlockPos> openConsole = pos -> {
+    };
+
     public DroneLinkerItem(Properties properties) {
         super(properties);
+    }
+
+    /** Clic derecho al aire (o a cualquier bloque que no sea un pad): abre el mapa, como la centralita. */
+    @Override
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (level.isClientSide()) {
+            openConsole.accept(player.blockPosition().immutable());
+        }
+        return InteractionResult.SUCCESS;
     }
 
     @Override

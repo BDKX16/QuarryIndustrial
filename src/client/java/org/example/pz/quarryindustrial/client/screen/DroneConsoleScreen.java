@@ -128,8 +128,16 @@ public class DroneConsoleScreen extends Screen {
     private boolean noticeOk;
     private int noticeTicks;
 
+    /** true: abierta con el vinculador en la mano, sin bloque centralita. */
+    private final boolean handheld;
+
     public DroneConsoleScreen(BlockPos console) {
+        this(console, false);
+    }
+
+    public DroneConsoleScreen(BlockPos console, boolean handheld) {
         super(Component.translatable("block.quarryindustrial.drone_console"));
+        this.handheld = handheld;
         this.console = console;
         this.centerX = console.getX() + 0.5;
         this.centerZ = console.getZ() + 0.5;
@@ -170,8 +178,11 @@ public class DroneConsoleScreen extends Screen {
         if (noticeTicks > 0) {
             noticeTicks--;
         }
-        if (minecraft.player != null
-                && minecraft.player.distanceToSqr(Vec3.atCenterOf(console)) > 8 * 8) {
+        if (minecraft.player != null && (handheld
+                ? !minecraft.player.getMainHandItem().is(ModItems.DRONE_LINKER)
+                        && !minecraft.player.getOffhandItem().is(ModItems.DRONE_LINKER)
+                        || minecraft.player.distanceToSqr(Vec3.atCenterOf(console)) > 48 * 48
+                : minecraft.player.distanceToSqr(Vec3.atCenterOf(console)) > 8 * 8)) {
             onClose();
         }
     }

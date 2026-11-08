@@ -83,7 +83,7 @@ public final class MachineSounds {
             }
         } else if (machine instanceof SteamTurbineBlockEntity turbine) {
             if (turbine.getBlockState().getValue(GeneratorBlock.LIT)) {
-                start(turbine, ModSounds.TURBINE, 0.5f, 1.0f, () -> Vec3.atCenterOf(pos),
+                start(turbine, ModSounds.TURBINE, 0.25f, 1.0f, () -> Vec3.atCenterOf(pos),
                         () -> !turbine.isRemoved() && turbine.getBlockState().getValue(GeneratorBlock.LIT));
             }
         } else if (machine instanceof PumpjackBlockEntity pumpjack) {

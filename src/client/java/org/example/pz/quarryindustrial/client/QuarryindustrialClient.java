@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import org.example.pz.quarryindustrial.ClientEffects;
 import org.example.pz.quarryindustrial.block.drone.DroneConsoleBlock;
+import org.example.pz.quarryindustrial.item.DroneLinkerItem;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.client.manual.ManualScreen;
 import org.example.pz.quarryindustrial.item.ManualItem;
@@ -44,6 +45,7 @@ public class QuarryindustrialClient implements ClientModInitializer {
         MenuScreens.register(ModMenus.INFO, InfoScreen::new);
         ManualItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new ManualScreen());
         DroneConsoleBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new DroneConsoleScreen(pos));
+        DroneLinkerItem.openConsole = pos -> Minecraft.getInstance().gui.setScreen(new DroneConsoleScreen(pos, true));
         ClientPlayNetworking.registerGlobalReceiver(ConsolePayloads.Snapshot.TYPE, (payload, context) -> {
             if (context.client().gui.screen() instanceof DroneConsoleScreen screen) {
                 screen.accept(payload);

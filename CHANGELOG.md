@@ -1,6 +1,27 @@
 # Changelog
 
-## Sin publicar — Viajes del explorador
+## 1.2.8 — Distribuidor de energía y consola portátil
+
+### Nuevo
+
+- **Distribuidor de energía** (`energy_splitter`). Recibe EU de un cable por cualquier cara y los reparte a partes
+  iguales entre todo lo que tenga pegado (cables, pads de drones, máquinas). Si un destino se llena, lo que sobra va a
+  los otros, así que con varios pads en la salida de un reactor ya no se llena primero el que está más cerca. Una cara
+  que le acaba de dar energía no recibe nada de vuelta, y nadie puede sacarle energía desde afuera. Guarda 8.192 EU y
+  mueve hasta 2.048 EU/t (`splitterCapacity` y `splitterMaxTransfer`). Tiene receta con y sin Ala Industrial.
+- **Consola portátil.** Clic derecho al aire con el vinculador de drones abre el mismo mapa que la centralita (pads,
+  drones, vinculación y viajes), centrado donde estás y con el alcance de la centralita. Se cierra si soltás el
+  vinculador o te alejás más de 48 bloques. Sobre un pad, el vinculador funciona igual que antes.
+
+### Cambios
+
+- **Los cables de Ala Industrial ahora se ven conectados** a los pads de drones, las quarrys (LV, MV y HV), el puerto de
+  energía, el distribuidor, la cigüeña, la plataforma offshore y los generadores. Antes recibían energía igual, pero el
+  cable no dibujaba el brazo. Se puede sumar otro bloque con el tag `quarryindustrial:cable_connectable`. Sin Ala
+  Industrial no cambia nada.
+- **La turbina de vapor suena a la mitad de volumen.**
+
+## 1.2.7 — Viajes del explorador
 
 ### Nuevo
 

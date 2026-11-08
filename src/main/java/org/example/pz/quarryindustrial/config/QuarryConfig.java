@@ -38,6 +38,9 @@ public final class QuarryConfig {
     public Tier nuclear = new Tier(512, 2_000_000, 64, 144, 4, 400);
     /** Buffer de cada puerto de energía de la quarry nuclear. */
     public long energyPortCapacity = 4096;
+    /** Distribuidor de energía: buffer y EU/t máximos que entran y salen (alcanza para varios reactores HV). */
+    public long splitterCapacity = 8192;
+    public long splitterMaxTransfer = 2_048;
     /** Máximo de puertos que cuenta el core (los demás quedan como carcasa). */
     public int maxEnergyPorts = 8;
 

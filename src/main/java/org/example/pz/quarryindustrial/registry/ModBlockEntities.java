@@ -14,6 +14,7 @@ import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackPartBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.EnergyPortBlockEntity;
+import org.example.pz.quarryindustrial.block.splitter.EnergySplitterBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import team.reborn.energy.api.EnergyStorage;
 
@@ -28,7 +29,10 @@ public final class ModBlockEntities {
     public static final BlockEntityType<EnergyPortBlockEntity> ENERGY_PORT = Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, Quarryindustrial.id("energy_port"),
             new BlockEntityType<>(EnergyPortBlockEntity::new, Set.of(ModBlocks.ENERGY_PORT)));
-    public static final BlockEntityType<PumpjackBlockEntity> PUMPJACK = Registry.register(
+    public static final BlockEntityType<EnergySplitterBlockEntity> ENERGY_SPLITTER = Registry.register(
+            BuiltInRegistries.BLOCK_ENTITY_TYPE, Quarryindustrial.id("energy_splitter"),
+            new BlockEntityType<>(EnergySplitterBlockEntity::new, Set.of(ModBlocks.ENERGY_SPLITTER)));
+    public static final BlockEntityType<PumpjackBlockEntity> PUMPJACK =Registry.register(
             BuiltInRegistries.BLOCK_ENTITY_TYPE, Quarryindustrial.id("pumpjack"),
             new BlockEntityType<>(PumpjackBlockEntity::new, Set.of(ModBlocks.PUMPJACK)));
     public static final BlockEntityType<PumpjackPartBlockEntity> PUMPJACK_PART = Registry.register(
@@ -64,6 +68,7 @@ public final class ModBlockEntities {
         EnergyStorage.SIDED.registerForBlockEntity(
                 (quarry, side) -> quarry.tier().multiblock() ? null : quarry.energy, QUARRY);
         EnergyStorage.SIDED.registerForBlockEntity((port, side) -> port.energy, ENERGY_PORT);
+        EnergyStorage.SIDED.registerForBlockEntity((splitter, side) -> splitter.storageFor(side), ENERGY_SPLITTER);
         // Tuberías y tolvas pueden sacar los drops del buffer por cualquier cara
         ItemStorage.SIDED.registerForBlockEntity((quarry, side) -> quarry.itemStorage(), QUARRY);
         // Agua de refrigeración: entra por cualquier cara (en la nuclear, por el core)

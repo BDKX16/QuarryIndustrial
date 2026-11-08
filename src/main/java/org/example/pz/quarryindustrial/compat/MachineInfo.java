@@ -13,6 +13,7 @@ import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackBlockEntity;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackPartBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.EnergyPortBlockEntity;
+import org.example.pz.quarryindustrial.block.splitter.EnergySplitterBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlockEntity;
 import org.example.pz.quarryindustrial.block.quarry.QuarryStatus;
 import org.example.pz.quarryindustrial.config.QuarryConfig;
@@ -83,6 +84,8 @@ public final class MachineInfo {
                 lines.add(energy(pad.energy.getAmount(), pad.energy.getCapacity()));
             }
             case EnergyPortBlockEntity port -> lines.add(energy(port.energy.getAmount(), port.energy.getCapacity()));
+            case EnergySplitterBlockEntity splitter ->
+                    lines.add(energy(splitter.energy.getAmount(), splitter.energy.getCapacity()));
             default -> {
             }
         }

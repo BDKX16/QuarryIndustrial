@@ -20,6 +20,7 @@ import org.example.pz.quarryindustrial.block.offshore.OffshoreLegBlock;
 import org.example.pz.quarryindustrial.block.offshore.OffshoreRigBlock;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackBlock;
 import org.example.pz.quarryindustrial.block.pumpjack.PumpjackPartBlock;
+import org.example.pz.quarryindustrial.block.splitter.EnergySplitterBlock;
 import org.example.pz.quarryindustrial.block.quarry.EnergyPortBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryBlock;
 import org.example.pz.quarryindustrial.block.quarry.QuarryFrameBlock;
@@ -44,6 +45,12 @@ public final class ModBlocks {
                     .strength(5.0f, 12.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.NETHERITE_BLOCK));
+    /** Reparte la energía de un cable en partes iguales entre todo lo que tenga pegado. */
+    public static final EnergySplitterBlock ENERGY_SPLITTER = register("energy_splitter", EnergySplitterBlock::new,
+            BlockBehaviour.Properties.of()
+                    .strength(3.5f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL));
     /** Sin loot table: el marco lo pone la quarry gratis (con EU), no tiene que poder farmearse. */
     public static final QuarryFrameBlock QUARRY_FRAME = register("quarry_frame", QuarryFrameBlock::new,
             BlockBehaviour.Properties.of()
