@@ -25,6 +25,10 @@
   contra el que lo colocás. Receta más barata y de drones: 2 cables de electrum, 1 circuito electrónico y 1 hormigón
   amarillo (sin Ala Industrial: 2 lingotes de cobre, redstone y hormigón amarillo).
 
+- **La config se migra sola al actualizar.** El archivo guarda un `configVersion`; al pasar a la 1.2.9, el máximo de
+  mejoras del explorador (`surveyRangeMax`) pasa de 4 a 17 y `maintenanceRangeBonus` de 384 a 90, pero solo si todavía
+  tienen el valor viejo: lo que el admin personalizó no se toca. No hace falta editar nada a mano.
+
 ### Arreglos
 
 - **Los distribuidores ahora se pasan la energía entre sí** (pegados o con un cable en el medio). Antes el pad

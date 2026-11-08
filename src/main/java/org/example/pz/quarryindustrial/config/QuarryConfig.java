@@ -15,11 +15,17 @@ import java.nio.file.Path;
 /**
  * Todos los números de balance en {@code config/quarryindustrial.json}. Se lee una vez al arrancar;
  * los campos que falten en el archivo toman el valor por defecto y el archivo se reescribe completo,
- * así una actualización del mod agrega las opciones nuevas sin pisar las que el admin cambió.
+ * así una actualización del mod agrega las opciones nuevas sin pisar las que el admin cambió. Cuando una
+ * versión mueve un valor por defecto, {@link #migrate} lo actualiza solo en los archivos que aún tienen el viejo.
  */
 public final class QuarryConfig {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static QuarryConfig instance = new QuarryConfig();
+
+    /** Versión de los valores por defecto con la que se escribió el archivo (ver {@link #migrate}). */
+    private static final int CONFIG_VERSION = 1;
+    /** 0 en los archivos de antes de que existiera el número: Gson deja este valor si el campo falta. */
+    public int configVersion = 0;
 
     // ── Coste por bloque: base × (1 + dureza) × multiplicadores de upgrades ──
     public long baseCostPerBlock = 50;
@@ -280,16 +286,38 @@ public final class QuarryConfig {
                 QuarryConfig read = GSON.fromJson(reader, QuarryConfig.class);
                 if (read != null) {
                     instance = read;
+                    migrate(instance);
                 }
             } catch (IOException | JsonParseException e) {
                 Quarryindustrial.LOGGER.error("No se pudo leer {}, uso los valores por defecto", path, e);
             }
+        } else {
+            instance.configVersion = CONFIG_VERSION;
         }
         try (Writer writer = Files.newBufferedWriter(path)) {
             GSON.toJson(instance, writer);
         } catch (IOException e) {
             Quarryindustrial.LOGGER.warn("No se pudo escribir {}", path, e);
         }
+    }
+
+    /**
+     * Al actualizar, un archivo viejo conserva sus valores aunque el mod cambie los por defecto. Para los pocos que
+     * hay que mover (rebalanceos), se cambia el valor solo si sigue siendo el viejo por defecto: lo que el admin
+     * personalizó no se toca.
+     */
+    private static void migrate(QuarryConfig config) {
+        if (config.configVersion < 1) {
+            // 1.2.9: 17 mejoras de alcance del explorador (antes 4) y el bonus del mantenimiento por mejora, para que
+            // con todas siga llegando a ~2040 bloques
+            if (config.drones.surveyRangeMax == 4) {
+                config.drones.surveyRangeMax = 17;
+            }
+            if (config.drones.maintenanceRangeBonus == 384) {
+                config.drones.maintenanceRangeBonus = 90;
+            }
+        }
+        config.configVersion = CONFIG_VERSION;
     }
 
     private QuarryConfig() {
