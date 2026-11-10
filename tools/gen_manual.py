@@ -226,26 +226,50 @@ CHAPTERS = [
          "energía: una batería voladora de 400k EU.\n\nLo que el destino no puede recibir vuelve con el dron.",
          [Q + "cargo_drone", Q + "tanker_drone", Q + "power_drone"]),
         ("Maintenance and survey", "Mantenimiento y exploración",
-         "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and "
-         "swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad "
-         "to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
-         "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) "
-         "y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho "
-         "en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres "
-         "que vio.",
+         "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks "
+         "(up to 2048 with Survey Range Upgrades) and swaps a bit when it is 90% worn or gone, bringing the old "
+         "one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back "
+         "a Survey Report with every oil geyser it saw and every oil lake. Geysers are infinite: a pumpjack drains "
+         "them forever. Lakes are finite surface pools.",
+         "Dron de mantenimiento: poné brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 "
+         "bloques (hasta 2048 con mejoras de alcance) y cambia la broca cuando está gastada al 90 % o falta, y "
+         "trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques "
+         "y vuelve con un informe de todos los géiseres y lagos de petróleo que vio. Los géiseres son infinitos: "
+         "una cigüeña los bombea para siempre. Los lagos son charcos finitos de superficie.",
          [Q + "maintenance_drone", Q + "survey_drone", Q + "survey_report"]),
+        ("Long-range surveys", "Exploración de largo alcance",
+         "Survey Range Upgrade: right-click a pad with it. Each one adds 64 blocks to the sweep (up to 17 per pad: "
+         "1216 blocks of radius) and about 90 to the Maintenance Drone's reach (2040 with all 17).\n\nYou can also "
+         "send the Survey Drone somewhere else: in the Drone Control Station press Travel and click the map. It "
+         "flies there (up to 10,000 blocks from its pad), sweeps the area and comes back with the report. The trip "
+         "costs 1 EU per block plus the sweep, taken from the pad: the biggest sweep needs about 500,000 EU, "
+         "which is what a pad stores. If the pad does not have enough yet, the drone leaves as soon as it "
+         "charges.\n\nLakes run dry, so a base that lasts keeps needing fresh oil fields: with a charged pad and "
+         "all the upgrades you can keep finding them, however far they are.",
+         "Mejora de alcance del explorador: clic derecho en un pad con ella. Cada una suma 64 bloques al barrido "
+         "(hasta 17 por pad: 1216 bloques de radio) y unos 90 al alcance del dron de mantenimiento (2040 con las "
+         "17).\n\nTambién podés mandar al explorador a otro lado: en la centralita de drones apretá Viajar y hacé "
+         "clic en el mapa. Vuela hasta ahí (hasta 10.000 bloques de su pad), barre la zona y vuelve con el "
+         "informe. El viaje cuesta 1 EU por bloque más el barrido, que sale de la energía del pad: el barrido más "
+         "grande pide unos 500.000 EU, que es lo que guarda un pad. Si todavía no le alcanza, el dron sale apenas "
+         "se cargue.\n\nLos lagos se secan, así que una base que dura necesita yacimientos nuevos: con el pad "
+         "cargado y todas las mejoras podés seguir encontrándolos, por lejos que estén.",
+         [Q + "survey_range_upgrade", Q + "survey_drone", Q + "drone_console"]),
         ("Drone Control Station", "Centralita de drones",
          "Right-click the station to open a map of every pad within 1024 blocks. The map shows the terrain you "
-         "have loaded, each pad's link as a dashed line, drones in flight (with the survey drone's remaining "
-         "sweep) and every oil geyser your survey drones found, as a black drop.\n\nClick a pad to select it, "
-         "then Link and click the destination pad. The Drones tab lists every pad with its status; the Wells tab "
-         "lists the geysers. You can also launch survey drones from here.",
-         "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el terreno "
-         "que tenés cargado, el vínculo de cada pad como una línea a trazos, los drones en vuelo (con lo que le "
-         "falta del barrido al explorador) y cada géiser que encontraron tus exploradores, como una gota negra."
-         "\n\nClic en un pad para elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista "
-         "todos los pads con su estado; la de Pozos, los géiseres. También podés mandar a explorar desde acá.",
-         [Q + "drone_console"]),
+         "have explored (it remembers it), each pad's link as a dashed line, drones in flight (with the survey "
+         "drone's remaining sweep), the range ring of the selected pad, and every oil geyser (violet drop) and lake "
+         "(grey pool) your survey drones found.\n\nClick a pad to select it, then Link and click the destination "
+         "pad. The Drones tab lists every pad with its status; the Wells tab lists the geysers and lakes. Press "
+         "Travel to send the survey drone to any spot of the map. Radar Repeaters extend the station's coverage.",
+         "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el "
+         "terreno que exploraste (lo recuerda), el vínculo de cada pad como una línea a trazos, los drones en "
+         "vuelo (con lo que le falta del barrido al explorador), el anillo de alcance del pad elegido y cada "
+         "géiser (gota violeta) y lago (charco gris) que encontraron tus exploradores.\n\nClic en un pad para "
+         "elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista todos los pads con su "
+         "estado; la de Pozos, los géiseres y lagos. Apretá Viajar para mandar al explorador a cualquier punto "
+         "del mapa. Los radares repetidores amplían la cobertura de la centralita.",
+         [Q + "drone_console", Q + "drone_radar"]),
         ("If something goes wrong", "Si algo sale mal",
          "Drones fly above everything and keep the chunk they are in loaded. Hit a drone to bring it down: it "
          "drops what it carried and reappears on its pad. If a pad hears nothing from its drone for 5 minutes, it "
@@ -254,6 +278,63 @@ CHAPTERS = [
          "suelta lo que llevaba y vuelve a aparecer en su pad. Si un pad no sabe nada de su dron por 5 minutos, lo "
          "da por perdido y el dron vuelve (sin la carga).",
          []),
+        ("Energy Distributor", "Distribuidor de energía",
+         "Splits the EU of a cable equally among everything touching it: cables, drone pads and machines. Energy "
+         "only comes in through its input arm, the one with the amber collar (it faces the block you placed it "
+         "against), and leaves through the other five sides, so an output can never be mistaken for an input. If one "
+         "destination fills up, the rest goes to the others: with several pads on one reactor's output, the nearest "
+         "no longer fills first.\n\nDistributors chain (an output into the next one's amber arm, touching or with a "
+         "cable between) and cables draw an arm to them. It stores 8192 EU and moves up to 2048 EU/t. Cheap to "
+         "make: 2 electrum cables, an electronic circuit and yellow concrete.",
+         "Reparte los EU de un cable en partes iguales entre todo lo que tenga pegado: cables, pads de drones y "
+         "máquinas. La energía entra solo por su brazo de entrada, el del collar ámbar (queda del lado del bloque "
+         "contra el que lo pusiste), y sale por los otros cinco lados, así que una salida nunca se confunde con "
+         "una entrada. Si un destino se llena, lo que sobra va a los otros: con varios pads en la salida de un "
+         "reactor, ya no se llena primero el más cercano.\n\nSe pueden encadenar (una salida al brazo ámbar del "
+         "siguiente, pegados o con un cable en el medio) y los cables dibujan un brazo hacia ellos. Guarda 8192 EU "
+         "y mueve hasta 2048 EU/t. Barato de hacer: 2 cables de electrum, un circuito electrónico y hormigón "
+         "amarillo.",
+         [Q + "energy_splitter"]),
+    ]),
+    ("filters", Q + "pipe_filter", "Pipe Filter", "Filtro de caño", [
+        ("Pipe Filter", "Filtro de caño",
+         "Clamps onto the arm of an Ala Industrial item pipe (basic or advanced) that touches an inventory: "
+         "right-click the arm with the filter in hand. From then on that side only lets the items you mark go "
+         "through, both when the pipe pulls from the inventory and when it pushes into it. It needs no energy "
+         "and you can see it on the pipe: an iron sleeve with a cyan band.\n\nRight-click it with an empty hand to "
+         "open its screen; put an item on a slot to mark it (nothing is consumed). Sneak + right-click takes it "
+         "off with its settings, and it drops if the pipe breaks. It only works with Ala Industrial's item pipes.",
+         "Se engancha al brazo de un caño de ítems de Ala Industrial (común o avanzado) que toque un inventario: "
+         "clic derecho en el brazo con el filtro en la mano. Desde ahí ese lado solo deja pasar los ítems que "
+         "marques, tanto cuando el caño saca del inventario como cuando le mete. No usa energía y se ve en el "
+         "caño: un manguito de hierro con una banda celeste.\n\nClic derecho con la mano vacía abre su pantalla; "
+         "poné un ítem en un casillero para marcarlo (no se gasta). Agachado + clic derecho lo saca con su "
+         "configuración, y se suelta si el caño se rompe. Solo funciona con los caños de ítems de Ala Industrial.",
+         [Q + "pipe_filter", A + "item_pipe", A + "item_pipe_advanced"]),
+        ("Expansion and lists", "Expansión y listas",
+         "Out of the box the filter has one slot. The Pipe Filter Expansion goes in its own panel on the right of "
+         "the screen and unlocks all five.\n\nWith one slot the button reads Allow / Deny; with the expansion it "
+         "becomes an Allow list / Deny list. Allow lets through only what is marked; Deny lets through everything "
+         "except what is marked. An empty allow list lets nothing through, an empty deny list lets everything "
+         "through. Both filter and expansion are crafted with an Ala Industrial Empty Chip.",
+         "De fábrica el filtro tiene un casillero. La Expansión de filtro va en su propio panel a la derecha de la "
+         "pantalla y desbloquea los cinco.\n\nCon un casillero el botón dice Permitir / Denegar; con la expansión "
+         "pasa a Lista blanca / Lista negra. Permitir deja pasar solo lo marcado; Denegar deja pasar todo menos "
+         "lo marcado. Una lista blanca vacía no deja pasar nada y una negra vacía lo deja pasar todo. El filtro y "
+         "la expansión se fabrican con un Chip vacío de Ala Industrial.",
+         [Q + "pipe_filter_upgrade", A + "empty_chip"]),
+        ("By item or by category", "Por ítem o por categoría",
+         "By item matches only the exact item you marked. By category matches every item that shares a category "
+         "(a tag) with it: mark an oak log and every kind of log goes through.\n\nAn item can belong to several "
+         "categories: click its slot to switch which one is used. While you are in category mode, a panel on the "
+         "right lists every item in the chosen category (scroll to see more) and hovering a slot shows its own. "
+         "Each button explains itself in a tooltip.",
+         "Por ítem coincide solo con el ítem exacto que marcaste. Por categoría coincide con todo ítem que "
+         "comparta una categoría (un tag) con él: marcás un tronco de roble y pasa cualquier tipo de "
+         "tronco.\n\nUn ítem puede tener varias categorías: clic en su casillero para cambiar cuál se usa. En modo "
+         "categoría, un panel a la derecha lista todos los ítems de la categoría elegida (rueda para ver más) y "
+         "al pasar el mouse por un casillero muestra la suya. Cada botón se explica en un tooltip.",
+         [Q + "pipe_filter", "minecraft:oak_log"]),
     ]),
     ("extras", "minecraft:spyglass", "Tips & Compatibility", "Consejos y compatibilidad", [
         ("Jade, JEI, REI", "Jade, JEI, REI",

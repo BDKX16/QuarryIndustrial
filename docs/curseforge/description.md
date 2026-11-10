@@ -14,7 +14,18 @@ Reborn Energy)**, so any compatible generator, cable or battery will do.
 
 ![What's new](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/headers/new.png)
 
-The latest updates turned the drones from a trick into a **logistics network**:
+The latest update puts **you in control of your item lines** and makes the drone network **sustainable late game**:
+
+- **Pipe Filter.** Clamp it onto an Ala Industrial item pipe and that side only lets through what you mark: one item
+  out of the box, five with the Expansion. Allow or deny, by exact item or by whole category ("every kind of log"),
+  with a panel that lists everything a category covers. No energy needed, and you can see it on the pipe.
+- **Energy Distributor.** One cable in, and its EU is shared equally among everything around it: cables, drone pads,
+  machines. Feed a whole drone site from a single reactor without the nearest pad hogging it all.
+- **Long-range surveying.** Up to 17 range upgrades per pad (a 1,216-block sweep) and a **Travel** button on the
+  console: send the survey drone to any spot up to 10,000 blocks away and it comes back with every oil geyser and
+  lake it found. Lakes run dry, so this is how a late-game base keeps finding fresh oil.
+
+Before that, the drones turned from a trick into a **logistics network**:
 
 - **A Drone Control Station with a real map.** One block shows every pad, every drone in flight and every oil
   geyser within a kilometre, over terrain it draws from the places you have actually walked. Link pads, send the
@@ -52,6 +63,10 @@ pipe with tool joints and a **tricone bit** whose three cones spin on their own 
   broken by a fake player carrying the owner's UUID, so claims behave.
 - **It will not flood your base.** Fluids inside the area are removed; fluids touching the border are dammed with
   cobblestone.
+
+![Quarries clearing chunks for a creeper farm](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/shots/40_site_quarries.jpg)
+
+*A real build: quarries stripping whole chunks for a massive creeper farm.*
 
 ![Drill close-up](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/shots/02_drill_closeup.jpg)
 
@@ -118,13 +133,18 @@ Drone Pads, a Drone Linker and five drones that take off, cruise above everythin
 - **Power:** a flying 400k EU battery for machines that are off the grid.
 - **Maintenance:** swaps worn drill bits on nearby quarries and rigs, and scrubs fouled Ala Industrial distillation
   columns.
-- **Survey:** sweeps a 128-block radius and brings back a report with every oil geyser it saw. Up to four **range
-  upgrades** per pad widen the sweep by 64 blocks each.
+- **Survey:** sweeps a 128-block radius and brings back a report with every oil geyser and lake it saw. Up to 17
+  **range upgrades** per pad widen the sweep by 64 blocks each (1,216 in total), and from the console you can send
+  it to **any spot up to 10,000 blocks away**: the trip costs 1 EU per block, taken from the pad.
 
 The pad at the other end drops the cargo into any chest, tank or machine touching it. The pad at the start pulls
 from any chest touching it. Plumbing optional.
 
 ![Drone pads](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/shots/14_drone_pads.jpg)
+
+![A whole site on the Drone Control Station](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/shots/41_site_console.png)
+
+*The same site from the Drone Control Station: 23 pads, their drone routes and the oil fields found so far.*
 
 ![](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/divider.png)
 
@@ -148,6 +168,31 @@ reaches, so a chain of them covers any distance.
 
 ![](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/divider.png)
 
+![Energy Distributor](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/headers/distributor.png)
+
+A discreet little hub you drop on a cable: the EU that comes in through its **amber-collared arm** is split equally
+among the other five sides, whether that is a cable, a drone pad or a machine. When one destination fills up, the
+rest flows to the others, so a row of pads on one reactor no longer fills nearest-first. Distributors **chain**
+(touching or with a cable between), hold 8,192 EU and move up to 2,048 EU/t, and cost two electrum cables, a circuit
+and some yellow concrete.
+
+![](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/divider.png)
+
+![Pipe Filter](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/headers/filter.png)
+
+Ala Industrial's item pipes move everything. The **Pipe Filter** clamps onto the arm of a pipe where it meets an
+inventory and decides what may pass, in or out, with no energy:
+
+- **One item, or five.** A single slot out of the box; the **Expansion**, in its own side panel, unlocks all five.
+- **Allow or deny.** Only what is marked, or everything except what is marked.
+- **By item or by category.** Mark an oak log and every kind of log goes through; a panel lists everything the
+  category covers.
+- **You can see it.** A filtered side shows an iron sleeve with a cyan band on the pipe's arm.
+
+Crafted with an Ala Industrial Empty Chip.
+
+![](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/divider.png)
+
 ![Ala Industrial, all the way](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/headers/ala.png)
 
 - **Diesel Generator** burns Ala's diesel, fuel oil or biofuel for up to 128 EU/t. Pumpjack, distillation, diesel,
@@ -160,7 +205,7 @@ reaches, so a chain of them covers any distance.
 
 ![Manual, sounds, advancements](https://raw.githubusercontent.com/BDKX16/QuarryIndustrial/main/docs/curseforge/headers/manual.png)
 
-An in-game **Operator's Manual** (ten chapters, English and Spanish) arrives with your first quarry. The machines
+An in-game **Operator's Manual** (eleven chapters, English and Spanish) arrives with your first quarry. The machines
 have voices of their own: drill, diesel engines, turbine, drones, the pumpjack's stroke and a stall alarm for when
 something stops. There are **14 advancements** to chase.
 
@@ -197,5 +242,8 @@ una **quarry nuclear multibloque** alimentada por hasta 8 reactores de Ala Indus
 ven gastarse) y se refrigeran con agua; cigüeñas y una plataforma offshore con petróleo infinito; generadores diésel
 y de vapor; y **cinco drones** (carga, cisterna, energía, mantenimiento y explorador) que se coordinan desde una
 **centralita con mapa**: recuerda el terreno que recorriste, muestra el alcance de cada dron según sus mejoras y se
-amplía con radares repetidores. El dron de mantenimiento hasta limpia las destilerías de Ala. Trae manual dentro del
-juego en español, sonidos propios y 14 logros. Funciona con EU (Team Reborn Energy).
+amplía con radares repetidores. El dron de mantenimiento hasta limpia las destilerías de Ala. El explorador llega hasta 10.000
+bloques desde su pad (con 17 mejoras barre 1216 de radio), y los lagos que se secan se reemplazan encontrando
+yacimientos nuevos. Un **distribuidor de energía** reparte los EU por partes iguales entre cables, pads y máquinas, y
+el **filtro de caño** deja pasar por cada lado de un caño de Ala solo lo que marques, por ítem o por categoría. Trae
+manual dentro del juego en español, sonidos propios y 14 logros. Funciona con EU (Team Reborn Energy).

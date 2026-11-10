@@ -40,6 +40,8 @@ Todo listo para copiar en el formulario de «Upload file» (ver el resto de los 
 
 ### Changes
 
+- The in-game manual gets a Pipe Filter chapter, an Energy Distributor page and a long-range surveying page (range
+  upgrades, the console's Travel button), and the console page now covers lakes, range rings and Radar Repeaters.
 - Shared drawing code for the mod's screens (quarry, machine info screens and the pipe filter), so their panels,
   slots and colours stay consistent.
 

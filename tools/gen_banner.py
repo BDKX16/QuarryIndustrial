@@ -230,6 +230,8 @@ ICONS = {
     "package": ["..bbbbbb.", ".bwwbwwwb", "bbbbbbbbb", "bwwwbwwwb", "bwwwbwwwb", "bwwwbwwwb", "bbbbbbbbb", ".........", "........."],
     "flag": ["bb.......", "bbwwwww..", "bbwwwwwww", "bbaaaaaaa", "bbaaaaaa.", "bb.......", "bb.......", "bb.......", "bbb......"],
     "console": ["bbbbbbbbb", "bdddddddb", "bd.dwd.db", "bdwdbdwdb", "bd.dwd.db", "bdddddddb", "bbbbbbbbb", "...bbb...", "..bbbbb.."],
+    "filter": ["bbbbbbbbb", ".bwwwwwb.", "..bwwwb..", "...bwb...", "...bab...", "...bab...", "...bbb...", ".........", "........."],
+    "splitter": ["....a....", "....a....", "..bbbbb..", "..bwwwb..", "..bbbbb..", ".b..b..b.", ".b..b..b.", "bbb.b.bbb", "........."],
     "new": ["...a.....", "..aaa..a.", ".aaaaa.aa", "..aaa..a.", "...a.....", ".....a...", "....aaa..", ".....a...", "........."],
 }
 ICON_COLORS = {"b": B4, "w": LIGHT, "a": A1, "d": B1}
@@ -242,6 +244,8 @@ HEADERS = {
     "offshore": ("offshore", "OFFSHORE DRILLING RIG"),
     "drones": ("drone", "DRONES"),
     "console": ("console", "DRONE CONTROL STATION"),
+    "filter": ("filter", "PIPE FILTER"),
+    "distributor": ("splitter", "ENERGY DISTRIBUTOR"),
     "ala": ("ala", "ALA INDUSTRIAL, ALL THE WAY"),
     "manual": ("manual", "MANUAL, SOUNDS, ADVANCEMENTS"),
     "upgrades": ("upgrade", "UPGRADES AND GUI"),

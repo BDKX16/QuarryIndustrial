@@ -18,6 +18,13 @@
     tooltip qué hace.
   - Receta con un Empty Chip de Ala (sin Ala: comparador). La expansión también lleva un chip.
 
+### Cambios
+
+- **Manual del operador ampliado.** Capítulo nuevo del filtro de caño (cómo se usa, expansión y listas, ítem o
+  categoría), página del distribuidor de energía en Generadores, página de exploración de largo alcance (mejoras,
+  viaje desde la centralita, por qué importa en el late game) y la centralita al día (lagos, alcance, repetidores).
+  También se corrigió el generador del manual, que se había quedado atrás del texto del explorador.
+
 ## 1.2.9 — Explorador de largo alcance, géiseres y lagos
 
 ### Nuevo
