@@ -136,7 +136,8 @@ public final class PipeFilterEvents {
         }
     }
 
-    private static void open(ServerPlayer player, BlockEntity pipe, Direction face, PipeFilterData data) {
+    /** Abre la GUI del filtro de esa cara. */
+    public static void open(ServerPlayer player, BlockEntity pipe, Direction face, PipeFilterData data) {
         BlockPos pos = pipe.getBlockPos();
         player.openMenu(new ExtendedMenuProvider<PipeFilterMenu.Open>() {
             @Override

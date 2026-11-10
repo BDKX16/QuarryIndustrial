@@ -13,6 +13,8 @@ import org.example.pz.quarryindustrial.block.quarry.QuarryStatus;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.example.pz.quarryindustrial.client.screen.ModGui.*;
+
 /**
  * Pantalla de la quarry, dibujada sin textura (rectángulos con el estilo de los inventarios vanilla):
  * barra de energía, estado, entrada de EU/t, capa y avance, minimapa de la capa actual, upgrades y buffer.
@@ -39,11 +41,6 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
     private static final int PROGRESS_Y = 72;
     private static final int PROGRESS_W = 102;
 
-    private static final int PANEL = 0xFFC6C6C6;
-    private static final int LIGHT = 0xFFFFFFFF;
-    private static final int SHADOW = 0xFF555555;
-    private static final int SLOT = 0xFF8B8B8B;
-    private static final int TEXT = 0xFF404040;
 
     public QuarryScreen(QuarryMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title, WIDTH, HEIGHT);
@@ -55,10 +52,9 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
         int x = leftPos;
         int y = topPos;
-        bevel(graphics, x, y, PANEL_WIDTH, HEIGHT, PANEL, LIGHT, SHADOW);
+        panel(graphics, x, y, PANEL_WIDTH, HEIGHT);
         // Panel lateral de upgrades, pegado al principal
-        bevel(graphics, x + PANEL_WIDTH + 2, y + 10, WIDTH - PANEL_WIDTH - 2,
-                QuarryMenu.BIT_Y + 18 + 4 - 10, PANEL, LIGHT, SHADOW);
+        sidePanel(graphics, x, PANEL_WIDTH, y + 10, WIDTH - PANEL_WIDTH - 2, QuarryMenu.BIT_Y + 18 + 4 - 10);
         for (int i = 0; i < QuarryBlockEntity.UPGRADE_SLOTS; i++) {
             slot(graphics, x + QuarryMenu.UPGRADE_X, y + QuarryMenu.UPGRADE_Y + i * 18);
         }
@@ -98,7 +94,7 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
     }
 
     private void drawEnergy(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, ENERGY_W + 2, ENERGY_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, ENERGY_W + 2, ENERGY_H + 2, INSET, SHADOW, LIGHT);
         long capacity = Math.max(1, menu.capacity());
         int filled = (int) Math.min(ENERGY_H, menu.energy() * ENERGY_H / capacity);
         // Rojo HV abajo, amarillo LV arriba: el mismo código de colores que los tiers de Ala
@@ -111,7 +107,7 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
     }
 
     private void drawCoolant(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, COOLANT_W + 2, ENERGY_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, COOLANT_W + 2, ENERGY_H + 2, INSET, SHADOW, LIGHT);
         int capacity = Math.max(1, menu.coolantCapacity());
         int filled = Math.min(ENERGY_H, menu.coolant() * ENERGY_H / capacity);
         graphics.fillGradient(x, y + ENERGY_H - filled, x + COOLANT_W, y + ENERGY_H, 0xFF6FB8FF, 0xFF2A5BD8);
@@ -119,7 +115,7 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
 
     /** Calor de la broca: verde → naranja → rojo; la marca blanca es donde empieza a frenar. */
     private void drawHeat(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, HEAT_W + 2, ENERGY_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, HEAT_W + 2, ENERGY_H + 2, INSET, SHADOW, LIGHT);
         int heat = Math.clamp(menu.heat(), 0, 1000);
         int filled = heat * ENERGY_H / 1000;
         int color = heat > 700 ? 0xFFFF3A2A : heat > 400 ? 0xFFFF9A2A : 0xFF4ACF5A;
@@ -146,7 +142,7 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
 
     /** Barra de avance a lo ancho, con el porcentaje a la derecha. */
     private void drawProgress(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, PROGRESS_W + 2, 7, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, PROGRESS_W + 2, 7, INSET, SHADOW, LIGHT);
         graphics.fill(x, y, x + menu.progressPermille() * PROGRESS_W / 1000, y + 5, 0xFF3CE87A);
         graphics.text(font, (menu.progressPermille() / 10) + "%", x + PROGRESS_W + 4, y - 1, TEXT, false);
     }
@@ -156,7 +152,7 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
      * amarillo = cabezales. Se arma con el área y los cursores que ya tiene el cliente.
      */
     private void drawMinimap(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, MAP_SIZE + 2, MAP_SIZE + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, MAP_SIZE + 2, MAP_SIZE + 2, INSET, SHADOW, LIGHT);
         QuarryBlockEntity quarry = menu.quarry();
         QuarryArea area = quarry != null ? quarry.area() : null;
         if (area == null || quarry.heads().isEmpty()) {
@@ -245,17 +241,5 @@ public class QuarryScreen extends AbstractContainerScreen<QuarryMenu> {
         return Long.toString(value);
     }
 
-    private static void slot(GuiGraphicsExtractor graphics, int x, int y) {
-        bevel(graphics, x - 1, y - 1, 18, 18, SLOT, SHADOW, LIGHT);
-    }
 
-    /** Rectángulo con borde claro arriba-izquierda y oscuro abajo-derecha (o al revés, para huecos). */
-    private static void bevel(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int fill, int topLeft,
-                              int bottomRight) {
-        graphics.fill(x, y, x + w, y + h, fill);
-        graphics.fill(x, y, x + w - 1, y + 1, topLeft);
-        graphics.fill(x, y, x + 1, y + h - 1, topLeft);
-        graphics.fill(x + 1, y + h - 1, x + w, y + h, bottomRight);
-        graphics.fill(x + w - 1, y + 1, x + w, y + h, bottomRight);
-    }
 }

@@ -8,9 +8,14 @@
   avanzado) que toca un inventario, y esa cara solo deja pasar los ítems marcados, tanto al extraer como al insertar.
   No usa energía. Clic derecho con la mano vacía abre su GUI; agachado + clic derecho lo saca con su configuración, y
   al romper el caño cae como ítem.
-  - 1 casillero fantasma (el ítem de muestra no se gasta); con la **Expansión de filtro** en su slot de mejora se
-    activan los 5.
-  - Lista blanca o lista negra, y comparar por ítem o por tag (clic en el casillero cambia al siguiente tag del ítem).
+  - Se ve enganchado al caño: un manguito de hierro con una banda celeste sobre el brazo, en cada cara con filtro.
+  - 1 casillero fantasma (el ítem de muestra no se gasta); con la **Expansión de filtro**, que va en un panel lateral
+    a la derecha de la GUI (como las mejoras de la quarry), se activan los 5. Sin ella se ve un solo casillero.
+  - Permitir o denegar (con un solo casillero) o lista blanca / lista negra (con la expansión), y comparar por ítem o
+    por categoría (tag): marcás un tronco y pasan todos los troncos; si el ítem tiene varias categorías, clic en el
+    casillero cambia cuál se usa. En modo categoría, un panel a la derecha lista todos los ítems que entran en esa
+    categoría (con rueda para ver más; pasar el mouse sobre un casillero muestra la suya). Cada botón explica en un
+    tooltip qué hace.
   - Receta con un Empty Chip de Ala (sin Ala: comparador). La expansión también lleva un chip.
 
 ## 1.2.9 — Explorador de largo alcance, géiseres y lagos

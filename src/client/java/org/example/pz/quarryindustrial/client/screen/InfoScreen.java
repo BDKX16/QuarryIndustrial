@@ -14,6 +14,8 @@ import org.example.pz.quarryindustrial.menu.InfoMenu;
 
 import java.util.List;
 
+import static org.example.pz.quarryindustrial.client.screen.ModGui.*;
+
 /**
  * Pantalla de solo lectura de las máquinas: título, y una fila por campo (estado, número, barra o posición),
  * dibujada sin textura con el mismo estilo que la de la quarry. El pad suma un botón para mandar a explorar.
@@ -27,11 +29,6 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     private static final int BAR_H = 6;
     private static final int BUTTON_H = InfoMenu.BUTTON_H;
 
-    private static final int PANEL = 0xFFC6C6C6;
-    private static final int LIGHT = 0xFFFFFFFF;
-    private static final int SHADOW = 0xFF555555;
-    private static final int TEXT = 0xFF404040;
-    private static final int DIM = 0xFF707070;
 
     private Button action;
     /** Solo el pad: abre el panel con las mejoras instaladas, como ítems. */
@@ -84,7 +81,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         super.extractBackground(graphics, mouseX, mouseY, partialTick);
-        bevel(graphics, leftPos, topPos, WIDTH, imageHeight, PANEL, LIGHT, SHADOW);
+        panel(graphics, leftPos, topPos, WIDTH, imageHeight);
         if (menu.kind() == InfoKind.PAD && upgradesOpen) {
             drawUpgrades(graphics);
         }
@@ -148,7 +145,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         graphics.text(font, Component.translatable("gui.quarryindustrial.info.pad_in"), leftPos + MARGIN,
                 topPos + InfoMenu.inboxY(kind) - InfoMenu.LABEL + 1, DIM, false);
         for (net.minecraft.world.inventory.Slot slot : menu.slots) {
-            bevel(graphics, leftPos + slot.x - 1, topPos + slot.y - 1, SLOT, SLOT, 0xFF8B8B8B, SHADOW, LIGHT);
+            slot(graphics, leftPos + slot.x, topPos + slot.y);
         }
     }
 
@@ -192,7 +189,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     }
 
     private void drawUpgrades(GuiGraphicsExtractor graphics) {
-        bevel(graphics, panelX(), panelY(), UPGRADE_PANEL_W, panelHeight(), PANEL, LIGHT, SHADOW);
+        sidePanel(graphics, leftPos, WIDTH, panelY(), UPGRADE_PANEL_W, panelHeight());
         drawSlot(graphics, chunkSlotX(), chunkSlotY(), new ItemStack(ModItems.PAD_CHUNK_LOADER),
                 menu.value(V_CHUNK_LOADER) != 0);
         int installed = (int) menu.value(V_SURVEY_UPGRADES);
@@ -205,7 +202,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
 
     /** Un casillero hundido; vacío muestra el ítem apagado, para ver qué falta instalar. */
     private void drawSlot(GuiGraphicsExtractor graphics, int x, int y, ItemStack stack, boolean installed) {
-        bevel(graphics, x, y, SLOT, SLOT, 0xFF8B8B8B, SHADOW, LIGHT);
+        bevel(graphics, x, y, SLOT_SIZE, SLOT_SIZE, SLOT_FILL, SHADOW, LIGHT);
         graphics.item(stack, x + 1, y + 1);
         if (!installed) {
             graphics.fill(x + 1, y + 1, x + SLOT - 1, y + SLOT - 1, 0xC08B8B8B);
@@ -247,7 +244,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
 
     private static void bar(GuiGraphicsExtractor graphics, int x, int y, int width, long amount, long capacity,
                             int top, int bottom) {
-        bevel(graphics, x - 1, y - 1, width + 2, BAR_H + 2, 0xFF1A1A1A, SHADOW, LIGHT);
+        bevel(graphics, x - 1, y - 1, width + 2, BAR_H + 2, INSET, SHADOW, LIGHT);
         int filled = capacity <= 0 ? 0 : (int) Math.min(width, amount * width / capacity);
         if (filled > 0) {
             graphics.fillGradient(x, y, x + filled, y + BAR_H, top, bottom);
@@ -305,12 +302,4 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         return Long.toString(value);
     }
 
-    private static void bevel(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int fill, int topLeft,
-                              int bottomRight) {
-        graphics.fill(x, y, x + w, y + h, fill);
-        graphics.fill(x, y, x + w - 1, y + 1, topLeft);
-        graphics.fill(x, y, x + 1, y + h - 1, topLeft);
-        graphics.fill(x + 1, y + h - 1, x + w, y + h, bottomRight);
-        graphics.fill(x + w - 1, y + 1, x + w, y + h, bottomRight);
-    }
 }

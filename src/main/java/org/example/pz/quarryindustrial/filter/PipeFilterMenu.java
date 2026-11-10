@@ -38,9 +38,12 @@ public class PipeFilterMenu extends AbstractContainerMenu {
     // Medidas de la pantalla
     public static final int WIDTH = 176;
     public static final int HEIGHT = 178;
-    public static final int CELL_X = 52;
     public static final int CELL_Y = 30;
-    public static final int UPGRADE_X = 18;
+    /** Posición x del casillero 0 (el del medio); los demás se abren hacia los costados al activarse. */
+    private static final int CELL_CENTER_X = 80;
+    private static final int[] CELL_OFFSETS = {0, -18, 18, -36, 36};
+    /** La expansión va en un panel a la derecha del principal, como las mejoras de la quarry. */
+    public static final int UPGRADE_X = WIDTH + 25;
     public static final int UPGRADE_Y = 30;
     public static final int INVENTORY_Y = 96;
 
@@ -91,7 +94,14 @@ public class PipeFilterMenu extends AbstractContainerMenu {
 
         for (int i = 0; i < PipeFilterData.CELLS; i++) {
             // Casilleros fantasma: no se puede poner ni sacar nada, el clic se resuelve en clicked()
-            addSlot(new Slot(filter, i, CELL_X + i * 18, CELL_Y) {
+            int cell = i;
+            addSlot(new Slot(filter, i, cellX(i), CELL_Y) {
+                /** Sin la expansión se ve un solo casillero. */
+                @Override
+                public boolean isActive() {
+                    return cell < filter.activeCells();
+                }
+
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return false;
@@ -122,6 +132,11 @@ public class PipeFilterMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inventory, col, 8 + col * 18, INVENTORY_Y + 58));
         }
+    }
+
+    /** Dónde va el casillero {@code cell}: el primero al medio, los otros alternando a izquierda y derecha. */
+    public static int cellX(int cell) {
+        return CELL_CENTER_X + CELL_OFFSETS[cell];
     }
 
     public BlockPos pos() {

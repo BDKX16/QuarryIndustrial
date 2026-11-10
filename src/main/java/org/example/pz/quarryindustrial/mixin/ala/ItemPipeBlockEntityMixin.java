@@ -2,6 +2,7 @@ package org.example.pz.quarryindustrial.mixin.ala;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -42,7 +43,13 @@ public abstract class ItemPipeBlockEntityMixin implements PipeFilterHolder {
             quarryindustrial$filters.put(face, data);
             data.setListener(((BlockEntity) (Object) this)::setChanged);
         }
-        ((BlockEntity) (Object) this).setChanged();
+        BlockEntity self = (BlockEntity) (Object) this;
+        self.setChanged();
+        // El caño de Ala manda al cliente todo lo que guarda: se lo repite para que dibuje (o quite) el filtro
+        Level level = self.getLevel();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(self.getBlockPos(), self.getBlockState(), self.getBlockState(), 3);
+        }
     }
 
     @Override

@@ -26,7 +26,8 @@
       "org.example.pz.quarryindustrial.gametest.CompatClientGameTest",
       "org.example.pz.quarryindustrial.gametest.NuclearClientGameTest",
       "org.example.pz.quarryindustrial.gametest.PumpjackClientGameTest",
-      "org.example.pz.quarryindustrial.gametest.QuarryClientGameTest"
+      "org.example.pz.quarryindustrial.gametest.QuarryClientGameTest",
+      "org.example.pz.quarryindustrial.gametest.PipeFilterClientGameTest"
     ]
   },
   "depends": {
