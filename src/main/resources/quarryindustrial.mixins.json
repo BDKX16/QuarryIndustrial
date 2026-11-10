@@ -5,7 +5,10 @@
   "plugin": "org.example.pz.quarryindustrial.mixin.QuarryMixinPlugin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "ala.CableBlockMixin"
+    "BlockEntityMixin",
+    "ala.CableBlockMixin",
+    "ala.FabricItemLookupMixin",
+    "ala.ItemPipeBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -39,6 +39,8 @@ public final class MachineGuide {
         add(entries, ModItems.DRONE_LINKER, "drone_linker");
         add(entries, ModItems.PAD_CHUNK_LOADER, "pad_chunk_loader");
         add(entries, ModItems.SURVEY_RANGE_UPGRADE, "survey_range_upgrade");
+        add(entries, ModItems.PIPE_FILTER, "pipe_filter");
+        add(entries, ModItems.PIPE_FILTER_UPGRADE, "pipe_filter_upgrade");
         add(entries, ModItems.MANUAL, "manual");
         for (BitTier tier : BitTier.values()) {
             add(entries, ModItems.bit(tier), "drill_bit");

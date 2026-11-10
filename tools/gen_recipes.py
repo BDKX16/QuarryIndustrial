@@ -81,6 +81,13 @@ RECIPES = {
                             "C": A + "drill_column_module"},
                            {"R": "minecraft:compass", "L": "minecraft:spyglass", "B": "minecraft:redstone_block",
                             "C": "minecraft:diamond_pickaxe"}),
+    # ── Filtro de caño (requiere un chip) ──
+    "pipe_filter": (1, [" H ", "PCP", " P "],
+                    {"P": "#c:plates/iron", "H": "minecraft:hopper", "C": A + "empty_chip"},
+                    {"P": "#c:ingots/iron", "H": "minecraft:hopper", "C": "minecraft:comparator"}),
+    "pipe_filter_upgrade": (1, ["GRG", "RCR", "GRG"],
+                            {"G": "#c:ingots/gold", "R": "minecraft:redstone", "C": A + "empty_chip"},
+                            {"G": "#c:ingots/gold", "R": "minecraft:redstone", "C": "minecraft:comparator"}),
     # ── Generadores ──
     "diesel_generator": (1, [" T ", "GXG", "PCP"],
                          {"T": A + "fluid_tank", "G": A + "iron_gear", "X": A + "generator", "P": "#c:plates/iron",

@@ -19,13 +19,13 @@ import java.util.List;
  * dibujada sin textura con el mismo estilo que la de la quarry. El pad suma un botón para mandar a explorar.
  */
 public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
-    private static final int WIDTH = 176;
-    private static final int MARGIN = 8;
-    private static final int TOP = 20;
-    private static final int LINE = 11;
-    private static final int BAR_ROW = 21;
+    private static final int WIDTH = InfoMenu.WIDTH;
+    private static final int MARGIN = InfoMenu.MARGIN;
+    private static final int TOP = InfoMenu.TOP;
+    private static final int LINE = InfoMenu.LINE;
+    private static final int BAR_ROW = InfoMenu.BAR_ROW;
     private static final int BAR_H = 6;
-    private static final int BUTTON_H = 20;
+    private static final int BUTTON_H = InfoMenu.BUTTON_H;
 
     private static final int PANEL = 0xFFC6C6C6;
     private static final int LIGHT = 0xFFFFFFFF;
@@ -38,7 +38,7 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     private Button toggle;
     private boolean upgradesOpen;
 
-    private static final int SLOT = 18;
+    private static final int SLOT = InfoMenu.SLOT;
     private static final int UPGRADE_COLUMNS = 6;
     private static final int UPGRADE_PANEL_W = UPGRADE_COLUMNS * SLOT + 8;
     /** Índices de los valores que manda el pad (ver DronePadBlockEntity.fillInfo). */
@@ -52,18 +52,13 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
     }
 
     public InfoScreen(InfoMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, WIDTH, height(menu.kind()));
-        inventoryLabelY = -1000;
-    }
-
-    private static int height(InfoKind kind) {
-        int height = TOP;
-        for (InfoKind.Field field : kind.fields()) {
-            if (!kind.hidden(field)) {
-                height += field.type() == InfoKind.Type.BAR ? BAR_ROW : LINE;
-            }
+        super(menu, inventory, title, WIDTH, InfoMenu.screenHeight(menu.kind()));
+        if (menu.kind().hasInventory()) {
+            inventoryLabelX = MARGIN;
+            inventoryLabelY = InfoMenu.playerY(menu.kind()) - InfoMenu.LABEL;
+        } else {
+            inventoryLabelY = -1000;
         }
-        return height + (kind.hasAction() ? BUTTON_H + 8 : 0) + MARGIN;
     }
 
     @Override
@@ -80,7 +75,8 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         if (menu.kind().hasAction()) {
             action = addRenderableWidget(Button.builder(Component.translatable("gui.quarryindustrial.info.survey"),
                             button -> minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0))
-                    .bounds(leftPos + MARGIN, topPos + imageHeight - MARGIN - BUTTON_H, WIDTH - MARGIN * 2, BUTTON_H)
+                    .bounds(leftPos + MARGIN, topPos + InfoMenu.infoHeight(menu.kind()) - MARGIN - BUTTON_H,
+                            WIDTH - MARGIN * 2, BUTTON_H)
                     .build());
         }
     }
@@ -91,6 +87,9 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
         bevel(graphics, leftPos, topPos, WIDTH, imageHeight, PANEL, LIGHT, SHADOW);
         if (menu.kind() == InfoKind.PAD && upgradesOpen) {
             drawUpgrades(graphics);
+        }
+        if (menu.kind().hasInventory()) {
+            drawInventory(graphics);
         }
         InfoKind kind = menu.kind();
         int y = topPos + TOP;
@@ -134,6 +133,22 @@ public class InfoScreen extends AbstractContainerScreen<InfoMenu> {
                     y += BAR_ROW;
                 }
             }
+        }
+    }
+
+    // ── Buzones del pad e inventario ──
+
+    /** Casilleros hundidos debajo de cada slot y los rótulos de los buzones. */
+    private void drawInventory(GuiGraphicsExtractor graphics) {
+        InfoKind kind = menu.kind();
+        graphics.fill(leftPos + MARGIN - 2, topPos + InfoMenu.infoHeight(kind) - 4,
+                leftPos + WIDTH - MARGIN + 2, topPos + InfoMenu.infoHeight(kind) - 3, SHADOW);
+        graphics.text(font, Component.translatable("gui.quarryindustrial.info.pad_out"), leftPos + MARGIN,
+                topPos + InfoMenu.outboxY(kind) - InfoMenu.LABEL + 1, DIM, false);
+        graphics.text(font, Component.translatable("gui.quarryindustrial.info.pad_in"), leftPos + MARGIN,
+                topPos + InfoMenu.inboxY(kind) - InfoMenu.LABEL + 1, DIM, false);
+        for (net.minecraft.world.inventory.Slot slot : menu.slots) {
+            bevel(graphics, leftPos + slot.x - 1, topPos + slot.y - 1, SLOT, SLOT, 0xFF8B8B8B, SHADOW, LIGHT);
         }
     }
 

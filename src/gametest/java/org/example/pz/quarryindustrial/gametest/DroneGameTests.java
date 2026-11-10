@@ -155,6 +155,23 @@ public class DroneGameTests {
         });
     }
 
+    /** Una quarry sin broca y un pad de mantenimiento sin repuestos: el pad lo dice, en vez de quedar "en espera". */
+    @GameTest(maxTicks = 400, skyAccess = true)
+    public void maintenancePadReportsMissingBits(GameTestHelper helper) {
+        fastDrones();
+        QuarryConfig config = QuarryConfig.get();
+        config.lv.baseSide = 3;
+        config.frameBlocksPerTick = 8;
+        config.drones.maintenanceRadius = 10;
+        DronePadBlockEntity pad = pad(helper, PAD_A, DroneKind.MAINTENANCE);
+        BlockPos quarryPos = new BlockPos(4, 1, 6);
+        helper.setBlock(quarryPos, ModBlocks.QUARRY_LV.defaultBlockState().setValue(QuarryBlock.FACING, Direction.SOUTH));
+        QuarryBlockEntity quarry = helper.getBlockEntity(quarryPos, QuarryBlockEntity.class);
+        quarry.energy.amount = quarry.energy.getCapacity();
+        helper.succeedWhen(() -> helper.assertTrue(pad.status() == DronePadStatus.NO_BITS,
+                "el pad avisa que no tiene brocas: " + pad.status() + " quarry " + quarry.status()));
+    }
+
     /** Una columna de destilación de Ala sucia cerca de un pad con dron de mantenimiento (sin brocas): la limpia. */
     @GameTest(maxTicks = 600, skyAccess = true)
     public void maintenanceDroneCleansADistillationColumn(GameTestHelper helper) {

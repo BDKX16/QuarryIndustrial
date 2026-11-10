@@ -360,7 +360,7 @@ public class DroneConsoleScreen extends Screen {
             case CHARGING -> WARN;
             case IN_FLIGHT -> FLYING;
             case NO_LINK, DESTINATION_FULL -> WARN;
-            case BAD_LINK, NO_POWER, LOST -> BAD;
+            case BAD_LINK, NO_POWER, LOST, NO_BITS -> BAD;
             case NO_DRONE -> DIM;
         };
     }

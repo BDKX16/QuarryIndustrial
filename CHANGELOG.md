@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.3.0 — Filtro de caño
+
+### Nuevo
+
+- **Filtro de caño** (requiere Ala Industrial). Se engancha con clic derecho al brazo de un caño de ítems (común o
+  avanzado) que toca un inventario, y esa cara solo deja pasar los ítems marcados, tanto al extraer como al insertar.
+  No usa energía. Clic derecho con la mano vacía abre su GUI; agachado + clic derecho lo saca con su configuración, y
+  al romper el caño cae como ítem.
+  - 1 casillero fantasma (el ítem de muestra no se gasta); con la **Expansión de filtro** en su slot de mejora se
+    activan los 5.
+  - Lista blanca o lista negra, y comparar por ítem o por tag (clic en el casillero cambia al siguiente tag del ítem).
+  - Receta con un Empty Chip de Ala (sin Ala: comparador). La expansión también lleva un chip.
+
 ## 1.2.9 — Explorador de largo alcance, géiseres y lagos
 
 ### Nuevo

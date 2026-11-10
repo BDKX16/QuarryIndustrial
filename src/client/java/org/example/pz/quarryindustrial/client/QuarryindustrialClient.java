@@ -20,6 +20,7 @@ import org.example.pz.quarryindustrial.client.render.PumpjackRenderer;
 import org.example.pz.quarryindustrial.client.render.QuarryRenderer;
 import org.example.pz.quarryindustrial.client.screen.DroneConsoleScreen;
 import org.example.pz.quarryindustrial.client.screen.InfoScreen;
+import org.example.pz.quarryindustrial.client.screen.PipeFilterScreen;
 import org.example.pz.quarryindustrial.client.screen.QuarryScreen;
 import org.example.pz.quarryindustrial.client.sound.MachineSounds;
 import org.example.pz.quarryindustrial.registry.ModBlockEntities;
@@ -43,6 +44,7 @@ public class QuarryindustrialClient implements ClientModInitializer {
         ExploredTerrain.init();
         MenuScreens.register(ModMenus.QUARRY, QuarryScreen::new);
         MenuScreens.register(ModMenus.INFO, InfoScreen::new);
+        MenuScreens.register(ModMenus.PIPE_FILTER, PipeFilterScreen::new);
         ManualItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new ManualScreen());
         DroneConsoleBlock.openScreen = pos -> Minecraft.getInstance().gui.setScreen(new DroneConsoleScreen(pos));
         DroneLinkerItem.openConsole = pos -> Minecraft.getInstance().gui.setScreen(new DroneConsoleScreen(pos, true));

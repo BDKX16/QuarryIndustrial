@@ -138,6 +138,11 @@ public enum InfoKind {
         return this == PAD;
     }
 
+    /** El pad muestra sus buzones (salida y llegada) y el inventario del jugador. */
+    public boolean hasInventory() {
+        return this == PAD;
+    }
+
     /** Índice (dentro del arreglo de valores) donde empieza el campo {@code field}. */
     public int offset(int field) {
         int offset = 0;

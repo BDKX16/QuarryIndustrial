@@ -27,6 +27,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -351,6 +352,18 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
         return true;
     }
 
+    // ── Buzones en la GUI ──
+
+    @Override
+    public Container outbox() {
+        return outbox;
+    }
+
+    @Override
+    public Container inbox() {
+        return inbox;
+    }
+
     // ── Cargador de chunks ──
 
     public boolean hasChunkLoader() {
@@ -398,16 +411,28 @@ public class DronePadBlockEntity extends BlockEntity implements InfoMachine {
 
     /** Busca, en los chunks cargados alrededor, una quarry o plataforma que necesite broca nueva. */
     private void tickMaintenance(ServerLevel level, BlockPos pos) {
-        setStatus(DronePadStatus.STANDBY);
+        if (status == DronePadStatus.NO_DRONE || status == DronePadStatus.IN_FLIGHT) {
+            setStatus(DronePadStatus.STANDBY);
+        }
         if (tickCounter % TRANSFER_INTERVAL == 0) {
             pullBitsFromNeighbours(level, pos);
         }
+        // El estado se decide cada tanto y se mantiene hasta la próxima revisión (así se ve por qué no sale)
         if (tickCounter % MAINTENANCE_INTERVAL != 0) {
             return;
         }
         int bitSlot = firstBitSlot();
-        BlockPos machine = findWornMachine(level, pos, bitSlot >= 0);
+        BlockPos machine = findWornMachine(level, pos, true);
+        if (machine != null && bitSlot < 0 && !AlaDistillery.isColumn(level.getBlockEntity(machine))) {
+            // Hay una máquina sin broca pero ninguna de repuesto: a lo sumo puede ir a limpiar una columna
+            machine = findWornMachine(level, pos, false);
+            if (machine == null) {
+                setStatus(DronePadStatus.NO_BITS);
+                return;
+            }
+        }
         if (machine == null) {
+            setStatus(DronePadStatus.STANDBY);
             return;
         }
         long cost = tripCost(pos, machine);

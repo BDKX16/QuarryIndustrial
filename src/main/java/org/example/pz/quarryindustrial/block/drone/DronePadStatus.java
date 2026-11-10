@@ -23,7 +23,9 @@ public enum DronePadStatus {
     /** No se supo más del dron: se dio por perdido y volvió al pad (sin la carga). */
     LOST,
     /** Explorador con una salida pedida: espera a juntar la energía de todo el recorrido. */
-    CHARGING;
+    CHARGING,
+    /** Mantenimiento: hay una máquina sin broca pero el pad no tiene ninguna de repuesto. */
+    NO_BITS;
 
     public Component label() {
         return Component.translatable("status.quarryindustrial.drone_pad." + name().toLowerCase());

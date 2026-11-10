@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.menu.v1.ExtendedMenuProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -24,6 +25,16 @@ public interface InfoMachine extends ExtendedMenuProvider<InfoMenu.Open> {
     default void onInfoButton(ServerPlayer player) {
     }
 
+    /** Buzón de salida (solo si {@link InfoKind#hasInventory}). */
+    default Container outbox() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** Buzón de llegada (solo si {@link InfoKind#hasInventory}). */
+    default Container inbox() {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     default Component getDisplayName() {
         return infoKind().title();
@@ -36,6 +47,6 @@ public interface InfoMachine extends ExtendedMenuProvider<InfoMenu.Open> {
 
     @Override
     default AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-        return new InfoMenu(containerId, infoKind(), getBlockPos(), this);
+        return new InfoMenu(containerId, inventory, infoKind(), getBlockPos(), this);
     }
 }

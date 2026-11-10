@@ -233,14 +233,36 @@ public class DroneEntity extends Entity {
                     continue;
                 }
                 // Un géiser tiene caño sellado y domo debajo (bomba infinita); un charco de superficie, no
-                if (OilWellValidator.validate(level, surface.above()) != null) {
-                    payload.sites.add(surface);
+                // El caño es de 1×1: el bloque de oil que se vio puede ser el charco de al lado, así que se
+                // prueban también las columnas vecinas
+                BlockPos geyser = findGeyserShaft(level, surface);
+                if (geyser != null) {
+                    payload.sites.add(geyser);
                 } else {
                     payload.lakes.add(surface);
                 }
                 entityData.set(LOADED, true);
             }
         }
+    }
+
+    /** Busca, a pocos bloques de {@code near}, la columna de oil cuyo caño valida como géiser. */
+    private static @Nullable BlockPos findGeyserShaft(ServerLevel level, BlockPos near) {
+        final int reach = 4;
+        for (int dx = -reach; dx <= reach; dx++) {
+            for (int dz = -reach; dz <= reach; dz++) {
+                int x = near.getX() + dx;
+                int z = near.getZ() + dz;
+                if (!level.isLoaded(new BlockPos(x, near.getY(), z))) {
+                    continue;
+                }
+                BlockPos top = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z) - 1, z);
+                if (OilFluids.isOil(level.getBlockState(top)) && OilWellValidator.validate(level, top.above()) != null) {
+                    return top;
+                }
+            }
+        }
+        return null;
     }
 
     /** Ya anotado (como géiser o como lago) a menos de 32 bloques. */

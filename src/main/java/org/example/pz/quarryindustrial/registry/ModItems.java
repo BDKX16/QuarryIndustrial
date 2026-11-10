@@ -62,6 +62,11 @@ public final class ModItems {
             new Item.Properties().stacksTo(16));
     public static final SurveyReportItem SURVEY_REPORT = register("survey_report", SurveyReportItem::new,
             new Item.Properties().stacksTo(1));
+    /** Filtro de caño: se engancha a una cara de un caño de ítems de Ala y solo deja pasar lo que se le marca. */
+    public static final Item PIPE_FILTER = register("pipe_filter", Item::new, new Item.Properties().stacksTo(16));
+    /** Mejora del filtro de caño: de 1 a 5 ítems distintos. Va en el slot de mejora de la GUI del filtro. */
+    public static final Item PIPE_FILTER_UPGRADE = register("pipe_filter_upgrade", Item::new,
+            new Item.Properties().stacksTo(16));
     public static final ManualItem MANUAL = register("manual", ManualItem::new, new Item.Properties().stacksTo(1));
 
     public static final CreativeModeTab TAB = Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB,
@@ -87,6 +92,8 @@ public final class ModItems {
                         output.accept(DRONE_LINKER);
                         output.accept(PAD_CHUNK_LOADER);
                         output.accept(SURVEY_RANGE_UPGRADE);
+                        output.accept(PIPE_FILTER);
+                        output.accept(PIPE_FILTER_UPGRADE);
                         output.accept(ModBlocks.RADAR);
                         DRONES.values().forEach(output::accept);
                         BITS.values().forEach(output::accept);

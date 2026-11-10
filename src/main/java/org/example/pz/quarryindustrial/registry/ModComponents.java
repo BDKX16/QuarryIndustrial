@@ -6,6 +6,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import org.example.pz.quarryindustrial.Quarryindustrial;
+import org.example.pz.quarryindustrial.filter.PipeFilterData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,14 @@ public final class ModComponents {
             new DataComponentType.Builder<List<BlockPos>>()
                     .persistent(BlockPos.CODEC.listOf())
                     .networkSynchronized(BlockPos.STREAM_CODEC.apply(ByteBufCodecs.collection(ArrayList::new)))
+                    .build());
+
+    /** Filtro de caño: su configuración (ítems, modo, mejora), que viaja con el ítem al sacarlo del caño. */
+    public static final DataComponentType<PipeFilterData> PIPE_FILTER = Registry.register(
+            BuiltInRegistries.DATA_COMPONENT_TYPE, Quarryindustrial.id("pipe_filter"),
+            new DataComponentType.Builder<PipeFilterData>()
+                    .persistent(PipeFilterData.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(PipeFilterData.CODEC))
                     .build());
 
     private ModComponents() {
