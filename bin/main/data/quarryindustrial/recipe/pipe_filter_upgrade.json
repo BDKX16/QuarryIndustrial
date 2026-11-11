@@ -1,0 +1,32 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "alaindustrial"
+      ]
+    },
+    {
+      "condition": "fabric:registry_contains",
+      "registry": "minecraft:item",
+      "values": [
+        "alaindustrial:empty_chip"
+      ]
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "GRG",
+    "RCR",
+    "GRG"
+  ],
+  "key": {
+    "G": "#c:ingots/gold",
+    "R": "minecraft:redstone",
+    "C": "alaindustrial:empty_chip"
+  },
+  "result": {
+    "id": "quarryindustrial:pipe_filter_upgrade"
+  }
+}

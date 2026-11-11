@@ -245,7 +245,7 @@
         },
         {
           "title": "Maintenance and survey",
-          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw.",
+          "text": "Maintenance Drone: put spare bits in its pad. It watches quarries and offshore rigs within 512 blocks (up to 2048 with Survey Range Upgrades) and swaps a bit when it is 90% worn or gone, bringing the old one back.\n\nSurvey Drone: right-click its pad to launch it. It sweeps a 128-block radius and brings back a Survey Report with every oil geyser it saw and every oil lake. Geysers are infinite: a pumpjack drains them forever. Lakes are finite surface pools.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",
@@ -253,16 +253,65 @@
           ]
         },
         {
-          "title": "Drone Control Station",
-          "text": "Right-click the station to open a map of every pad within 1024 blocks. The map shows the terrain you have loaded, each pad's link as a dashed line, drones in flight (with the survey drone's remaining sweep) and every oil geyser your survey drones found, as a black drop.\n\nClick a pad to select it, then Link and click the destination pad. The Drones tab lists every pad with its status; the Wells tab lists the geysers. You can also launch survey drones from here.",
+          "title": "Long-range surveys",
+          "text": "Survey Range Upgrade: right-click a pad with it. Each one adds 64 blocks to the sweep (up to 17 per pad: 1216 blocks of radius) and about 90 to the Maintenance Drone's reach (2040 with all 17).\n\nYou can also send the Survey Drone somewhere else: in the Drone Control Station press Travel and click the map. It flies there (up to 10,000 blocks from its pad), sweeps the area and comes back with the report. The trip costs 1 EU per block plus the sweep, taken from the pad: the biggest sweep needs about 500,000 EU, which is what a pad stores. If the pad does not have enough yet, the drone leaves as soon as it charges.\n\nLakes run dry, so a base that lasts keeps needing fresh oil fields: with a charged pad and all the upgrades you can keep finding them, however far they are.",
           "items": [
+            "quarryindustrial:survey_range_upgrade",
+            "quarryindustrial:survey_drone",
             "quarryindustrial:drone_console"
+          ]
+        },
+        {
+          "title": "Drone Control Station",
+          "text": "Right-click the station to open a map of every pad within 1024 blocks. The map shows the terrain you have explored (it remembers it), each pad's link as a dashed line, drones in flight (with the survey drone's remaining sweep), the range ring of the selected pad, and every oil geyser (violet drop) and lake (grey pool) your survey drones found.\n\nClick a pad to select it, then Link and click the destination pad. The Drones tab lists every pad with its status; the Wells tab lists the geysers and lakes. Press Travel to send the survey drone to any spot of the map. Radar Repeaters extend the station's coverage.",
+          "items": [
+            "quarryindustrial:drone_console",
+            "quarryindustrial:drone_radar"
           ]
         },
         {
           "title": "If something goes wrong",
           "text": "Drones fly above everything and keep the chunk they are in loaded. Hit a drone to bring it down: it drops what it carried and reappears on its pad. If a pad hears nothing from its drone for 5 minutes, it gives it up for lost and the drone comes back (without its cargo).",
           "items": []
+        },
+        {
+          "title": "Energy Distributor",
+          "text": "Splits the EU of a cable equally among everything touching it: cables, drone pads and machines. Energy only comes in through its input arm, the one with the amber collar (it faces the block you placed it against), and leaves through the other five sides, so an output can never be mistaken for an input. If one destination fills up, the rest goes to the others: with several pads on one reactor's output, the nearest no longer fills first.\n\nDistributors chain (an output into the next one's amber arm, touching or with a cable between) and cables draw an arm to them. It stores 8192 EU and moves up to 2048 EU/t. Cheap to make: 2 electrum cables, an electronic circuit and yellow concrete.",
+          "items": [
+            "quarryindustrial:energy_splitter"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filters",
+      "title": "Pipe Filter",
+      "icon": "quarryindustrial:pipe_filter",
+      "pages": [
+        {
+          "title": "Pipe Filter",
+          "text": "Clamps onto the arm of an Ala Industrial item pipe (basic or advanced) that touches an inventory: right-click the arm with the filter in hand. From then on that side only lets the items you mark go through, both when the pipe pulls from the inventory and when it pushes into it. It needs no energy and you can see it on the pipe: an iron sleeve with a cyan band.\n\nRight-click it with an empty hand to open its screen; put an item on a slot to mark it (nothing is consumed). Sneak + right-click takes it off with its settings, and it drops if the pipe breaks. It only works with Ala Industrial's item pipes.",
+          "items": [
+            "quarryindustrial:pipe_filter",
+            "alaindustrial:item_pipe",
+            "alaindustrial:item_pipe_advanced"
+          ]
+        },
+        {
+          "title": "Expansion and lists",
+          "text": "Out of the box the filter has one slot. The Pipe Filter Expansion goes in its own panel on the right of the screen and unlocks all five.\n\nWith one slot the button reads Allow / Deny; with the expansion it becomes an Allow list / Deny list. Allow lets through only what is marked; Deny lets through everything except what is marked. An empty allow list lets nothing through, an empty deny list lets everything through. Both filter and expansion are crafted with an Ala Industrial Empty Chip.",
+          "items": [
+            "quarryindustrial:pipe_filter_upgrade",
+            "alaindustrial:empty_chip"
+          ]
+        },
+        {
+          "title": "By item or by category",
+          "text": "By item matches only the exact item you marked. By category matches every item that shares a category (a tag) with it: mark an oak log and every kind of log goes through.\n\nAn item can belong to several categories: click its slot to switch which one is used. While you are in category mode, a panel on the right lists every item in the chosen category (scroll to see more) and hovering a slot shows its own. Each button explains itself in a tooltip.",
+          "items": [
+            "quarryindustrial:pipe_filter",
+            "minecraft:oak_log"
+          ]
         }
       ]
     },

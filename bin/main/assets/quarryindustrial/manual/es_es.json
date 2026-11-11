@@ -245,7 +245,7 @@
         },
         {
           "title": "Mantenimiento y exploración",
-          "text": "Dron de mantenimiento: pon brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres que vio.",
+          "text": "Dron de mantenimiento: pon brocas de repuesto en su pad. Vigila las quarries y plataformas a 512 bloques (hasta 2048 con mejoras de alcance) y cambia la broca cuando está gastada al 90 % o falta, y trae la vieja.\n\nDron explorador: clic derecho en su pad para mandarlo. Recorre un radio de 128 bloques y vuelve con un informe de todos los géiseres y lagos de petróleo que vio. Los géiseres son infinitos: una cigüeña los bombea para siempre. Los lagos son charcos finitos de superficie.",
           "items": [
             "quarryindustrial:maintenance_drone",
             "quarryindustrial:survey_drone",
@@ -253,16 +253,65 @@
           ]
         },
         {
-          "title": "Centralita de drones",
-          "text": "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el terreno que tienes cargado, el vínculo de cada pad como una línea a trazos, los drones en vuelo (con lo que le falta del barrido al explorador) y cada géiser que encontraron tus exploradores, como una gota negra.\n\nClic en un pad para elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista todos los pads con su estado; la de Pozos, los géiseres. También puedes mandar a explorar desde acá.",
+          "title": "Exploración de largo alcance",
+          "text": "Mejora de alcance del explorador: clic derecho en un pad con ella. Cada una suma 64 bloques al barrido (hasta 17 por pad: 1216 bloques de radio) y unos 90 al alcance del dron de mantenimiento (2040 con las 17).\n\nTambién puedes mandar al explorador a otro lado: en la centralita de drones apretá Viajar y haz clic en el mapa. Vuela hasta ahí (hasta 10.000 bloques de su pad), barre la zona y vuelve con el informe. El viaje cuesta 1 EU por bloque más el barrido, que sale de la energía del pad: el barrido más grande pide unos 500.000 EU, que es lo que guarda un pad. Si todavía no le alcanza, el dron sale apenas se cargue.\n\nLos lagos se secan, así que una base que dura necesita yacimientos nuevos: con el pad cargado y todas las mejoras puedes seguir encontrándolos, por lejos que estén.",
           "items": [
+            "quarryindustrial:survey_range_upgrade",
+            "quarryindustrial:survey_drone",
             "quarryindustrial:drone_console"
+          ]
+        },
+        {
+          "title": "Centralita de drones",
+          "text": "Clic derecho en la centralita abre un mapa de todos los pads a menos de 1024 bloques. Muestra el terreno que exploraste (lo recuerda), el vínculo de cada pad como una línea a trazos, los drones en vuelo (con lo que le falta del barrido al explorador), el anillo de alcance del pad elegido y cada géiser (gota violeta) y lago (charco gris) que encontraron tus exploradores.\n\nClic en un pad para elegirlo, después Vincular y clic en el pad de destino. La pestaña Drones lista todos los pads con su estado; la de Pozos, los géiseres y lagos. Apretá Viajar para mandar al explorador a cualquier punto del mapa. Los radares repetidores amplían la cobertura de la centralita.",
+          "items": [
+            "quarryindustrial:drone_console",
+            "quarryindustrial:drone_radar"
           ]
         },
         {
           "title": "Si algo sale mal",
           "text": "Los drones vuelan por arriba de todo y mantienen cargado el chunk donde están. Si golpeas un dron, cae: suelta lo que llevaba y vuelve a aparecer en su pad. Si un pad no sabe nada de su dron por 5 minutos, lo da por perdido y el dron vuelve (sin la carga).",
           "items": []
+        },
+        {
+          "title": "Distribuidor de energía",
+          "text": "Reparte los EU de un cable en partes iguales entre todo lo que tenga pegado: cables, pads de drones y máquinas. La energía entra solo por su brazo de entrada, el del collar ámbar (queda del lado del bloque contra el que lo pusiste), y sale por los otros cinco lados, así que una salida nunca se confunde con una entrada. Si un destino se llena, lo que sobra va a los otros: con varios pads en la salida de un reactor, ya no se llena primero el más cercano.\n\nSe pueden encadenar (una salida al brazo ámbar del siguiente, pegados o con un cable en el medio) y los cables dibujan un brazo hacia ellos. Guarda 8192 EU y mueve hasta 2048 EU/t. Barato de hacer: 2 cables de electrum, un circuito electrónico y hormigón amarillo.",
+          "items": [
+            "quarryindustrial:energy_splitter"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filters",
+      "title": "Filtro de caño",
+      "icon": "quarryindustrial:pipe_filter",
+      "pages": [
+        {
+          "title": "Filtro de caño",
+          "text": "Se engancha al brazo de un caño de ítems de Ala Industrial (común o avanzado) que toque un inventario: clic derecho en el brazo con el filtro en la mano. Desde ahí ese lado solo deja pasar los ítems que marques, tanto cuando el caño saca del inventario como cuando le mete. No usa energía y se ve en el caño: un manguito de hierro con una banda celeste.\n\nClic derecho con la mano vacía abre su pantalla; pon un ítem en un casillero para marcarlo (no se gasta). Agachado + clic derecho lo saca con su configuración, y se suelta si el caño se rompe. Solo funciona con los caños de ítems de Ala Industrial.",
+          "items": [
+            "quarryindustrial:pipe_filter",
+            "alaindustrial:item_pipe",
+            "alaindustrial:item_pipe_advanced"
+          ]
+        },
+        {
+          "title": "Expansión y listas",
+          "text": "De fábrica el filtro tiene un casillero. La Expansión de filtro va en su propio panel a la derecha de la pantalla y desbloquea los cinco.\n\nCon un casillero el botón dice Permitir / Denegar; con la expansión pasa a Lista blanca / Lista negra. Permitir deja pasar solo lo marcado; Denegar deja pasar todo menos lo marcado. Una lista blanca vacía no deja pasar nada y una negra vacía lo deja pasar todo. El filtro y la expansión se fabrican con un Chip vacío de Ala Industrial.",
+          "items": [
+            "quarryindustrial:pipe_filter_upgrade",
+            "alaindustrial:empty_chip"
+          ]
+        },
+        {
+          "title": "Por ítem o por categoría",
+          "text": "Por ítem coincide solo con el ítem exacto que marcaste. Por categoría coincide con todo ítem que comparta una categoría (un tag) con él: marcás un tronco de roble y pasa cualquier tipo de tronco.\n\nUn ítem puede tener varias categorías: clic en su casillero para cambiar cuál se usa. En modo categoría, un panel a la derecha lista todos los ítems de la categoría elegida (rueda para ver más) y al pasar el mouse por un casillero muestra la suya. Cada botón se explica en un tooltip.",
+          "items": [
+            "quarryindustrial:pipe_filter",
+            "minecraft:oak_log"
+          ]
         }
       ]
     },
